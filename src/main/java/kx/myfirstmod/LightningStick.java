@@ -32,8 +32,8 @@ public class LightningStick extends Item {
 
         int size = 7;
         BinomialDistribution bd = new BinomialDistribution(size - 1, 0.5);
-        for (int delay = 0; delay < 14; delay++) {
-            for (int iter = 0; iter < 4; iter++) {
+        for (int delay = 0; delay < 6; delay++) {
+            for (int iter = 0; iter < 2; iter++) {
                 int modX = bd.sample() - (size / 2);
                 int modZ = bd.sample() - (size / 2);
                 Runnable runnable = SummonLightning.getRunnable(
