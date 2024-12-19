@@ -29,9 +29,12 @@ public class LightningStick extends Item {
         }
 
         // Spawn the lightning bolt.
-        LightningEntity lightningBolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
-        lightningBolt.setPosition(blockPos.toCenterPos());
-        world.spawnEntity(lightningBolt);
+        SummonLightning.summon(world, blockPos, 0);
+        Runnable runnable = SummonLightning.getRunnable(world, blockPos, 0);
+
+        TaskScheduler.schedule(runnable, 10);
+        TaskScheduler.schedule(runnable, 20);
+
 
         // Nothing has changed to the item stack,
         // so we just return it how it was.
