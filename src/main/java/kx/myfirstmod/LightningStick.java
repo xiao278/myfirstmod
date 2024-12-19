@@ -31,17 +31,19 @@ public class LightningStick extends Item {
         // Spawn the lightning bolt.
         SummonLightning.summon(world, blockPos, 0);
 
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                if (z == 0 && x == 0) continue;
+        int size = 3;
+        for (int x = -size; x <= size; x++) {
+            for (int z = -size; z <= size; z++) {
+                int dist = (Math.abs(x) + Math.abs(z));
+                if ((z == 0 && x == 0) || dist > 3) continue;
                 Runnable runnable = SummonLightning.getRunnable(world, new BlockPos(blockPos.getX() + x, blockPos.getY(), blockPos.getZ() + z), 5);
-                TaskScheduler.schedule(runnable, (Math.abs(x) + Math.abs(z)) * 4);
+                TaskScheduler.schedule(runnable, dist * 5);
             }
         }
 
-
         // Nothing has changed to the item stack,
         // so we just return it how it was.
+        user.getItemCooldownManager().set(this, 60);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }
