@@ -29,11 +29,15 @@ public class LightningStick extends Item {
         }
 
         // Spawn the lightning bolt.
-        SummonLightning.summon(world, blockPos, 5);
-        Runnable runnable = SummonLightning.getRunnable(world, blockPos, 5);
+        SummonLightning.summon(world, blockPos, 0);
 
-        TaskScheduler.schedule(runnable, 5);
-        TaskScheduler.schedule(runnable, 10);
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                if (z == 0 && x == 0) continue;
+                Runnable runnable = SummonLightning.getRunnable(world, new BlockPos(blockPos.getX() + x, blockPos.getY(), blockPos.getZ() + z), 5);
+                TaskScheduler.schedule(runnable, (Math.abs(x) + Math.abs(z)) * 4);
+            }
+        }
 
 
         // Nothing has changed to the item stack,
