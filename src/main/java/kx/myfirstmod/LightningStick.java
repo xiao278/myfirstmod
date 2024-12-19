@@ -23,17 +23,17 @@ public class LightningStick extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
 
-        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 20);
+        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 75);
         if (blockPos == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }
 
         // Spawn the lightning bolt.
-        SummonLightning.summon(world, blockPos, 0);
-        Runnable runnable = SummonLightning.getRunnable(world, blockPos, 0);
+        SummonLightning.summon(world, blockPos, 5);
+        Runnable runnable = SummonLightning.getRunnable(world, blockPos, 5);
 
+        TaskScheduler.schedule(runnable, 5);
         TaskScheduler.schedule(runnable, 10);
-        TaskScheduler.schedule(runnable, 20);
 
 
         // Nothing has changed to the item stack,
