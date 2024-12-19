@@ -23,11 +23,14 @@ public class LightningStick extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
 
-        BlockPos frontOfPlayer = user.getBlockPos().offset(user.getHorizontalFacing(), 10);
+        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 20);
+        if (blockPos == null) {
+            return TypedActionResult.fail(user.getStackInHand(hand));
+        }
 
         // Spawn the lightning bolt.
         LightningEntity lightningBolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
-        lightningBolt.setPosition(frontOfPlayer.toCenterPos());
+        lightningBolt.setPosition(blockPos.toCenterPos());
         world.spawnEntity(lightningBolt);
 
         // Nothing has changed to the item stack,
