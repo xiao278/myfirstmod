@@ -1,11 +1,10 @@
 package kx.myfirstmod;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LightningEntity;
+
+import org.apache.commons.math3.distribution.BinomialDistribution;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -29,17 +28,23 @@ public class LightningStick extends Item {
         }
 
         // Spawn the lightning bolt.
-        SummonLightning.summon(world, blockPos, 0);
+        // SummonLightning.summon(world, blockPos, 0, true);
 
-        int size = 3;
-        for (int x = -size; x <= size; x++) {
-            for (int z = -size; z <= size; z++) {
-                int dist = (Math.abs(x) + Math.abs(z));
-                if ((z == 0 && x == 0) || dist > 3) continue;
-                Runnable runnable = SummonLightning.getRunnable(world, new BlockPos(blockPos.getX() + x, blockPos.getY(), blockPos.getZ() + z), 5);
-                TaskScheduler.schedule(runnable, dist * 5);
+        int size = 7;
+        BinomialDistribution bd = new BinomialDistribution(size - 1, 0.5);
+        for (int delay = 0; delay < 14; delay++) {
+            for (int iter = 0; iter < 4; iter++) {
+                int modX = bd.sample() - (size / 2);
+                int modZ = bd.sample() - (size / 2);
+                Runnable runnable = SummonLightning.getRunnable(
+                        world,
+                        new BlockPos(blockPos.getX() + modX, blockPos.getY(), blockPos.getZ() + modZ),
+                        5,
+                        true
+                );
+                TaskScheduler.schedule(runnable, delay);
             }
-        }
+        };
 
         // Nothing has changed to the item stack,
         // so we just return it how it was.

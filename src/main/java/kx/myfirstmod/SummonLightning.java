@@ -8,12 +8,15 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 
 public class SummonLightning {
-    public static Runnable getRunnable(World world, BlockPos blockPos, int checkColumn) {
+    public static Runnable getRunnable(World world, BlockPos blockPos, int checkColumn, boolean useCustom) {
         return () -> {
-            summon(world, blockPos, checkColumn);
+            summon(world, blockPos, checkColumn, useCustom);
         };
     }
-    public static void summon(World world, BlockPos blockPos, int checkColumn) {
+    public static void summon(World world, BlockPos blockPos) {
+        summon(world, blockPos, 0, false);
+    }
+    public static void summon(World world, BlockPos blockPos, int checkColumn, boolean useCustom) {
         BlockPos topBlock = null;
         if (checkColumn <= 0) {
             topBlock = blockPos;
@@ -25,8 +28,14 @@ public class SummonLightning {
             return;
         }
         Vec3d hitPos = topBlock.toCenterPos().add(0,0.5,0);
-        LightningEntity lightningBolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
-        lightningBolt.setPosition(hitPos);
-        world.spawnEntity(lightningBolt);
+        LightningEntity bolt = null;
+        if (useCustom) {
+            bolt =  new CustomLightningEntity(EntityType.LIGHTNING_BOLT, world);
+        }
+        else {
+            bolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
+        }
+        bolt.setPosition(hitPos);
+        world.spawnEntity(bolt);
     }
 }
