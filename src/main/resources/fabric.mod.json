@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"kx.myfirstmod.MyFirstMod"
+		],
+		"client": [
+			"kx.myfirstmod.MyFirstModClient"
 		]
 	},
 	"mixins": [

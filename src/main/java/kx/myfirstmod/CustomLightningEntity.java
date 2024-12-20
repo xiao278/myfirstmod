@@ -2,7 +2,6 @@ package kx.myfirstmod;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -11,7 +10,6 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
@@ -32,7 +30,7 @@ public class CustomLightningEntity extends LightningEntity {
         if (this.age == 1) {
             this.getStruckEntities().forEach(e -> {
                 // retrieve vanilla lightning damage
-                if (e.getType() == this.getType()) return;
+                if (!e.isAlive()) return;
 //                System.out.println(e.getName());
 //                RegistryEntry<DamageType> lightningBoltDamage = e.getWorld().getRegistryManager()
 //                        .get(RegistryKeys.DAMAGE_TYPE)
