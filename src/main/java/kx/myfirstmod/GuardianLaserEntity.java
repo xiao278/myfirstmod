@@ -10,7 +10,10 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ArrowItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Vec3d;
@@ -152,7 +155,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
 //                );
 //            }
         } else {
-            if (this.age > 500 || !this.hasBeamTarget()) {
+            if (this.age > 200 || !this.hasBeamTarget() || getOwner() == null || getOwner().isRemoved() || !getOwner().isAlive()) {
                 this.discard();
                 return;
             }
@@ -168,16 +171,14 @@ public class GuardianLaserEntity extends ProjectileEntity {
     }
 
     public void stopUsing() {
-        if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
-            RegistryEntry<DamageType> magicDamage = this.getWorld().getRegistryManager()
-                    .get(RegistryKeys.DAMAGE_TYPE)
-                    .entryOf(DamageTypes.MAGIC);
-            RegistryEntry<DamageType> playerDamage = this.getWorld().getRegistryManager()
-                    .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
-            target.damage(new DamageSource(magicDamage), 15);
-            target.damage(new DamageSource(playerDamage), 1);
+        if (!this.getWorld().isClient()){
+            if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
+                RegistryEntry<DamageType> dtype = this.getWorld().getRegistryManager()
+                        .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
+                target.damage(new DamageSource(dtype, this.getOwner()), 15);
+            }
+            this.discard();
         }
-        this.discard();
     }
 
     @Override
