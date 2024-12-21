@@ -151,10 +151,10 @@ public class GuardianLaserEntity extends ProjectileEntity {
                 if (!selectedItem.isOf(ModItems.GUARDIAN_LASER)) {
                     this.stopUsing();
                 }
-            }
-            if (target.getPos().distanceTo(this.getPos()) > 8) {
-                this.setPosition(target.getPos());
-                this.setVelocity(new Vec3d(0,0,0));
+                if (getOwner().getPos().distanceTo(this.getPos()) > 8) {
+                    this.setPosition(getOwner().getPos());
+                    this.setVelocity(new Vec3d(0,0,0));
+                }
             }
         }
         if (beamTicks <= this.getWarmupTime()) this.beamTicks++;

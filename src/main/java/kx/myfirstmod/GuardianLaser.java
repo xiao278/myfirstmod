@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class GuardianLaser extends Item {
-    private static final int range = 60;
+    private static final int range = 64;
     private GuardianLaserEntity hook;
     public GuardianLaser(Settings settings) {
         super(settings);
