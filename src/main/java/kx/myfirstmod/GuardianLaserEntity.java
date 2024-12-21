@@ -137,23 +137,8 @@ public class GuardianLaserEntity extends ProjectileEntity {
         World world = this.getWorld();
         if (this.getWorld().isClient()) {
             if (!this.hasBeamTarget()) {
-//                System.out.printf("{this: %s, target: %s} discarded%n", this.toString(), this.target);
-//                System.out.println(this.getPos());
             }
             if (this.isRemoved()) return;
-//            Vec3d targetPos = null;
-//            if (this.target == null) targetPos = new Vec3d(0,0,0);
-//            else targetPos = target.getPos();
-//            this.setPos(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-//            Random random = world.getRandom();
-//            for (int i = 0; i < 3; i++) {
-//                world.addParticle(ParticleTypes.ELECTRIC_SPARK,
-//                        this.getX() + random.nextDouble() * 0.2,
-//                        this.getY() + random.nextDouble() * 0.2 + 1.5,
-//                        this.getZ() + random.nextDouble() * 0.2,
-//                        0, 0, 0
-//                );
-//            }
         } else {
             if (this.age > 200 || !this.hasBeamTarget() || getOwner() == null || getOwner().isRemoved() || !getOwner().isAlive()) {
                 this.discard();
@@ -163,9 +148,6 @@ public class GuardianLaserEntity extends ProjectileEntity {
                 this.setPosition(target.getPos());
                 this.setVelocity(new Vec3d(0,0,0));
             }
-//            Vec3d targetVel = target.getVelocity();
-//            this.setVelocity(targetVel);
-//            this.move(MovementType.SELF, this.getVelocity());
         }
         if (beamTicks <= this.getWarmupTime()) this.beamTicks++;
     }
