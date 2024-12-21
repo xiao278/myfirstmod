@@ -47,13 +47,13 @@ public class GuardianLaser extends Item {
         }
 
         if (target != null && (hook == null || hook.isRemoved())) {
-            GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user);
-            if (!world.isClient()) {
-                world.spawnEntity(GLEntity);
-            }
-            this.hook = GLEntity;
             ItemStack stack = user.getStackInHand(hand);
-            user.setCurrentHand(hand);
+            if (!world.isClient()) {
+                GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user);
+                world.spawnEntity(GLEntity);
+                this.hook = GLEntity;
+                user.setCurrentHand(hand);
+            }
             return TypedActionResult.consume(stack);
         }
         else {
