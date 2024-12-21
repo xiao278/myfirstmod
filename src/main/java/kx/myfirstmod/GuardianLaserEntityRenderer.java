@@ -17,6 +17,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEntity> {
     private static final Identifier TEXTURE = new Identifier("textures/entity/guardian.png");
@@ -37,9 +38,10 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
         } else {
             if (GLEntity.hasBeamTarget()) {
                 LivingEntity livingEntity = GLEntity.getBeamTarget();
-                if (livingEntity != null) {
+                PlayerEntity owner = GLEntity.getOwner();
+                if (livingEntity != null && owner != null) {
                     Vec3d vec3d = this.fromLerpedPosition(livingEntity, (double)livingEntity.getHeight() * (double)0.5F, 1.0F);
-                    Vec3d vec3d2 = this.fromLerpedPosition(GLEntity.getBeamTarget(), (double)GLEntity.getStandingEyeHeight(), 1.0F);
+                    Vec3d vec3d2 = this.fromLerpedPosition(owner, owner.getHandPosOffset(ModItems.GUARDIAN_LASER), 1.0F);
                     return frustum.isVisible(new Box(vec3d2.x, vec3d2.y, vec3d2.z, vec3d.x, vec3d.y, vec3d.z));
                 }
             }
@@ -61,7 +63,7 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
 
     public void render(GuardianLaserEntity GLEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         super.render(GLEntity, f, g, matrixStack, vertexConsumerProvider, i);
-//        System.out.printf("GLEntity: %s\n, Target: %s\n", GLEntity, GLEntity.getBeamTarget());
+        System.out.printf("GLEntity: %s\n, Target: %s\n", GLEntity, GLEntity.getBeamTarget());
         LivingEntity target = GLEntity.getBeamTarget();
         PlayerEntity owner = GLEntity.getOwner();
         if (target != null && owner != null) {
@@ -71,10 +73,13 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
 //            Vec3d l = owner.getBoundingBox().getCenter().subtract(owner.getPos());
             Vec3d l = new Vec3d(0.0, 0.8999999761581421, 0.0);
             matrixStack.push();
+            Vec3d negGLPos = GLEntity.getPos().multiply(-1);
+            matrixStack.translate(negGLPos.x, negGLPos.y, negGLPos.z);
+            Vec3d vec3d2 = this.fromLerpedPosition(target, 0, g);
+            matrixStack.translate(vec3d2.x, vec3d2.y, vec3d2.z);
             matrixStack.translate(l.getX(), l.getY(), l.getZ());
-            Vec3d vec3d = this.fromLerpedPosition(target, 0, g);
-            Vec3d vec3d2 = this.fromLerpedPosition(owner, owner.getHandPosOffset(ModItems.GUARDIAN_LASER), g);
-            Vec3d vec3d3 = vec3d2.subtract(vec3d);
+            Vec3d vec3d = this.fromLerpedPosition(owner, owner.getHandPosOffset(ModItems.GUARDIAN_LASER), g);
+            Vec3d vec3d3 = vec3d.subtract(vec3d2);
             float m = (float)(vec3d3.length() - (double) 0.5F);
             vec3d3 = vec3d3.normalize();
             float n = (float)Math.acos(vec3d3.y);
@@ -132,7 +137,6 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
             vertex(vertexConsumer, matrix4f, matrix3f, ab, m, ac, s, t, u, 0.5F, as);
             matrixStack.pop();
         }
-
     }
 
     private static void vertex(VertexConsumer vertexConsumer, Matrix4f positionMatrix, Matrix3f normalMatrix, float x, float y, float z, int red, int green, int blue, float u, float v) {

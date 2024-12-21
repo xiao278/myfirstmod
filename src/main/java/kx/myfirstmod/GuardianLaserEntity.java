@@ -4,6 +4,7 @@ import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -142,11 +143,15 @@ public class GuardianLaserEntity extends ProjectileEntity {
 //                System.out.println(this.getPos());
             }
             if (this.isRemoved()) return;
+//            Vec3d targetPos = null;
+//            if (this.target == null) targetPos = new Vec3d(0,0,0);
+//            else targetPos = target.getPos();
+//            this.setPos(targetPos.getX(), targetPos.getY(), targetPos.getZ());
             Random random = world.getRandom();
             for (int i = 0; i < 3; i++) {
                 world.addParticle(ParticleTypes.ELECTRIC_SPARK,
                         this.getX() + random.nextDouble() * 0.2,
-                        this.getY() + random.nextDouble() * 0.2 + 1,
+                        this.getY() + random.nextDouble() * 0.2 + 1.5,
                         this.getZ() + random.nextDouble() * 0.2,
                         0, 0, 0
                 );
@@ -156,10 +161,13 @@ public class GuardianLaserEntity extends ProjectileEntity {
                 this.discard();
                 return;
             }
-            Vec3d targetPos = null;
-            if (this.target == null) targetPos = new Vec3d(0,0,0);
-            else targetPos = target.getPos();
-            this.setPosition(targetPos);
+            if (target.getPos().distanceTo(this.getPos()) > 8) {
+                this.setPosition(target.getPos());
+                this.setVelocity(new Vec3d(0,0,0));
+            }
+//            Vec3d targetVel = target.getVelocity();
+//            this.setVelocity(targetVel);
+//            this.move(MovementType.SELF, this.getVelocity());
         }
         this.beamTicks++;
     }

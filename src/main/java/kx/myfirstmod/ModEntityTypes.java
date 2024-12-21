@@ -18,7 +18,7 @@ public class ModEntityTypes {
             Registries.ENTITY_TYPE,
             new Identifier("myfirstmod","guardian_laser_entity"),
             FabricEntityTypeBuilder.<GuardianLaserEntity>create(SpawnGroup.MISC, (eType, world) -> new GuardianLaserEntity(eType, world))
-                    .dimensions(EntityDimensions.fixed(1F, 1F))
+                    .dimensions(EntityDimensions.fixed(0, 0))
                     .trackRangeChunks(8)
                     .trackedUpdateRate(1).build()
     );
