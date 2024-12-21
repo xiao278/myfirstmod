@@ -21,6 +21,7 @@ public class MyFirstMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModEntityTypes.initialize();
 		ModItems.initialize();
 		TaskScheduler.initialize();
 	}

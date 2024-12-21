@@ -9,8 +9,10 @@ import net.minecraft.util.Identifier;
 
 public class ModItems {
     public static void initialize() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS)
-                .register((itemGroup) -> itemGroup.add(ModItems.LIGHTNING_STICK));
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((itemGroup) -> {
+            itemGroup.add(ModItems.LIGHTNING_STICK);
+            itemGroup.add(ModItems.GUARDIAN_LASER);
+        });
     }
 
     public static Item register(Item item, String id) {
@@ -30,5 +32,12 @@ public class ModItems {
                     .fireproof()
             ),
             "lightning_stick"
+    );
+
+    public static final Item LIGHTNING_STICK_MODEL = register(new Item(new Item.Settings()), "lightning_stick_model");
+
+    public static final Item GUARDIAN_LASER = register(
+            new GuardianLaser(new Item.Settings()),
+            "guardian_laser"
     );
 }
