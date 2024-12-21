@@ -63,13 +63,16 @@ public class GuardianLaser extends Item {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-
+        if (hook == null || !hook.hasBeamTarget() || !hook.isAlive() || hook.isRemoved()) {
+            hook = null;
+        }
     }
 
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient()) {
             if (hook != null) {
-                hook.discard();
+                hook.stopUsing();
+                hook = null;
             }
         }
     }

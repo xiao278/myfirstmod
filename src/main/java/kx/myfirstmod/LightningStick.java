@@ -31,6 +31,7 @@ public class LightningStick extends Item {
         // SummonLightning.summon(world, blockPos, 0, true);
 
         int size = 7;
+        // dont use this this can cause crashes
         BinomialDistribution bd = new BinomialDistribution(size - 1, 0.5);
         for (int delay = 0; delay < 6; delay++) {
             for (int iter = 0; iter < 2; iter++) {

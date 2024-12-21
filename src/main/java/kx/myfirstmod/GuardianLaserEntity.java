@@ -1,24 +1,19 @@
 package kx.myfirstmod;
 
-import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MovementType;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.FishingRodItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 import java.util.Optional;
@@ -147,15 +142,15 @@ public class GuardianLaserEntity extends ProjectileEntity {
 //            if (this.target == null) targetPos = new Vec3d(0,0,0);
 //            else targetPos = target.getPos();
 //            this.setPos(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-            Random random = world.getRandom();
-            for (int i = 0; i < 3; i++) {
-                world.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                        this.getX() + random.nextDouble() * 0.2,
-                        this.getY() + random.nextDouble() * 0.2 + 1.5,
-                        this.getZ() + random.nextDouble() * 0.2,
-                        0, 0, 0
-                );
-            }
+//            Random random = world.getRandom();
+//            for (int i = 0; i < 3; i++) {
+//                world.addParticle(ParticleTypes.ELECTRIC_SPARK,
+//                        this.getX() + random.nextDouble() * 0.2,
+//                        this.getY() + random.nextDouble() * 0.2 + 1.5,
+//                        this.getZ() + random.nextDouble() * 0.2,
+//                        0, 0, 0
+//                );
+//            }
         } else {
             if (this.age > 500 || !this.hasBeamTarget()) {
                 this.discard();
@@ -169,7 +164,20 @@ public class GuardianLaserEntity extends ProjectileEntity {
 //            this.setVelocity(targetVel);
 //            this.move(MovementType.SELF, this.getVelocity());
         }
-        this.beamTicks++;
+        if (beamTicks <= this.getWarmupTime()) this.beamTicks++;
+    }
+
+    public void stopUsing() {
+        if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
+            RegistryEntry<DamageType> magicDamage = this.getWorld().getRegistryManager()
+                    .get(RegistryKeys.DAMAGE_TYPE)
+                    .entryOf(DamageTypes.MAGIC);
+            RegistryEntry<DamageType> playerDamage = this.getWorld().getRegistryManager()
+                    .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
+            target.damage(new DamageSource(magicDamage), 15);
+            target.damage(new DamageSource(playerDamage), 1);
+        }
+        this.discard();
     }
 
     @Override
