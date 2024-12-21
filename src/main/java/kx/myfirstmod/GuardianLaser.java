@@ -38,8 +38,8 @@ public class GuardianLaser extends Item {
         double minCriteria = Float.POSITIVE_INFINITY;
         for (Entity e: potentialTargets) {
             if (e.isAlive() && e.isLiving()) {
-                double criteria = e.distanceTo(user);
-                if (criteria < minCriteria && e instanceof LivingEntity) {
+                double criteria = EntityDetector.getLookAngle(world, user, e);
+                if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(user) < range && criteria < 10) {
                     target = (LivingEntity) e;
                     minCriteria = criteria;
                 }

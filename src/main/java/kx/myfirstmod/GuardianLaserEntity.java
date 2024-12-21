@@ -9,6 +9,7 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -136,7 +137,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
     public void tick() {
         super.tick();
         World world = this.getWorld();
-        if (this.getWorld().isClient()) {
+        if (world.isClient()) {
             if (!this.hasBeamTarget()) {
             }
             if (this.isRemoved()) return;
@@ -146,14 +147,20 @@ public class GuardianLaserEntity extends ProjectileEntity {
                 return;
             }
             if (getOwner() != null) {
+                // check if caster still using guardian core
                 PlayerEntity player = getOwner();
                 ItemStack selectedItem = player.getInventory().getStack(player.getInventory().selectedSlot);
                 if (!selectedItem.isOf(ModItems.GUARDIAN_LASER)) {
                     this.stopUsing();
                 }
+                // follow caster around
                 if (getOwner().getPos().distanceTo(this.getPos()) > 8) {
                     this.setPosition(getOwner().getPos());
                     this.setVelocity(new Vec3d(0,0,0));
+                }
+                // check if caster has a clear Line of Sight
+                if (!EntityDetector.isLineOfSightClear(world, player, target)) {
+                    player.stopUsingItem();
                 }
             }
         }

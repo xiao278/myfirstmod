@@ -37,7 +37,7 @@ public class ModItems {
     public static final Item LIGHTNING_STICK_MODEL = register(new Item(new Item.Settings()), "lightning_stick_model");
 
     public static final Item GUARDIAN_LASER = register(
-            new GuardianLaser(new Item.Settings()),
-            "guardian_laser"
+            new GuardianLaser(new Item.Settings().maxCount(1)),
+            "guardian_core"
     );
 }
