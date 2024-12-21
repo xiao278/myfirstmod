@@ -19,8 +19,10 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
     private static final Identifier TEXTURE = new Identifier("textures/entity/guardian.png");
     private static final Identifier EXPLOSION_BEAM_TEXTURE = new Identifier("textures/entity/guardian_beam.png");
     private static final RenderLayer LAYER;
+    private Vec3d prevPos;
     protected GuardianLaserEntityRenderer(EntityRendererFactory.Context ctx) {
         super(ctx);
+        prevPos = new Vec3d(0,0,0);
     }
 
     @Override
@@ -59,10 +61,11 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
 
     public void render(GuardianLaserEntity GLEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         super.render(GLEntity, f, g, matrixStack, vertexConsumerProvider, i);
-        System.out.printf("GLEntity: %s\n, Target: %s\n", GLEntity, GLEntity.getBeamTarget());
+//        System.out.printf("GLEntity: %s\n, Target: %s\n", GLEntity, GLEntity.getBeamTarget());
         LivingEntity target = GLEntity.getBeamTarget();
         PlayerEntity owner = GLEntity.getOwner();
-        if (target != null && owner != null) {
+        boolean posChanged = prevPos.equals(GLEntity.getPos());
+        if (target != null && owner != null && !posChanged) {
             float h = GLEntity.getBeamProgress(g);
             float j = GLEntity.getBeamTicks() + g;
             float k = j * 0.5F % 1.0F;
@@ -133,6 +136,7 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
             vertex(vertexConsumer, matrix4f, matrix3f, ab, m, ac, s, t, u, 0.5F, as);
             matrixStack.pop();
         }
+        if (posChanged) prevPos = GLEntity.getPos();
     }
 
     private static void vertex(VertexConsumer vertexConsumer, Matrix4f positionMatrix, Matrix3f normalMatrix, float x, float y, float z, int red, int green, int blue, float u, float v) {

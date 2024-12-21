@@ -13,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ArrowItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -62,7 +63,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
         super.onTrackedDataSet(data);
         World world = this.getWorld();
         if (world.isClient()) {
-            System.out.println("18273");
+//            System.out.println("18273");
         }
         if (data.equals(TARGET_ID)) {
             int targetId = this.dataTracker.get(TARGET_ID);
@@ -143,6 +144,13 @@ public class GuardianLaserEntity extends ProjectileEntity {
             if (this.age > 200 || !this.hasBeamTarget() || getOwner() == null || getOwner().isRemoved() || !getOwner().isAlive()) {
                 this.discard();
                 return;
+            }
+            if (getOwner() != null) {
+                PlayerEntity player = getOwner();
+                ItemStack selectedItem = player.getInventory().getStack(player.getInventory().selectedSlot);
+                if (!selectedItem.isOf(ModItems.GUARDIAN_LASER)) {
+                    this.stopUsing();
+                }
             }
             if (target.getPos().distanceTo(this.getPos()) > 8) {
                 this.setPosition(target.getPos());
