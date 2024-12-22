@@ -2,5 +2,19 @@
   "parent": "item/generated",
   "textures": {
     "layer0": "myfirstmod:item/guardian_core"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": { "glow": 0.01 },
+      "model": "myfirstmod:item/guardian_laser_glow0"
+    },
+    {
+      "predicate": { "glow": 0.5 },
+      "model": "myfirstmod:item/guardian_laser_glow1"
+    },
+    {
+      "predicate": { "glow": 0.99 },
+      "model": "myfirstmod:item/guardian_laser_glow2"
+    }
+  ]
 }

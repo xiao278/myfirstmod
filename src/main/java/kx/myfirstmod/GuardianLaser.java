@@ -39,7 +39,7 @@ public class GuardianLaser extends Item {
         for (Entity e: potentialTargets) {
             if (e.isAlive() && e.isLiving()) {
                 double criteria = EntityDetector.getLookAngle(world, user, e);
-                if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(user) < range && criteria < 10) {
+                if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(user) < range && criteria < 30) {
                     target = (LivingEntity) e;
                     minCriteria = criteria;
                 }
@@ -78,5 +78,9 @@ public class GuardianLaser extends Item {
                 hook = null;
             }
         }
+    }
+
+    public Entity getHook() {
+        return this.hook;
     }
 }

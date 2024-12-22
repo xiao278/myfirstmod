@@ -5,7 +5,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 
 public class MyFirstModClient implements ClientModInitializer {
     private boolean initialized = false;
@@ -17,6 +20,11 @@ public class MyFirstModClient implements ClientModInitializer {
                 initialized = true;
                 onResourcesReady();
             }
+        });
+        ModelPredicateProviderRegistry.register(ModItems.GUARDIAN_LASER, new Identifier("glow"), (stack, world, entity, seed) -> {
+            GuardianLaserEntity tracker = (GuardianLaserEntity) ((GuardianLaser) stack.getItem()).getHook();
+            if (tracker == null || !tracker.hasBeamTarget() || tracker.isRemoved()) return 0;
+            return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
     }
 
