@@ -3,6 +3,7 @@ package kx.myfirstmod;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.GuardianEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.GuardianEntity;
@@ -70,14 +71,16 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
             float j = GLEntity.getBeamTicks() + g;
             float k = j * 0.5F % 1.0F;
 //            Vec3d l = owner.getBoundingBox().getCenter().subtract(owner.getPos());
-            Vec3d l = new Vec3d(0.0, 0.8999999761581421, 0.0);
+            Vec3d l = new Vec3d(0.0, 0.8999999761581421 * 0, 0.0);
             matrixStack.push();
             Vec3d negGLPos = GLEntity.getPos().multiply(-1);
             matrixStack.translate(negGLPos.x, negGLPos.y, negGLPos.z);
-            Vec3d vec3d2 = this.fromLerpedPosition(target, 0, g);
+
+            Vec3d vec3d2 = this.fromLerpedPosition(target, (double) target.getHeight() * (double) 0.5F, g);
             matrixStack.translate(vec3d2.x, vec3d2.y, vec3d2.z);
             matrixStack.translate(l.getX(), l.getY(), l.getZ());
-            Vec3d vec3d = this.fromLerpedPosition(owner, owner.getHandPosOffset(ModItems.GUARDIAN_LASER), g);
+
+            Vec3d vec3d = this.fromLerpedPosition(owner, owner.getHandPosOffset(ModItems.GUARDIAN_LASER).add(EntityDetector.getCenterOffset(owner)), g);
             Vec3d vec3d3 = vec3d.subtract(vec3d2);
             float m = (float)(vec3d3.length() - (double) 0.5F);
             vec3d3 = vec3d3.normalize();
