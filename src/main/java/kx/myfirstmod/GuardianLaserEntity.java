@@ -27,17 +27,21 @@ import java.util.UUID;
 public class GuardianLaserEntity extends ProjectileEntity {
     private static final TrackedData<Integer> TARGET_ID;
     private static final TrackedData<Optional<UUID>> TARGET_UUID;
+    private static final TrackedData<Integer> WARMUP_TIME;
+    private float damage = 0;
     private LivingEntity target = null;
     private int beamTicks;
 
-    public GuardianLaserEntity(EntityType<? extends ProjectileEntity> entityType, World world, LivingEntity target, PlayerEntity caster) {
+    public GuardianLaserEntity(EntityType<? extends ProjectileEntity> entityType, World world, LivingEntity target, PlayerEntity caster, float damage, int warmup_time) {
         super(entityType, world);
         this.target = target;
-        this.setOwner(caster);
-        this.beamTicks = 0;
         if (!this.getWorld().isClient() && this.target != null) {
+            this.setOwner(caster);
+            this.damage = damage;
+            this.beamTicks = 0;
             this.dataTracker.set(TARGET_ID, this.target.getId());
             this.dataTracker.set(TARGET_UUID, Optional.ofNullable(this.target.getUuid()));
+            this.dataTracker.set(WARMUP_TIME, warmup_time);
         }
     }
 
@@ -57,6 +61,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
     protected void initDataTracker() {
         this.dataTracker.startTracking(TARGET_ID, -1);
         this.dataTracker.startTracking(TARGET_UUID, Optional.empty());
+        this.dataTracker.startTracking(WARMUP_TIME, GuardianLaser.getMaxWarmupTime());
     }
 
     @Override
@@ -80,6 +85,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
     static {
         TARGET_ID = DataTracker.registerData(GuardianLaserEntity.class, TrackedDataHandlerRegistry.INTEGER);
         TARGET_UUID = DataTracker.registerData(GuardianLaserEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+        WARMUP_TIME = DataTracker.registerData(GuardianLaserEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 
 //    @Override
@@ -93,7 +99,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
 //    }
 
     public int getWarmupTime() {
-        return 80;
+        return this.dataTracker.get(WARMUP_TIME);
     }
 
     public float getBeamTicks() {
@@ -102,7 +108,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
 
 
     public float getBeamProgress(float tickDelta) {
-        return ((float)this.beamTicks + tickDelta) / (float)this.getWarmupTime();
+        return Math.min(((float)this.beamTicks + tickDelta) / (float)this.getWarmupTime(), (float) 1.01);
     }
 
 //    @Override
@@ -172,7 +178,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
             if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
                 RegistryEntry<DamageType> dtype = this.getWorld().getRegistryManager()
                         .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
-                target.damage(new DamageSource(dtype, this.getOwner()), 15);
+                target.damage(new DamageSource(dtype, this.getOwner()), damage);
             }
             this.discard();
         }

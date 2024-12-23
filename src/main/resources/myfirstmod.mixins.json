@@ -1,11 +1,12 @@
 {
-	"required": true,
-	"package": "kx.myfirstmod.mixin",
-	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-		"ExampleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "kx.myfirstmod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "EnchantmentTargetMixin",
+    "ExampleMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

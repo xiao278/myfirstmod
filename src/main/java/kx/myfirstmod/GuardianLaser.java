@@ -1,11 +1,17 @@
 package kx.myfirstmod;
 
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
@@ -16,6 +22,7 @@ import java.util.List;
 
 public class GuardianLaser extends Item {
     private static final int range = 64;
+    private static final int base_damage = 24;
     private GuardianLaserEntity hook;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -33,7 +40,7 @@ public class GuardianLaser extends Item {
         if (target != null && (hook == null || hook.isRemoved())) {
             ItemStack stack = user.getStackInHand(hand);
             if (!world.isClient()) {
-                GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user);
+                GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user, getDamage(stack), getWarmupTime(stack));
                 world.spawnEntity(GLEntity);
                 this.hook = GLEntity;
                 user.setCurrentHand(hand);
@@ -59,9 +66,41 @@ public class GuardianLaser extends Item {
         if (!world.isClient()) {
             if (hook != null) {
                 hook.stopUsing();
+                if (user instanceof PlayerEntity) {
+                    ((PlayerEntity) user).getItemCooldownManager().set(this, 8);
+                }
                 hook = null;
             }
         }
+    }
+
+    public static int getMaxWarmupTime() {
+        return 80;
+    }
+
+    public int getWarmupTime(ItemStack stack) {
+        return getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * 20;
+    }
+
+    public int getDamage(ItemStack stack) {
+        return base_damage * getWarmupTime(stack) / getMaxWarmupTime();
+    }
+
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return true; // Allows this item to be enchanted
+    }
+
+    @Override
+    public int getEnchantability() {
+        return 15; // Enchantability value (similar to iron)
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(stack, world, tooltip, context);
+        tooltip.add(Text.literal(this.getDamage(stack) + " Attack Damage").formatted(Formatting.DARK_GREEN));
+        tooltip.add(Text.literal(this.getWarmupTime(stack)/20 + "s Charge Time" ).formatted(Formatting.DARK_GREEN));
     }
 
     public Entity getHook() {
