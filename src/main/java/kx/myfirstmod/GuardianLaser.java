@@ -22,7 +22,8 @@ import java.util.List;
 
 public class GuardianLaser extends Item {
     private static final int range = 64;
-    private static final int base_damage = 24;
+    private static final float base_damage = 16;
+    private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private GuardianLaserEntity hook;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -67,7 +68,7 @@ public class GuardianLaser extends Item {
             if (hook != null) {
                 hook.stopUsing();
                 if (user instanceof PlayerEntity) {
-                    ((PlayerEntity) user).getItemCooldownManager().set(this, 8);
+                    ((PlayerEntity) user).getItemCooldownManager().set(this, 4);
                 }
                 hook = null;
             }
@@ -82,8 +83,11 @@ public class GuardianLaser extends Item {
         return getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * 20;
     }
 
-    public int getDamage(ItemStack stack) {
-        return base_damage * getWarmupTime(stack) / getMaxWarmupTime();
+    public float getDamage(ItemStack stack) {
+        return (
+                ((base_damage - reducible_damage) + (reducible_damage * getWarmupTime(stack) / getMaxWarmupTime()))
+                * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / (float) 2.0)
+        );
     }
 
     @Override
