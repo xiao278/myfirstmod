@@ -27,24 +27,8 @@ public class GuardianLaser extends Item {
         if (world.isClient) {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
-        Vec3d uPos = user.getPos();
-        Box searchBox = new Box(
-                uPos.x - range, uPos.y - range, uPos.z - range,
-                uPos.x + range, uPos.y + range, uPos.z + range
-        );
-        List<Entity> potentialTargets = world.getOtherEntities(user, searchBox, entity -> (entity instanceof PlayerEntity || entity instanceof MobEntity));
 
-        LivingEntity target = null;
-        double minCriteria = Float.POSITIVE_INFINITY;
-        for (Entity e: potentialTargets) {
-            if (e.isAlive() && e.isLiving()) {
-                double criteria = EntityDetector.getLookAngle(world, user, e);
-                if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(user) < range && criteria < 30) {
-                    target = (LivingEntity) e;
-                    minCriteria = criteria;
-                }
-            }
-        }
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, this.range, 30);
 
         if (target != null && (hook == null || hook.isRemoved())) {
             ItemStack stack = user.getStackInHand(hand);

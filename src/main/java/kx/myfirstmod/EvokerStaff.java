@@ -37,13 +37,15 @@ public class EvokerStaff extends Item {
     }
 
     protected void castSpell(PlayerEntity user) {
-        double dist = 5;
+        double range = 30;
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(user.getWorld(), user, range, 45);
+        Vec3d targetPos = target == null ? user.getPos() : target.getPos();
         Vec3d lookDir = user.getRotationVector();
         Vec3d lookDirHorizontal = (new Vec3d(lookDir.x, 0, lookDir.z)).normalize();
-        Vec3d target = lookDirHorizontal.multiply(dist).add(user.getPos());
-        double d = Math.min(target.getY(), user.getY()) - 5;
-        double e = Math.max(target.getY(), user.getY()) + (double)1.0F * 5;
-        float f = (float)MathHelper.atan2(target.getZ() - user.getZ(), target.getX() - user.getX());
+        Vec3d targetDir = lookDirHorizontal.add(user.getPos());
+        double d = Math.min(targetPos.getY(), user.getY());
+        double e = Math.max(targetPos.getY(), user.getY()) + (double)1.0F;
+        float f = (float)MathHelper.atan2(targetDir.getZ() - user.getZ(), targetDir.getX() - user.getX());
         if (Math.abs(user.getPitch()) > 85 || user.isSneaking()) {
             //radial fangs
             for(int i = 0; i < 5; ++i) {
