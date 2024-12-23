@@ -38,4 +38,9 @@ public class ModItems {
             new GuardianLaser(new Item.Settings().maxCount(1)),
             "guardian_core"
     );
+
+    public static final Item EVOKER_STAFF = register(
+            new EvokerStaff(new Item.Settings()),
+            "evoker_staff"
+    );
 }
