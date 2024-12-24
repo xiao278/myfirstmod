@@ -63,7 +63,7 @@ public class EvokerStaff extends Item {
             }
 
             int[] lvl_fangs = {11,14,17,20};
-            for (int lvl = 0; lvl < EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)); lvl++) {
+            for (int lvl = 0; lvl < Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)), lvl_fangs.length); lvl++) {
                 float circumference = ((float) lvl_fangs[lvl] / 8.0F) * 2.5F;
                 for (int i = 0; i < lvl_fangs[lvl]; i++) {
                     float g = f + (float) (Math.PI * 2.0F) * i / lvl_fangs[lvl] + lvl * 1.2566371F;
