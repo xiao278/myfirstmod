@@ -1,21 +1,20 @@
 package kx.myfirstmod;
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.enchantment.Enchantment;
+import net.minecraft.client.sound.Sound;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -24,6 +23,8 @@ public class GuardianLaser extends Item {
     private static final int range = 64;
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
+    private static final int LASER_SOUND_COOLDOWN_TICKS = 2;
+    private int sound_cooldown_remaining = 0;
     private GuardianLaserEntity hook;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -39,13 +40,14 @@ public class GuardianLaser extends Item {
         LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, this.range, 30);
 
         if (target != null && (hook == null || hook.isRemoved())) {
+            boolean canSee = EntityDetector.isLineOfSightClear(world, user, target);
+            if (!canSee) return TypedActionResult.fail(user.getStackInHand(hand));
+
             ItemStack stack = user.getStackInHand(hand);
-            if (!world.isClient()) {
-                GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user, getDamage(stack), getWarmupTime(stack));
-                world.spawnEntity(GLEntity);
-                this.hook = GLEntity;
-                user.setCurrentHand(hand);
-            }
+            GuardianLaserEntity GLEntity = new GuardianLaserEntity(ModEntityTypes.GUARDIAN_LASER_ENTITY, world, target, user, getDamage(stack), getWarmupTime(stack));
+            world.spawnEntity(GLEntity);
+            this.hook = GLEntity;
+            user.setCurrentHand(hand);
             return TypedActionResult.consume(stack);
         }
         else {
@@ -61,6 +63,18 @@ public class GuardianLaser extends Item {
                 hook = null;
             }
         }
+        else {
+            sound_cooldown_remaining = Math.max(sound_cooldown_remaining - 1, 0);
+            if (hook != null && (hook.hasBeamTarget() && hook.isAlive() && !hook.isRemoved())) {
+                if (sound_cooldown_remaining == 0) {
+                    float progress = (hook.getBeamTicks() / hook.getWarmupTime());
+                    user.playSound(
+                            SoundEvents.ENTITY_GUARDIAN_ATTACK, 0.5F + 0.5F * progress * progress, progress >= 0.99 ? 0.7F : progress * 0.5F
+                    );
+                    sound_cooldown_remaining = LASER_SOUND_COOLDOWN_TICKS;
+                }
+            }
+        }
     }
 
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
@@ -68,9 +82,15 @@ public class GuardianLaser extends Item {
             if (hook != null) {
                 hook.stopUsing();
                 if (user instanceof PlayerEntity) {
-                    ((PlayerEntity) user).getItemCooldownManager().set(this, 4);
+                    ((PlayerEntity) user).getItemCooldownManager().set(this, 5);
                 }
                 hook = null;
+            }
+        } else {
+            if (hook != null && (hook.hasBeamTarget() && hook.isAlive() && !hook.isRemoved())) {
+                if (hook.getBeamTicks() >= hook.getWarmupTime()) {
+                    user.playSound(SoundEvents.ENTITY_GUARDIAN_DEATH, 0.8F, 1.0F);
+                }
             }
         }
     }

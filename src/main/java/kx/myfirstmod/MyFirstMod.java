@@ -24,5 +24,6 @@ public class MyFirstMod implements ModInitializer {
 		ModEntityTypes.initialize();
 		ModItems.initialize();
 		TaskScheduler.initialize();
+		ModSounds.initialize();
 	}
 }
