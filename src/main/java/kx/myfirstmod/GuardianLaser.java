@@ -81,9 +81,6 @@ public class GuardianLaser extends Item {
         if (!world.isClient()) {
             if (hook != null) {
                 hook.stopUsing();
-                if (user instanceof PlayerEntity) {
-                    ((PlayerEntity) user).getItemCooldownManager().set(this, 5);
-                }
                 hook = null;
             }
         } else {

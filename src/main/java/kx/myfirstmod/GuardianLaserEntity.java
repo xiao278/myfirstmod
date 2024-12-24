@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ArrowItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.registry.RegistryKeys;
@@ -28,6 +29,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
     private static final TrackedData<Integer> TARGET_ID;
     private static final TrackedData<Optional<UUID>> TARGET_UUID;
     private static final TrackedData<Integer> WARMUP_TIME;
+    private final ItemStack stack_used;
     private float damage = 0;
     private LivingEntity target = null;
     private int beamTicks;
@@ -38,11 +40,16 @@ public class GuardianLaserEntity extends ProjectileEntity {
         if (!this.getWorld().isClient() && this.target != null) {
             this.setOwner(caster);
             this.damage = damage;
+            this.stack_used = caster.getInventory().getStack(caster.getInventory().selectedSlot);
             this.beamTicks = 0;
             this.dataTracker.set(TARGET_ID, this.target.getId());
             this.dataTracker.set(TARGET_UUID, Optional.ofNullable(this.target.getUuid()));
             this.dataTracker.set(WARMUP_TIME, warmup_time);
         }
+        else {
+            this.stack_used = null;
+        }
+        System.out.println(this.stack_used);
     }
 
     @Override
@@ -55,6 +62,11 @@ public class GuardianLaserEntity extends ProjectileEntity {
     public GuardianLaserEntity(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
         this.beamTicks = 0;
+        this.stack_used = null;
+    }
+
+    public ItemStack getStackUsed() {
+        return this.stack_used;
     }
 
     @Override
@@ -88,16 +100,6 @@ public class GuardianLaserEntity extends ProjectileEntity {
         WARMUP_TIME = DataTracker.registerData(GuardianLaserEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 
-//    @Override
-//    protected void writeCustomDataToNbt(NbtCompound nbt) {
-//        super.writeCustomDataToNbt(nbt);
-//        if (this.target != null) {
-////            System.out.printf("written to nbt {target: %s}\n", target.toString());
-//            nbt.putInt("targetId", this.target.getId());
-//            nbt.putUuid("targetUuid", this.target.getUuid());
-//        }
-//    }
-
     public int getWarmupTime() {
         return this.dataTracker.get(WARMUP_TIME);
     }
@@ -110,25 +112,6 @@ public class GuardianLaserEntity extends ProjectileEntity {
     public float getBeamProgress(float tickDelta) {
         return Math.min(((float)this.beamTicks + tickDelta) / (float)this.getWarmupTime(), (float) 1.01);
     }
-
-//    @Override
-//    protected void readCustomDataFromNbt(NbtCompound nbt) {
-//        super.readCustomDataFromNbt(nbt);
-//        if (nbt.contains("targetId") && nbt.contains("targetUuid")) {
-//            int targetId = nbt.getInt("targetID");
-//            UUID targetUuid = nbt.getUuid("targetUuid");
-//            Entity maybeTarget = this.getWorld().getEntityById(targetId);
-//            // on re-logging there will be error fetching target
-//            if (maybeTarget != null && maybeTarget.getUuid() == targetUuid && maybeTarget instanceof LivingEntity) {
-//                this.target = (LivingEntity) maybeTarget;
-//                this.targetId = targetId;
-//                this.targetUuid = targetUuid;
-//            }
-//            else {
-//                System.out.printf("GuardianLaserEntity %s: Error fetching target\n", this);
-//            }
-//        }
-//    }
 
     public boolean hasBeamTarget() {
         // equivalent to not null target AND not removed AND alive
@@ -156,7 +139,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
                 // check if caster still using guardian core
                 PlayerEntity player = getOwner();
                 ItemStack selectedItem = player.getInventory().getStack(player.getInventory().selectedSlot);
-                if (!selectedItem.isOf(ModItems.GUARDIAN_LASER)) {
+                if (selectedItem != stack_used) {
                     this.stopUsing();
                 }
                 // follow caster around
@@ -175,6 +158,9 @@ public class GuardianLaserEntity extends ProjectileEntity {
 
     public void stopUsing() {
         if (!this.getWorld().isClient()){
+            if (getOwner() instanceof PlayerEntity) {
+                ((PlayerEntity) getOwner()).getItemCooldownManager().set(stack_used.getItem(), 5);
+            }
             if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
                 RegistryEntry<DamageType> dtype = this.getWorld().getRegistryManager()
                         .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
