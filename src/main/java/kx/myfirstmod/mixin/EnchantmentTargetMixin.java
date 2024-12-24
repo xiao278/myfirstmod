@@ -1,9 +1,8 @@
 package kx.myfirstmod.mixin;
 
+import kx.myfirstmod.EvokerStaff;
 import kx.myfirstmod.GuardianLaser;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.PowerEnchantment;
-import net.minecraft.enchantment.QuickChargeEnchantment;
+import net.minecraft.enchantment.*;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Enchantment.class)
-public abstract class GuardianLaserEnchantmentTargetMixin {
+public abstract class EnchantmentTargetMixin {
     @Shadow @Nullable protected String translationKey;
 
     @Shadow public abstract String getTranslationKey();
@@ -37,6 +36,17 @@ public abstract class GuardianLaserEnchantmentTargetMixin {
         boolean compatible = isCompatible(self, other, mutex_enchs);
         if (!compatible) {
             cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true)
+    private void injectEvokerStaffEnchantments(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        // have guardian laser accept enchantmnet
+        Enchantment self = (Enchantment) (Object) this;
+        if (stack.getItem() instanceof EvokerStaff &&
+                (self instanceof MultishotEnchantment || self instanceof PiercingEnchantment)
+        ) {
+            cir.setReturnValue(true); // Allow the enchantment
         }
     }
 
