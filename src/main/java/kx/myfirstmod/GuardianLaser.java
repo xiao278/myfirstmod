@@ -23,7 +23,7 @@ public class GuardianLaser extends Item {
     private static final int range = 64;
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
-    private static final int LASER_SOUND_COOLDOWN_TICKS = 2;
+    private static final int LASER_SOUND_COOLDOWN_TICKS = 0;
     private int sound_cooldown_remaining = 0;
     private GuardianLaserEntity hook;
     public GuardianLaser(Settings settings) {
@@ -37,7 +37,7 @@ public class GuardianLaser extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
 
-        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, this.range, 30);
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 30);
 
         if (target != null && (hook == null || hook.isRemoved())) {
             boolean canSee = EntityDetector.isLineOfSightClear(world, user, target);
@@ -69,7 +69,7 @@ public class GuardianLaser extends Item {
                 if (sound_cooldown_remaining == 0) {
                     float progress = (hook.getBeamTicks() / hook.getWarmupTime());
                     user.playSound(
-                            SoundEvents.ENTITY_GUARDIAN_ATTACK, 0.5F + 0.5F * progress * progress, progress >= 0.99 ? 0.7F : progress * 0.5F
+                            ModSounds.GUARDIAN_LASER_CHARGE_SOUND, 0.5F + 0.5F * progress * progress, progress >= 0.99 ? 0.7F : progress * 0.5F
                     );
                     sound_cooldown_remaining = LASER_SOUND_COOLDOWN_TICKS;
                 }
@@ -89,7 +89,10 @@ public class GuardianLaser extends Item {
         } else {
             if (hook != null && (hook.hasBeamTarget() && hook.isAlive() && !hook.isRemoved())) {
                 if (hook.getBeamTicks() >= hook.getWarmupTime()) {
-                    user.playSound(SoundEvents.ENTITY_GUARDIAN_DEATH, 0.8F, 1.0F);
+                    float volume = 0.1F;
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1F);
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 2F);
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 4F);
                 }
             }
         }

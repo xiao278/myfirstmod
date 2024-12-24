@@ -2,7 +2,6 @@ package kx.myfirstmod.mixin;
 
 import kx.myfirstmod.GuardianLaser;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.PowerEnchantment;
 import net.minecraft.enchantment.QuickChargeEnchantment;
 import net.minecraft.item.ItemStack;
@@ -15,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Enchantment.class)
-public abstract class EnchantmentTargetMixin {
+public abstract class GuardianLaserEnchantmentTargetMixin {
     @Shadow @Nullable protected String translationKey;
 
     @Shadow public abstract String getTranslationKey();
