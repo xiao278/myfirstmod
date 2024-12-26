@@ -1,4 +1,4 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.hit.BlockHitResult;

@@ -1,4 +1,4 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 

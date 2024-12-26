@@ -1,5 +1,6 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
+import kx.myfirstmod.entities.CustomLightningEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.util.math.BlockPos;

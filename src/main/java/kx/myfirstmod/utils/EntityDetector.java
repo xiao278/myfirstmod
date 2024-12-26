@@ -1,4 +1,4 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

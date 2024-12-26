@@ -5,10 +5,10 @@
 
 package kx.myfirstmod;
 
+import kx.myfirstmod.entities.ModEntityTypes;
+import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.utils.TaskScheduler;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

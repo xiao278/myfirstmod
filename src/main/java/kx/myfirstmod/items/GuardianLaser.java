@@ -1,17 +1,17 @@
-package kx.myfirstmod;
+package kx.myfirstmod.items;
 
+import kx.myfirstmod.utils.EntityDetector;
+import kx.myfirstmod.entities.GuardianLaserEntity;
+import kx.myfirstmod.entities.ModEntityTypes;
+import kx.myfirstmod.ModSounds;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.sound.Sound;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShieldItem;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;

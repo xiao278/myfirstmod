@@ -1,20 +1,12 @@
-package kx.myfirstmod;
+package kx.myfirstmod.entities;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 public class CustomLightningEntity extends LightningEntity {
     private boolean cosmetic;

@@ -1,4 +1,4 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;

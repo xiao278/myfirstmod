@@ -1,14 +1,16 @@
 package kx.myfirstmod;
 
+import kx.myfirstmod.entities.GuardianLaserEntity;
+import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
+import kx.myfirstmod.entities.ModEntityTypes;
+import kx.myfirstmod.items.GuardianLaser;
+import kx.myfirstmod.items.ModItems;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
 public class MyFirstModClient implements ClientModInitializer {

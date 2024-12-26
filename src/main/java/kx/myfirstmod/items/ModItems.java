@@ -1,5 +1,6 @@
-package kx.myfirstmod;
+package kx.myfirstmod.items;
 
+import kx.myfirstmod.MyFirstMod;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
@@ -43,5 +44,10 @@ public class ModItems {
     public static final Item EVOKER_STAFF = register(
             new EvokerStaff(new Item.Settings()),
             "evoker_staff"
+    );
+
+    public static final Item SHULKER_STAFF = register (
+            new ShulkerStaff(new Item.Settings().maxCount(1)),
+            "shulker_staff"
     );
 }

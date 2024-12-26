@@ -1,9 +1,10 @@
-package kx.myfirstmod;
+package kx.myfirstmod.entities;
 
+import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.utils.EntityDetector;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.GuardianEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.GuardianEntity;
@@ -21,7 +22,7 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
     private static final Identifier EXPLOSION_BEAM_TEXTURE = new Identifier("textures/entity/guardian_beam.png");
     private static final RenderLayer LAYER;
     private Vec3d prevPos;
-    protected GuardianLaserEntityRenderer(EntityRendererFactory.Context ctx) {
+    public GuardianLaserEntityRenderer(EntityRendererFactory.Context ctx) {
         super(ctx);
         prevPos = new Vec3d(0,0,0);
     }

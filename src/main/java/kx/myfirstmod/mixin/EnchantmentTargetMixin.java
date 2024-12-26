@@ -1,7 +1,7 @@
 package kx.myfirstmod.mixin;
 
-import kx.myfirstmod.EvokerStaff;
-import kx.myfirstmod.GuardianLaser;
+import kx.myfirstmod.items.EvokerStaff;
+import kx.myfirstmod.items.GuardianLaser;
 import net.minecraft.enchantment.*;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;

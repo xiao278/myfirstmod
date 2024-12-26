@@ -1,5 +1,9 @@
-package kx.myfirstmod;
+package kx.myfirstmod.items;
 
+import kx.myfirstmod.utils.BinomialDistribution;
+import kx.myfirstmod.utils.BlockDetector;
+import kx.myfirstmod.utils.SummonLightning;
+import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

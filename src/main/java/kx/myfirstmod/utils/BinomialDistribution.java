@@ -1,4 +1,4 @@
-package kx.myfirstmod;
+package kx.myfirstmod.utils;
 
 public class BinomialDistribution {
 
