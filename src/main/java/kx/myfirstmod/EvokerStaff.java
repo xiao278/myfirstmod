@@ -73,7 +73,7 @@ public class EvokerStaff extends Item {
 
         } else {
             //directional fangs
-            for(int i = 0; i < 16 + EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)) * 4;
+            for(int i = 0; i < 16 + Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)), 4) * 4;
                 ++i) {
                 double h = (double)1.25F * (double)(i + 1);
                 int j = 1 * i;

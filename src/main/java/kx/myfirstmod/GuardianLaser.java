@@ -8,8 +8,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShieldItem;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -40,6 +42,7 @@ public class GuardianLaser extends Item {
         LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 30);
 
         if (target != null && (hook == null || hook.isRemoved())) {
+//            user.getStackInHand(Hand.OFF_HAND).onStoppedUsing(world, user, 0);
             boolean canSee = EntityDetector.isLineOfSightClear(world, user, target);
             if (!canSee) return TypedActionResult.fail(user.getStackInHand(hand));
 
@@ -89,7 +92,7 @@ public class GuardianLaser extends Item {
                     float volume = 0.1F;
                     user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1F);
                     user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 2F);
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 4F);
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 3F);
                 }
             }
         }

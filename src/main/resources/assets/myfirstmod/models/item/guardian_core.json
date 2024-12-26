@@ -9,12 +9,16 @@
       "model": "myfirstmod:item/guardian_laser_glow0"
     },
     {
-      "predicate": { "glow": 0.5 },
+      "predicate": { "glow": 0.35 },
       "model": "myfirstmod:item/guardian_laser_glow1"
     },
     {
-      "predicate": { "glow": 0.99 },
+      "predicate": { "glow": 0.7 },
       "model": "myfirstmod:item/guardian_laser_glow2"
+    },
+    {
+      "predicate": { "glow": 0.99 },
+      "model": "myfirstmod:item/guardian_laser_glow3"
     }
   ]
 }
