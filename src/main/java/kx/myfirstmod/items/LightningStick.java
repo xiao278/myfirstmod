@@ -4,6 +4,8 @@ import kx.myfirstmod.utils.BinomialDistribution;
 import kx.myfirstmod.utils.BlockDetector;
 import kx.myfirstmod.utils.SummonLightning;
 import kx.myfirstmod.utils.TaskScheduler;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -34,8 +36,17 @@ public class LightningStick extends Item {
         // SummonLightning.summon(world, blockPos, 0, true);
 
         int size = 7;
-        for (int delay = 0; delay < 6; delay++) {
-            for (int iter = 0; iter < 2; iter++) {
+        int strikes = 6;
+        int iters = 2;
+        if (EnchantmentHelper.getLevel(Enchantments.SWEEPING, user.getStackInHand(hand)) > 0) {
+            size += 7;
+            iters += 1;
+        }
+        if (EnchantmentHelper.getLevel(Enchantments.SMITE, user.getStackInHand(hand)) > 0) {
+            strikes += 3;
+        }
+        for (int strike = 0; strike < strikes; strike++) {
+            for (int i = 0; i < iters; i++) {
                 int modX = BinomialDistribution.sample(size - 1, 0.5) - (size / 2);
                 int modZ = BinomialDistribution.sample(size - 1, 0.5)  - (size / 2);
                 Runnable runnable = SummonLightning.getRunnable(
@@ -44,7 +55,7 @@ public class LightningStick extends Item {
                         5,
                         true
                 );
-                TaskScheduler.schedule(runnable, delay);
+                TaskScheduler.schedule(runnable, strike);
             }
         };
 

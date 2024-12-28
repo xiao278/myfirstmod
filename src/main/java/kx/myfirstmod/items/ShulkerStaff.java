@@ -1,5 +1,6 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.entities.CustomShulkerBulletEntity;
 import kx.myfirstmod.utils.EntityDetector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,12 +26,15 @@ public class ShulkerStaff extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
         // serverside stuff
-        Entity target = EntityDetector.findClosestCrosshairEntity(world, user, 20, 45);
+        Entity target = EntityDetector.findClosestCrosshairEntity(world, user, 32, 50);
         if (target == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }
         Direction.Axis initialDir = user.getPitch() <= -45 ? Direction.UP.getAxis() : user.getHorizontalFacing().getAxis();
-        world.spawnEntity(new ShulkerBulletEntity(world, user, target, initialDir));
+        for (int i = 0; i < 8; i++) {
+            world.spawnEntity(new CustomShulkerBulletEntity(world, user, target, initialDir, 0.6));
+        }
+        user.getItemCooldownManager().set(this, 300);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }

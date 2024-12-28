@@ -2,6 +2,7 @@ package kx.myfirstmod.mixin;
 
 import kx.myfirstmod.items.EvokerStaff;
 import kx.myfirstmod.items.GuardianLaser;
+import kx.myfirstmod.items.LightningStick;
 import net.minecraft.enchantment.*;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +46,17 @@ public abstract class EnchantmentTargetMixin {
         Enchantment self = (Enchantment) (Object) this;
         if (stack.getItem() instanceof EvokerStaff &&
                 (self instanceof MultishotEnchantment || self instanceof PiercingEnchantment)
+        ) {
+            cir.setReturnValue(true); // Allow the enchantment
+        }
+    }
+
+    @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true)
+    private void injectLightningStickEnchantments(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        // have guardian laser accept enchantmnet
+        Enchantment self = (Enchantment) (Object) this;
+        if (stack.getItem() instanceof LightningStick &&
+                (self instanceof SweepingEnchantment || self.getTranslationKey().equals("enchantment.minecraft.smite"))
         ) {
             cir.setReturnValue(true); // Allow the enchantment
         }

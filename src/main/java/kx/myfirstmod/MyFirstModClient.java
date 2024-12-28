@@ -26,9 +26,13 @@ public class MyFirstModClient implements ClientModInitializer {
         });
         ModelPredicateProviderRegistry.register(ModItems.GUARDIAN_LASER, new Identifier("glow"), (stack, world, entity, seed) -> {
             GuardianLaserEntity tracker = (GuardianLaserEntity) ((GuardianLaser) stack.getItem()).getHook();
-            if (tracker == null) return 0;
+            if (tracker == null || tracker.getOwner() == null) return 0;
             if (!tracker.hasBeamTarget() || tracker.isRemoved()) return 0;
-            if (entity instanceof PlayerEntity && ((PlayerEntity) entity).getInventory().getStack(((PlayerEntity) entity).getInventory().selectedSlot) != stack) return 0;
+            if (!(entity instanceof  PlayerEntity)) return 0;
+            PlayerEntity user = (PlayerEntity) entity;
+            if (user.getInventory().getStack(((PlayerEntity) entity).getInventory().selectedSlot) != stack ||
+                            !user.getUuid().equals(tracker.getOwner().getUuid())
+            ) return 0;
             return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
     }
