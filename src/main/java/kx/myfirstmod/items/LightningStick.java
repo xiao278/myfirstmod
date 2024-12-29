@@ -35,18 +35,13 @@ public class LightningStick extends Item {
         // Spawn the lightning bolt.
         // SummonLightning.summon(world, blockPos, 0, true);
 
-        int size = 7;
-        int strikes = 6;
-        int iters = 2;
-        if (EnchantmentHelper.getLevel(Enchantments.SWEEPING, user.getStackInHand(hand)) > 0) {
-            size += 7;
-            iters += 1;
-        }
-        if (EnchantmentHelper.getLevel(Enchantments.SMITE, user.getStackInHand(hand)) > 0) {
-            strikes += 3;
-        }
-        for (int strike = 0; strike < strikes; strike++) {
-            for (int i = 0; i < iters; i++) {
+        int sweeping_level = EnchantmentHelper.getLevel(Enchantments.SWEEPING, user.getStackInHand(hand));
+        int smite_level = EnchantmentHelper.getLevel(Enchantments.SMITE, user.getStackInHand(hand));
+        int size = 7 + sweeping_level * 10; // has to be odd
+        int strike_attempts = 2 + smite_level;
+        int lightnings_per_strike = 1 + sweeping_level;
+        for (int strike = 0; strike < strike_attempts; strike++) {
+            for (int i = 0; i < lightnings_per_strike; i++) {
                 int modX = BinomialDistribution.sample(size - 1, 0.5) - (size / 2);
                 int modZ = BinomialDistribution.sample(size - 1, 0.5)  - (size / 2);
                 Runnable runnable = SummonLightning.getRunnable(
@@ -55,7 +50,7 @@ public class LightningStick extends Item {
                         5,
                         true
                 );
-                TaskScheduler.schedule(runnable, strike);
+                TaskScheduler.schedule(runnable, strike + 1);
             }
         };
 

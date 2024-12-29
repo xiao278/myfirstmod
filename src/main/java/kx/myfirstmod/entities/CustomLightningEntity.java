@@ -31,7 +31,7 @@ public class CustomLightningEntity extends LightningEntity {
             });
             this.discard();
         }
-        spawnFire(4);
+        spawnFire(1);
     }
 
 
