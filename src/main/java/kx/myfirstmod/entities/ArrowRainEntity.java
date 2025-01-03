@@ -20,6 +20,8 @@ public class ArrowRainEntity extends ArrowEntity {
     private int hitBlockSelfDestruct = 15;
     private boolean hasHitBlock = false;
     private Vec3d targetPos;
+    private LivingEntity target;
+    private Vec3d offset = new Vec3d(0,0,0);
     private double speed = 7;
     private boolean guiding = true;
 
@@ -33,10 +35,22 @@ public class ArrowRainEntity extends ArrowEntity {
         this.setPosition(pos);
         Random random = world.getRandom();
         Vec3d center = targetBlock.toCenterPos();
-        double x = center.x + (random.nextDouble() - 0.5) * 2.5;
-        double z = center.z + (random.nextDouble() - 0.5) * 2.5;
+        double x = (random.nextDouble() - 0.5) * 2.5;
+        double z = (random.nextDouble() - 0.5) * 2.5;
         this.pickupType = PickupPermission.DISALLOWED;
-        targetPos = new Vec3d(x, targetBlock.getY(), z);
+        targetPos = center;
+        offset = new Vec3d(x,0,z);
+    }
+
+    public ArrowRainEntity(EntityType<? extends ArrowEntity> entityType, World world, PlayerEntity owner, Vec3d pos, LivingEntity target) {
+        super(entityType, world);
+        this.setOwner(owner);
+        this.setPosition(pos);
+        this.target = target;
+        Random random = world.getRandom();
+        double x = (random.nextDouble() - 0.5) * 2.5;
+        double z = (random.nextDouble() - 0.5) * 2.5;
+        offset = new Vec3d(x,0,z);
     }
 
     @Override
@@ -62,26 +76,18 @@ public class ArrowRainEntity extends ArrowEntity {
             }
         }
         else {
+            if (target != null && target.isAlive() && !target.isRemoved()) {
+                targetPos = target.getPos();
+            }
             if (this.targetPos != null && this.guiding) {
                 // final minus initial
-                Vec3d toTarget = this.targetPos.subtract(this.getPos());
-                double dist = targetPos.distanceTo(this.getPos());
+                Vec3d toTarget = this.targetPos.add(offset).subtract(this.getPos());
+                double dist = targetPos.add(offset).distanceTo(this.getPos());
                 if (dist < 30) {
                     this.guiding = false;
                 }
-                this.setVelocity(this.targetPos.subtract(this.getPos()).normalize().multiply(this.speed));
+                this.setVelocity(toTarget.normalize().multiply(this.speed));
             }
-//            if (this.hitBlockSelfDestruct <= 1) {
-//                Vec3d pos = this.getPos();
-//                this.getWorld().createExplosion(
-//                        this.getOwner(), // The entity that caused the explosion (can be null)
-//                        pos.x,    // X-coordinate of the explosion
-//                        pos.y,    // Y-coordinate of the explosion
-//                        pos.z,    // Z-coordinate of the explosion
-//                        10, // Explosion strength
-//                        World.ExplosionSourceType.TNT // Prevent block destruction
-//                );
-//            }
         }
         if (this.hitBlockSelfDestruct <= 0) {
             this.discard();

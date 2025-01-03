@@ -3,7 +3,9 @@ package kx.myfirstmod.items;
 import kx.myfirstmod.entities.ArrowRainEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.utils.BlockDetector;
+import kx.myfirstmod.utils.EntityDetector;
 import kx.myfirstmod.utils.TaskScheduler;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.Item;
@@ -20,18 +22,37 @@ public class ArrowRainWeapon extends Item {
     public ArrowRainWeapon(Settings settings) {
         super(settings);
     }
+    public static final double range = 64;
+    public static final int projectile_count = 15;
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient) {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
-        BlockPos bPos = BlockDetector.getBlockLookingAt(world, user, 64);
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+        Random random = world.getRandom();
+        if (target != null) {
+            for (int i = 0; i < projectile_count; i++) {
+                TaskScheduler.schedule(() -> {
+                    double x_variance = (random.nextDouble() - 0.5) * 24;
+                    double z_variance = (random.nextDouble() - 0.5) * 24;
+                    world.spawnEntity(new ArrowRainEntity(
+                            ModEntityTypes.ARROW_RAIN_ENTITY,
+                            world,
+                            user,
+                            new Vec3d(target.getX() + x_variance, 255, target.getZ() + z_variance),
+                            target
+                    ));
+                }, i + 1);
+            }
+            return TypedActionResult.success(user.getStackInHand(hand));
+        }
+        BlockPos bPos = BlockDetector.getBlockLookingAt(world, user, range);
         if (bPos == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }
-        Random random = world.getRandom();
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < projectile_count; i++) {
             TaskScheduler.schedule(() -> {
                 double x_variance = (random.nextDouble() - 0.5) * 24;
                 double z_variance = (random.nextDouble() - 0.5) * 24;
