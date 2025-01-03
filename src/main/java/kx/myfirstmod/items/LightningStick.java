@@ -56,7 +56,7 @@ public class LightningStick extends Item {
 
         // Nothing has changed to the item stack,
         // so we just return it how it was.
-        user.getItemCooldownManager().set(this, 60);
+        user.getItemCooldownManager().set(this, 100);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }

@@ -14,6 +14,7 @@ public class ModItems {
             itemGroup.add(ModItems.LIGHTNING_STICK);
             itemGroup.add(ModItems.GUARDIAN_LASER);
             itemGroup.add(ModItems.EVOKER_STAFF);
+            itemGroup.add(ModItems.SHULKER_STAFF);
         });
     }
 

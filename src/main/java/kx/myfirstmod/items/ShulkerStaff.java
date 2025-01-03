@@ -34,7 +34,7 @@ public class ShulkerStaff extends Item {
         for (int i = 0; i < 8; i++) {
             world.spawnEntity(new CustomShulkerBulletEntity(world, user, target, initialDir, 0.6));
         }
-        user.getItemCooldownManager().set(this, 300);
+        user.getItemCooldownManager().set(this, 280);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }

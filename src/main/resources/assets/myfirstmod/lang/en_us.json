@@ -2,5 +2,6 @@
   "item.myfirstmod.lightning_stick": "Lightning Stick",
   "item.myfirstmod.guardian_core": "Guardian Core",
   "item.myfirstmod.evoker_staff": "Evoker Staff",
-  "death.attack.magic.item": "{0} was killed by {1} using magic"
+  "death.attack.magic.item": "{0} was killed by {1} using magic",
+  "item.myfirstmod.shulker_staff": "Shulker Staff"
 }
