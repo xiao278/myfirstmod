@@ -20,7 +20,8 @@ public class ArrowRainWeapon extends Item {
         if (world.isClient) {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
-        return TypedActionResult.fail(user.getStackInHand(hand));
+        world.spawnEntity(new ArrowEntity(world, user.getX(), user.getY() + 5, user.getZ()));
+        return TypedActionResult.success(user.getStackInHand(hand));
     }
 
     private void spawnArrows(World world, BlockPos coordinates, PlayerEntity user) {

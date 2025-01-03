@@ -39,6 +39,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
             this.damage = damage;
             this.stack_used = caster.getInventory().getStack(caster.getInventory().selectedSlot);
             this.beamTicks = 0;
+            this.setPosition(caster.getPos());
             this.dataTracker.set(TARGET_ID, this.target.getId());
             this.dataTracker.set(TARGET_UUID, Optional.ofNullable(this.target.getUuid()));
             this.dataTracker.set(WARMUP_TIME, warmup_time);
@@ -46,7 +47,6 @@ public class GuardianLaserEntity extends ProjectileEntity {
         else {
             this.stack_used = null;
         }
-        System.out.println(this.stack_used);
     }
 
     @Override

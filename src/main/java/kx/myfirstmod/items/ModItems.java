@@ -51,4 +51,9 @@ public class ModItems {
             new ShulkerStaff(new Item.Settings().maxCount(1)),
             "shulker_staff"
     );
+
+    public static final Item ARROW_RAIN = register (
+            new ArrowRainWeapon(new Item.Settings().maxCount(1)),
+            "arrow_rain"
+    );
 }
