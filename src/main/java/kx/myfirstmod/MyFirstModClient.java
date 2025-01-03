@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.render.entity.ArrowEntityRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -31,6 +32,7 @@ public class MyFirstModClient implements ClientModInitializer {
             if (!(entity instanceof  PlayerEntity)) return 0;
             return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
+        EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowEntityRenderer::new);
     }
 
     private void onResourcesReady() {
