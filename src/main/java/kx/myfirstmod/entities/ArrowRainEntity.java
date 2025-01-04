@@ -1,5 +1,6 @@
 package kx.myfirstmod.entities;
 
+import kx.myfirstmod.utils.NormalDistribution;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -37,8 +38,8 @@ public class ArrowRainEntity extends ArrowEntity {
         this.setPosition(pos);
         Random random = world.getRandom();
         Vec3d center = targetBlock.toCenterPos();
-        double x = (random.nextDouble() - 0.5) * 2.5;
-        double z = (random.nextDouble() - 0.5) * 2.5;
+        double x = NormalDistribution.nextValue(0, 1);
+        double z = NormalDistribution.nextValue(0, 1);
         this.pickupType = PickupPermission.DISALLOWED;
         targetPos = center;
         offset = new Vec3d(x,0,z);
