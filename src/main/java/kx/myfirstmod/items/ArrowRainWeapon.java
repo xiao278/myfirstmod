@@ -23,7 +23,7 @@ public class ArrowRainWeapon extends Item {
         super(settings);
     }
     public static final double range = 64;
-    public static final int projectile_count = 15;
+    public static final int projectile_count = 16;
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
@@ -31,44 +31,51 @@ public class ArrowRainWeapon extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
         LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
-        Random random = world.getRandom();
         if (target != null) {
-            for (int i = 0; i < projectile_count; i++) {
-                TaskScheduler.schedule(() -> {
-                    double x_variance = (random.nextDouble() - 0.5) * 24;
-                    double z_variance = (random.nextDouble() - 0.5) * 24;
-                    world.spawnEntity(new ArrowRainEntity(
-                            ModEntityTypes.ARROW_RAIN_ENTITY,
-                            world,
-                            user,
-                            new Vec3d(target.getX() + x_variance, 255, target.getZ() + z_variance),
-                            target
-                    ));
-                }, i + 1);
-            }
+            spawnArrows(world, target, user);
             return TypedActionResult.success(user.getStackInHand(hand));
         }
         BlockPos bPos = BlockDetector.getBlockLookingAt(world, user, range);
         if (bPos == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }
+        spawnArrows(world, bPos, user);
+        return TypedActionResult.success(user.getStackInHand(hand));
+    }
+
+    private Vec3d getSpawnCoords(Random random, Vec3d pos, PlayerEntity user) {
+        double x_variance = (random.nextDouble() - 0.5) * 24;
+        double z_variance = (random.nextDouble() - 0.5) * 24;
+        return new Vec3d(pos.getX() + x_variance, pos.y + 256, pos.getZ() + z_variance);
+    }
+
+    private void spawnArrows(World world, BlockPos bPos, PlayerEntity user) {
+        Random random = world.getRandom();
         for (int i = 0; i < projectile_count; i++) {
             TaskScheduler.schedule(() -> {
-                double x_variance = (random.nextDouble() - 0.5) * 24;
-                double z_variance = (random.nextDouble() - 0.5) * 24;
                 world.spawnEntity(new ArrowRainEntity(
                         ModEntityTypes.ARROW_RAIN_ENTITY,
                         world,
                         user,
-                        new Vec3d(bPos.getX() + x_variance, 255, bPos.getZ() + z_variance),
+                        getSpawnCoords(random, bPos.toCenterPos(), user),
                         bPos
                 ));
             }, i + 1);
         }
-        return TypedActionResult.success(user.getStackInHand(hand));
     }
 
-    private void spawnArrows(World world, BlockPos coordinates, PlayerEntity user) {
-        world.spawnEntity(new ArrowEntity(world, coordinates.getX(), coordinates.getY(), coordinates.getZ()));
+    private void spawnArrows(World world, LivingEntity target, PlayerEntity user) {
+        Random random = world.getRandom();
+        for (int i = 0; i < projectile_count; i++) {
+            TaskScheduler.schedule(() -> {
+                world.spawnEntity(new ArrowRainEntity(
+                        ModEntityTypes.ARROW_RAIN_ENTITY,
+                        world,
+                        user,
+                        getSpawnCoords(random, target.getPos(), user),
+                        target
+                ));
+            }, i + 1);
+        }
     }
 }

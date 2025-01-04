@@ -24,6 +24,8 @@ public class ArrowRainEntity extends ArrowEntity {
     private Vec3d offset = new Vec3d(0,0,0);
     private double speed = 7;
     private boolean guiding = true;
+    private Vec3d prevPos;
+    private double prevOverflow = 0;
 
     public ArrowRainEntity(EntityType<? extends ArrowEntity> entityType, World world) {
         super(entityType, world);
@@ -74,6 +76,25 @@ public class ArrowRainEntity extends ArrowEntity {
             if (this.hitBlockSelfDestruct <= 1) {
                 spawnHitParticles(this.getPos());
             }
+            // spawn particles along path
+            if (!this.hasHitBlock && prevPos != null) {
+                Vec3d movementVector = this.getPos().subtract(prevPos);
+                Vec3d movementDir = movementVector.normalize();
+                double spacing = 0.3;
+                double total_length = movementVector.length();
+                double cur_lerp = prevOverflow;
+                while (cur_lerp < total_length) {
+                    Vec3d pos = this.getPos().add(movementDir.multiply(cur_lerp));
+                    Vec3d vel = this.getRotationVector().multiply(-0.5);
+                    this.getWorld().addParticle(ParticleTypes.CRIT,
+                            pos.x, pos.y, pos.z,
+                            vel.x, vel.y, vel.z
+                    );
+                    cur_lerp += spacing;
+                }
+                prevOverflow = cur_lerp - total_length;
+            }
+            prevPos = this.getPos();
         }
         else {
             if (target != null && target.isAlive() && !target.isRemoved()) {
