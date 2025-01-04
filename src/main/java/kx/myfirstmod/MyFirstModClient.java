@@ -5,6 +5,7 @@ import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.utils.BlockGlowRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -33,6 +34,7 @@ public class MyFirstModClient implements ClientModInitializer {
             return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowEntityRenderer::new);
+        BlockGlowRenderer.register();
     }
 
     private void onResourcesReady() {

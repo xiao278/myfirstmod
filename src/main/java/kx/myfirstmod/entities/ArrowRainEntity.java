@@ -101,7 +101,7 @@ public class ArrowRainEntity extends ArrowEntity {
             if (target != null && target.isAlive() && !target.isRemoved()) {
                 targetPos = target.getPos();
             }
-            if (this.targetPos != null && this.guiding) {
+            if (this.targetPos != null && this.guiding && !this.hasHitBlock) {
                 // final minus initial
                 Vec3d toTarget = this.targetPos.add(offset).subtract(this.getPos());
                 double dist = targetPos.add(offset).distanceTo(this.getPos());

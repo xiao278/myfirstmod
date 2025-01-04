@@ -1,8 +1,10 @@
 package kx.myfirstmod.items;
 
 import kx.myfirstmod.entities.ArrowRainEntity;
+import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.utils.BlockDetector;
+import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EntityDetector;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.LivingEntity;
@@ -10,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -24,23 +27,44 @@ public class ArrowRainWeapon extends Item {
     }
     public static final double range = 64;
     public static final int projectile_count = 16;
+    private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient) {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
-        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
-        if (target != null) {
-            spawnArrows(world, target, user);
-            return TypedActionResult.success(user.getStackInHand(hand));
+        user.setCurrentHand(hand);
+        return TypedActionResult.consume(user.getStackInHand(hand));
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (world.isClient) {
+            BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
+            BlockGlowRenderer.setBlockPos(block);
         }
-        BlockPos bPos = BlockDetector.getBlockLookingAt(world, user, range);
-        if (bPos == null) {
-            return TypedActionResult.fail(user.getStackInHand(hand));
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (world.isClient) {
+            BlockGlowRenderer.setBlockPos(null);
+            return;
         }
-        spawnArrows(world, bPos, user);
-        return TypedActionResult.success(user.getStackInHand(hand));
+        else {
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+            BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
+            if (target != null) {
+                spawnArrows(world, target, (PlayerEntity) user);
+                return;
+            }
+
+            if (block == null) {
+                return;
+            }
+            spawnArrows(world, block, (PlayerEntity) user);
+        }
     }
 
     private Vec3d getSpawnCoords(Random random, Vec3d pos, PlayerEntity user) {
