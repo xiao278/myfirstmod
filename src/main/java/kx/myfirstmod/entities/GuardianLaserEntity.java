@@ -1,6 +1,7 @@
 package kx.myfirstmod.entities;
 
 import kx.myfirstmod.items.GuardianLaser;
+import kx.myfirstmod.misc.GuardianLaserDamageSource;
 import kx.myfirstmod.utils.EntityDetector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -161,7 +162,7 @@ public class GuardianLaserEntity extends ProjectileEntity {
             if (hasBeamTarget() && this.getBeamTicks() >= this.getWarmupTime()) {
                 RegistryEntry<DamageType> dtype = this.getWorld().getRegistryManager()
                         .get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
-                target.damage(new DamageSource(dtype, this.getOwner()), damage);
+                target.damage(new GuardianLaserDamageSource(dtype, this.getOwner()), damage);
             }
             this.discard();
         }
