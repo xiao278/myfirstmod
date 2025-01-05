@@ -2,5 +2,19 @@
   "parent": "item/handheld",
   "textures": {
     "layer0": "myfirstmod:item/arrow_rain"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": { "pull": 0.01 },
+      "model": "myfirstmod:item/arrow_rain_pull0"
+    },
+    {
+      "predicate": { "pull": 0.5 },
+      "model": "myfirstmod:item/arrow_rain_pull1"
+    },
+    {
+      "predicate": { "pull": 0.99 },
+      "model": "myfirstmod:item/arrow_rain_pull2"
+    }
+  ]
 }

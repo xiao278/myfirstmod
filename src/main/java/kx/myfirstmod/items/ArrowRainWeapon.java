@@ -8,8 +8,13 @@ import kx.myfirstmod.utils.EntityDetector;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -18,10 +23,11 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 
-public class ArrowRainWeapon extends Item {
+public class ArrowRainWeapon extends BowItem {
     public ArrowRainWeapon(Settings settings) {
         super(settings);
     }
+    public static final int MAX_PULL_TICKS = 20;
     public static final double range = 64;
     public static final int projectile_count = 16;
     private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";
@@ -53,23 +59,34 @@ public class ArrowRainWeapon extends Item {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        int maxPullTicks = stack.getMaxUseTime();
+        int ticksPulled = maxPullTicks - user.getItemUseTimeLeft();
         if (world.isClient) {
             BlockGlowRenderer.setBlockPos(null);
             BlockGlowRenderer.setEntity(null);
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+            BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
+            if ((target != null || block != null) && ticksPulled >= MAX_PULL_TICKS) {
+                shootParticles(world, (PlayerEntity) user);
+            }
             return;
         }
         else {
-            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
-            BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
-            if (target != null) {
-                spawnArrows(world, target, (PlayerEntity) user);
-                return;
-            }
+            if (ticksPulled >= MAX_PULL_TICKS) {
+                LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+                BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
+                if (target != null) {
+                    spawnArrows(world, target, (PlayerEntity) user);
+                    playShootSound(world, (PlayerEntity) user);
+                    return;
+                }
 
-            if (block == null) {
-                return;
+                if (block == null) {
+                    return;
+                }
+                playShootSound(world, (PlayerEntity) user);
+                spawnArrows(world, block, (PlayerEntity) user);
             }
-            spawnArrows(world, block, (PlayerEntity) user);
         }
     }
 
@@ -91,6 +108,32 @@ public class ArrowRainWeapon extends Item {
                         bPos
                 ));
             }, i + 1);
+        }
+    }
+
+    public static float getPullProgress(int useTicks) {
+        float f = (float)useTicks / MAX_PULL_TICKS;
+//        f = (f * f + f * 2.0F) / 3.0F;
+        if (f > 1.0F) {
+            f = 1.0F;
+        }
+
+        return f;
+    }
+
+    public void playShootSound(World world, PlayerEntity user) {
+        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) +  0.5F);
+    }
+
+    public void shootParticles(World world, PlayerEntity user) {
+        Random rand = world.getRandom();
+        Vec3d root = user.getEyePos().add(user.getHandPosOffset(this).multiply(0.5));
+        for (int i = 0; i < 10; i++) {
+            Vec3d vel = user.getRotationVector().add(new Vec3d(rand.nextDouble() - 0.5, rand.nextDouble() - 0.5, rand.nextDouble() - 0.5).multiply(0.25)).multiply(0.3);
+            world.addParticle(ParticleTypes.POOF,
+                    root.x, root.y, root.z,
+                    vel.x, vel.y, vel.z
+            );
         }
     }
 

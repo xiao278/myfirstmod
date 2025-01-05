@@ -17,7 +17,7 @@ public class ModEntityTypes {
             Registries.ENTITY_TYPE,
             new Identifier("myfirstmod", "arrow_rain_entity"),
             FabricEntityTypeBuilder.<ArrowRainEntity>create(SpawnGroup.MISC, ArrowRainEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.5F, 0.5F)) // Arrow size
+                    .dimensions(EntityDimensions.fixed(1F, 1F)) // Arrow size
                     .trackRangeChunks(10) // Range in chunks where the entity is tracked
                     .trackedUpdateRate(1).build()
     );

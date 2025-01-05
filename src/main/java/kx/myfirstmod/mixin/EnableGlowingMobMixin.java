@@ -14,7 +14,7 @@ public class EnableGlowingMobMixin {
     @Inject(method = "hasOutline", at = @At("HEAD"), cancellable = true)
     private void outlineMob(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (entity.getType().equals(ModEntityTypes.ARROW_RAIN_ENTITY)) {
-            cir.setReturnValue(true);
+            cir.setReturnValue(false);
         }
     }
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "myfirstmod:item/arrow_rain_pull1"
+  }
+}

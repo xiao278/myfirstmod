@@ -43,7 +43,7 @@ public class ArrowRainEntity extends ArrowEntity {
         double x = NormalDistribution.nextValue(0, 1);
         double z = NormalDistribution.nextValue(0, 1);
         this.pickupType = PickupPermission.DISALLOWED;
-        this.setDamage(4);
+        this.setDamage(5);
         targetPos = center;
         offset = new Vec3d(x,0,z);
     }
@@ -95,8 +95,8 @@ public class ArrowRainEntity extends ArrowEntity {
                 double cur_lerp = prevOverflow;
                 while (cur_lerp < total_length) {
                     Vec3d pos = this.prevPos.add(movementDir.multiply(cur_lerp));
-                    Vec3d vel = this.getRotationVector().multiply(speed * -0.5);
-                    this.getWorld().addParticle(ParticleTypes.CRIT,
+                    Vec3d vel = this.getRotationVector().multiply(speed * 0.125);
+                    this.getWorld().addParticle(ParticleTypes.ELECTRIC_SPARK,
                             pos.x, pos.y, pos.z,
                             vel.x, vel.y, vel.z
                     );

@@ -4,6 +4,7 @@ import kx.myfirstmod.entities.ArrowRainEntityRenderer;
 import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
 import kx.myfirstmod.entities.ModEntityTypes;
+import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.BlockGlowRenderer;
@@ -34,6 +35,17 @@ public class MyFirstModClient implements ClientModInitializer {
             if (!(entity instanceof  PlayerEntity)) return 0;
             return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
+
+        ModelPredicateProviderRegistry.register(ModItems.ARROW_RAIN, new Identifier("pull"), (stack, world, entity, seed) -> {
+            if (entity == null) return 0;
+            if (entity.getActiveItem().getItem() != ModItems.ARROW_RAIN) return 0;
+
+            int maxPullTicks = stack.getMaxUseTime(); // Typically 20
+            int ticksPulled = maxPullTicks - entity.getItemUseTimeLeft();
+
+            return ArrowRainWeapon.getPullProgress(ticksPulled);
+        });
+
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         BlockGlowRenderer.register();
     }
