@@ -1,7 +1,6 @@
 package kx.myfirstmod.items;
 
 import kx.myfirstmod.entities.ArrowRainEntity;
-import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.utils.BlockDetector;
 import kx.myfirstmod.utils.BlockGlowRenderer;
@@ -9,10 +8,8 @@ import kx.myfirstmod.utils.EntityDetector;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -41,7 +38,7 @@ public class ArrowRainWeapon extends Item {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (world.isClient) {
-            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25, true);
             if (target != null) {
                 BlockGlowRenderer.setEntity(target);
                 BlockGlowRenderer.setBlockPos(null);

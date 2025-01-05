@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -18,12 +19,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 
 public class ArrowRainEntity extends ArrowEntity {
-    private int hitBlockSelfDestruct = 15;
+    private int hitBlockSelfDestruct = 20;
     private boolean hasHitBlock = false;
     private Vec3d targetPos;
     private LivingEntity target;
     private Vec3d offset = new Vec3d(0,0,0);
-    private double speed = 7;
+    private double speed = 5;
     private boolean guiding = true;
     private Vec3d prevPos;
     private double prevOverflow = 0;
@@ -54,6 +55,12 @@ public class ArrowRainEntity extends ArrowEntity {
         double x = (random.nextDouble() - 0.5) * 2.5;
         double z = (random.nextDouble() - 0.5) * 2.5;
         offset = new Vec3d(x,0,z);
+    }
+
+    @Override
+    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
+        super.onSpawnPacket(packet);
+        this.setGlowing(true);
     }
 
     @Override

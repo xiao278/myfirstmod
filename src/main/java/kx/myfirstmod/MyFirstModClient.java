@@ -1,5 +1,6 @@
 package kx.myfirstmod;
 
+import kx.myfirstmod.entities.ArrowRainEntityRenderer;
 import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
 import kx.myfirstmod.entities.ModEntityTypes;
@@ -33,7 +34,7 @@ public class MyFirstModClient implements ClientModInitializer {
             if (!(entity instanceof  PlayerEntity)) return 0;
             return (tracker.getBeamTicks() / tracker.getWarmupTime());
         });
-        EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         BlockGlowRenderer.register();
     }
 
