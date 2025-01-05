@@ -24,8 +24,9 @@ public class ArrowRainEntity extends ArrowEntity {
     private Vec3d targetPos;
     private LivingEntity target;
     private Vec3d offset = new Vec3d(0,0,0);
-    private double speed = 5;
+    private double speed = 4;
     private boolean guiding = true;
+    private double guidingRange = 20;
     private Vec3d prevPos;
     private double prevOverflow = 0;
 
@@ -42,6 +43,7 @@ public class ArrowRainEntity extends ArrowEntity {
         double x = NormalDistribution.nextValue(0, 1);
         double z = NormalDistribution.nextValue(0, 1);
         this.pickupType = PickupPermission.DISALLOWED;
+        this.setDamage(4);
         targetPos = center;
         offset = new Vec3d(x,0,z);
     }
@@ -88,12 +90,12 @@ public class ArrowRainEntity extends ArrowEntity {
             if (!this.hasHitBlock && prevPos != null) {
                 Vec3d movementVector = this.getPos().subtract(prevPos);
                 Vec3d movementDir = movementVector.normalize();
-                double spacing = 0.3;
+                double spacing = 0.375;
                 double total_length = movementVector.length();
                 double cur_lerp = prevOverflow;
                 while (cur_lerp < total_length) {
-                    Vec3d pos = this.getPos().add(movementDir.multiply(cur_lerp));
-                    Vec3d vel = this.getRotationVector().multiply(-0.5);
+                    Vec3d pos = this.prevPos.add(movementDir.multiply(cur_lerp));
+                    Vec3d vel = this.getRotationVector().multiply(speed * -0.5);
                     this.getWorld().addParticle(ParticleTypes.CRIT,
                             pos.x, pos.y, pos.z,
                             vel.x, vel.y, vel.z
@@ -112,7 +114,7 @@ public class ArrowRainEntity extends ArrowEntity {
                 // final minus initial
                 Vec3d toTarget = this.targetPos.add(offset).subtract(this.getPos());
                 double dist = targetPos.add(offset).distanceTo(this.getPos());
-                if (dist < 30) {
+                if (dist < this.guidingRange) {
                     this.guiding = false;
                 }
                 this.setVelocity(toTarget.normalize().multiply(this.speed));

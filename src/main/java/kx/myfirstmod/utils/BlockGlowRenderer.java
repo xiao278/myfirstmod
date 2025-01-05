@@ -2,6 +2,7 @@ package kx.myfirstmod.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import kx.myfirstmod.MyFirstMod;
+import kx.myfirstmod.items.ModItems;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
@@ -48,10 +49,12 @@ public class BlockGlowRenderer {
      */
     public static void renderGlowingBlock(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null) return;
+        if (client.world == null || client.player == null) return;
         Box box = null;
 
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+
+        if (client.player.getActiveItem().getItem() != ModItems.ARROW_RAIN) return;
 
         if (blockPos != null) {
             box = new Box(blockPos).offset(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -216,7 +219,8 @@ public class BlockGlowRenderer {
 
     private static void renderEntityTarget(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null || entity == null) return;
+        if (client.world == null || entity == null || client.player == null) return;
+        if (client.player.getActiveItem().getItem() != ModItems.ARROW_RAIN) return;
         MatrixStack adjustedMatrixStack = new MatrixStack();
         adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
 
