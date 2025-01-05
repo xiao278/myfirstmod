@@ -1,5 +1,5 @@
 {
-  "parent": "item/handheld",
+  "parent": "item/bow",
   "textures": {
     "layer0": "myfirstmod:item/arrow_rain_pull0"
   }
