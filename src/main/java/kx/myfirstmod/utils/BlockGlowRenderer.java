@@ -1,21 +1,30 @@
 package kx.myfirstmod.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import kx.myfirstmod.MyFirstMod;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.GlowSquidEntityRenderer;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
-    private static final Identifier OUTLINE_TEXTURE = new Identifier("myfirstmod", "textures/dummy_texture.png");
+    private static Entity entity;
+    private static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
     private static final float[] color = {1,0,0,0.5F};
     private static final float thickness = 5;
 
@@ -23,6 +32,10 @@ public class BlockGlowRenderer {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderGlowingBlock(context, color, context.tickDelta(), context.consumers());
+        });
+        WorldRenderEvents.END.register((context) -> {
+            // Call the BlockGlowRenderer to render the glow
+            BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
         });
     }
 
@@ -35,11 +48,18 @@ public class BlockGlowRenderer {
      */
     public static void renderGlowingBlock(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null || blockPos == null) return;
+        if (client.world == null) return;
+        Box box = null;
 
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
-        Box box = new Box(blockPos).offset(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-        box = box.expand(0.125);
+
+        if (blockPos != null) {
+            box = new Box(blockPos).offset(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            box = box.expand(0.01);
+        }
+
+        if (box == null) return;
+
 //        System.out.printf("(%f, %f, %f), (%f, %f, %f)\n", box.maxX, box.maxY, box.maxZ, box.minX, box.minY, box.minZ);
 
         VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
@@ -168,11 +188,106 @@ public class BlockGlowRenderer {
                 .next();
     }
 
-    public static void setBlockPos(BlockPos blockPos) {
-        BlockGlowRenderer.blockPos = blockPos;
+    private static void renderEntityOutline(MatrixStack matrices, Entity entity, float red, float green, float blue, float alpha) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
+        EntityRenderer<?> renderer = dispatcher.getRenderer(entity);
+
+        if (renderer instanceof LivingEntityRenderer<?, ?> livingRenderer) {
+//            System.out.println("isworking");
+            // Get the model from the renderer
+            VertexConsumerProvider.Immediate bufferProvider = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+
+            // Set up a custom render layer for the outline
+            RenderLayer outlineLayer = RenderLayer.getOutline(OUTLINE_TEXTURE);
+            VertexConsumer buffer = bufferProvider.getBuffer(outlineLayer);
+
+            // Render the model
+            matrices.push();
+            matrices.translate(0, 0.01, 0); // Slightly offset to avoid z-fighting
+
+            // Pass the entity model and outline color
+            livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
+
+            matrices.pop();
+            bufferProvider.draw();
+        }
+    }
+
+    private static void renderEntityTarget(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null || entity == null) return;
+        MatrixStack adjustedMatrixStack = new MatrixStack();
+        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
+
+        Vec3d entityCenterPos = entity.getPos().add(0,entity.getHeight() / 2,0);
+
+        Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+        Vec3d planeNormal = cameraPos.subtract(entityCenterPos).normalize();
+
+        VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
+
+        float width = 0.25f;
+        float height = 1.875f;
+
+        Vec2f[][] planeQuads = {
+                {
+                        new Vec2f(-height,-width), new Vec2f(-height,width), new Vec2f(height,width), new Vec2f(height,-width)
+                },
+                {
+                        new Vec2f(-width,-height), new Vec2f(-width,height), new Vec2f(width,height), new Vec2f(width,-height)
+                },
+        };
+
+        RenderSystem.disableDepthTest();
+
+        adjustedMatrixStack.push();
+
+        MatrixStack.Entry entry = adjustedMatrixStack.peek();
+        Matrix4f positionMatrix = entry.getPositionMatrix();
+        Matrix3f normalMatrix = entry.getNormalMatrix();
+        float nx = 0.0F, ny = 1.0F, nz = 0.0F;
+
+        float z_offset = 0;
+        for (Vec2f[] quad: planeQuads) {
+            for (Vec2f point: quad) {
+                Vec3d newPoint = map2DTo3D(point, entityCenterPos.subtract(cameraPos).multiply(1 + z_offset), planeNormal);
+                buffer.vertex(positionMatrix, (float) newPoint.x, (float) newPoint.y,  (float) newPoint.z)
+                        .color(color[0], color[1], color[2], color[3])
+                        .normal(normalMatrix, nx, ny, nz)
+                        .next();
+            }
+            z_offset += 0.01f;
+        }
+
+        adjustedMatrixStack.pop();
+
+        RenderSystem.enableDepthTest();
+    }
+
+    public static Vec3d map2DTo3D(Vec2f point2f, Vec3d planeOrigin, Vec3d planeNormal) {
+        // Compute basis vectors
+        Vec3d arbitrary = (planeNormal.x == 0 && planeNormal.y == 0) ? new Vec3d(0, 1, 0) : new Vec3d(1, 0, 0);
+        Vec3d u = planeNormal.crossProduct(arbitrary).normalize();
+        Vec3d v = planeNormal.crossProduct(u).normalize();
+
+        // Map 2D point to 3D
+        return planeOrigin.add(u.multiply(point2f.x)).add(v.multiply(point2f.y));
+    }
+
+    public static void setBlockPos(BlockPos bPos) {
+        blockPos = bPos;
     }
 
     public static BlockPos getBlockPos() {
         return blockPos;
+    }
+
+    public static void setEntity(Entity e) {
+        entity = e;
+    }
+
+    public static Entity getEntity() {
+        return entity;
     }
 }

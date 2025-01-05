@@ -41,8 +41,16 @@ public class ArrowRainWeapon extends Item {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (world.isClient) {
-            BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
-            BlockGlowRenderer.setBlockPos(block);
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+            if (target != null) {
+                BlockGlowRenderer.setEntity(target);
+                BlockGlowRenderer.setBlockPos(null);
+            }
+            else {
+                BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
+                BlockGlowRenderer.setEntity(null);
+                BlockGlowRenderer.setBlockPos(block);
+            }
         }
     }
 
@@ -50,6 +58,7 @@ public class ArrowRainWeapon extends Item {
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (world.isClient) {
             BlockGlowRenderer.setBlockPos(null);
+            BlockGlowRenderer.setEntity(null);
             return;
         }
         else {
