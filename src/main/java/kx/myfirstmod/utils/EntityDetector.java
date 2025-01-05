@@ -39,7 +39,7 @@ public class EntityDetector {
         return Math.acos(lookDir.dotProduct(targetDir)) * 180 / Math.PI;
     }
 
-    public static LivingEntity findClosestCrosshairEntity (World world, Entity source, double range, double maxAngle) {
+    public static LivingEntity findClosestCrosshairEntity (World world, Entity source, double range, double maxAngle, boolean checkVisibility) {
         Vec3d uPos = source.getPos();
         Box searchBox = new Box(
                 uPos.x - range, uPos.y - range, uPos.z - range,
@@ -51,6 +51,11 @@ public class EntityDetector {
         LivingEntity target = null;
         double minCriteria = Float.POSITIVE_INFINITY;
         for (Entity e: potentialTargets) {
+            if (checkVisibility) {
+                if (!isLineOfSightClear(world, source, e)) {
+                    continue;
+                }
+            }
             if (e.isAlive() && e.isLiving()) {
                 double criteria = EntityDetector.getLookAngle(world, source, e);
                 if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(source) < range && criteria < maxAngle) {
@@ -61,6 +66,10 @@ public class EntityDetector {
         }
 
         return target;
+    }
+
+    public static LivingEntity findClosestCrosshairEntity(World world, Entity source, double range, double maxAngle) {
+        return findClosestCrosshairEntity(world, source, range, maxAngle, false);
     }
 
     public static Vec3d getCenterOffset(Entity e) {
