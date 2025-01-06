@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -38,7 +39,6 @@ public class ArrowRainEntity extends ArrowEntity {
         super(entityType, world);
         this.setOwner(owner);
         this.setPosition(pos);
-        Random random = world.getRandom();
         Vec3d center = targetBlock.toCenterPos();
         double x = NormalDistribution.nextValue(0, 1);
         double z = NormalDistribution.nextValue(0, 1);
@@ -49,14 +49,8 @@ public class ArrowRainEntity extends ArrowEntity {
     }
 
     public ArrowRainEntity(EntityType<? extends ArrowEntity> entityType, World world, PlayerEntity owner, Vec3d pos, LivingEntity target) {
-        super(entityType, world);
-        this.setOwner(owner);
-        this.setPosition(pos);
+        this(entityType, world, owner, pos, target.getBlockPos());
         this.target = target;
-        Random random = world.getRandom();
-        double x = (random.nextDouble() - 0.5) * 2.5;
-        double z = (random.nextDouble() - 0.5) * 2.5;
-        offset = new Vec3d(x,0,z);
     }
 
     @Override
@@ -74,6 +68,11 @@ public class ArrowRainEntity extends ArrowEntity {
     @Override
     protected void onHit(LivingEntity target) {
         super.onHit(target);
+    }
+
+    @Override
+    protected void onEntityHit(EntityHitResult entityHitResult) {
+        super.onEntityHit(entityHitResult);
     }
 
     @Override
