@@ -29,6 +29,7 @@ public class ArrowRainWeapon extends BowItem {
     }
     public static final int MAX_PULL_TICKS = 20;
     public static final double range = 64;
+    public static final double angle = 6;
     public static final int projectile_count = 16;
     private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";
 
@@ -44,7 +45,7 @@ public class ArrowRainWeapon extends BowItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (world.isClient) {
-            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25, true);
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
             if (target != null) {
                 BlockGlowRenderer.setEntity(target);
                 BlockGlowRenderer.setBlockPos(null);
@@ -64,7 +65,7 @@ public class ArrowRainWeapon extends BowItem {
         if (world.isClient) {
             BlockGlowRenderer.setBlockPos(null);
             BlockGlowRenderer.setEntity(null);
-            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+            LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
             BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
             if ((target != null || block != null) && ticksPulled >= MAX_PULL_TICKS) {
                 shootParticles(world, (PlayerEntity) user);
@@ -73,7 +74,7 @@ public class ArrowRainWeapon extends BowItem {
         }
         else {
             if (ticksPulled >= MAX_PULL_TICKS) {
-                LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 25);
+                LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
                 BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
                 if (target != null) {
                     spawnArrows(world, target, (PlayerEntity) user);

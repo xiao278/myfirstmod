@@ -5,7 +5,7 @@
   },
   "overrides": [
     {
-      "predicate": { "pull": 0.01 },
+      "predicate": { "pull": 0.05 },
       "model": "myfirstmod:item/arrow_rain_pull0"
     },
     {
@@ -13,7 +13,7 @@
       "model": "myfirstmod:item/arrow_rain_pull1"
     },
     {
-      "predicate": { "pull": 0.99 },
+      "predicate": { "pull": 1.0 },
       "model": "myfirstmod:item/arrow_rain_pull2"
     }
   ]

@@ -11,26 +11,27 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.GlowSquidEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SlimeEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
     private static Entity entity;
     private static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
-    private static final float[] color = {1,0,0,0.5F};
+    private static final float[] color = {0.5f,1f,0.75f,0.25F};
     private static final float thickness = 5;
     private static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
 
@@ -42,7 +43,7 @@ public class BlockGlowRenderer {
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
-            BlockGlowRenderer.renderEntityOutline(context.matrixStack(), entity, color[0], color[1], color[2], color[3]);
+//            BlockGlowRenderer.renderEntityOutline(context.matrixStack(), entity, color[0], color[1], color[2], color[3]);
         });
     }
 
@@ -163,7 +164,7 @@ public class BlockGlowRenderer {
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         EntityRenderer<?> renderer = dispatcher.getRenderer(entity);
 
-        if (renderer instanceof LivingEntityRenderer<?, ?> livingRenderer) {
+        if (renderer instanceof LivingEntityRenderer<?, ?> livingRenderer && entity instanceof  LivingEntity livingEntity) {
 //            System.out.println("isworking");
             // Get the model from the renderer
             VertexConsumerProvider.Immediate bufferProvider = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
@@ -178,12 +179,12 @@ public class BlockGlowRenderer {
             matrices.push();
 //            matrices.translate(1,1,1); // Slightly offset to avoid z-fighting
             matrices.translate(toEntity.x, toEntity.y + entity.getEyeHeight(entity.getPose()), toEntity.z);
-            float yaw = entity.getYaw();
-            float pitch = entity.getPitch();
-            Quaternionf yawRotation = new Quaternionf().rotateY((float) Math.toRadians(-yaw));
-            matrices.multiply(yawRotation);
-            Quaternionf pitchRotation = new Quaternionf().rotateX((float) Math.toRadians(180 - pitch));
-            matrices.multiply(pitchRotation);
+            float yaw = (float) Math.toRadians(-entity.getBodyYaw());
+            float pitch = (float) Math.toRadians(180);
+            Quaternionf pitchRotation = new Quaternionf().rotateX(pitch);
+            Quaternionf yawRotation = new Quaternionf().rotateY(yaw);
+            Quaternionf totalRot = yawRotation.mul(pitchRotation);
+            matrices.multiply(totalRot);
 
             // Apply entity-specific scaling
             if (entity instanceof GhastEntity) {
@@ -198,7 +199,7 @@ public class BlockGlowRenderer {
             }
 
             // Pass the entity model and outline color
-            livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
+//            livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
 
             matrices.pop();
             bufferProvider.draw();
@@ -208,6 +209,7 @@ public class BlockGlowRenderer {
     private static void renderEntityTarget(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || entity == null || client.player == null) return;
+        PlayerEntity player = client.player;
         if (client.player.getActiveItem().getItem() != ModItems.ARROW_RAIN) return;
 //        MatrixStack adjustedMatrixStack = new MatrixStack();
 //        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
@@ -219,8 +221,8 @@ public class BlockGlowRenderer {
 
         VertexConsumer buffer = consumers.getBuffer(TEST_LAYER);
 
-        float width = 0.25f;
-        float height = 1.875f;
+        float width = 0.125f;
+        float height = 1.625f;
 
         Vec2f[][] planeQuads = {
                 {
@@ -239,7 +241,7 @@ public class BlockGlowRenderer {
         float z_offset = 0;
         for (Vec2f[] quad: planeQuads) {
             for (Vec2f point: quad) {
-                Vec3d newPoint = map2DTo3D(point, entityCenterPos.subtract(cameraPos).multiply(1 + z_offset), planeNormal);
+                Vec3d newPoint = map2DTo3D(point, entityCenterPos.subtract(cameraPos).multiply(1 + z_offset), player.getPitch(), -player.getYaw());
                 buffer.vertex(positionMatrix, (float) newPoint.x, (float) newPoint.y,  (float) newPoint.z)
                         .color(color[0], color[1], color[2], color[3])
 //                        .normal(normalMatrix, nx, ny, nz)
@@ -250,14 +252,19 @@ public class BlockGlowRenderer {
         }
     }
 
-    public static Vec3d map2DTo3D(Vec2f point2f, Vec3d planeOrigin, Vec3d planeNormal) {
-        // Compute basis vectors
-        Vec3d arbitrary = (planeNormal.x == 0 && planeNormal.y == 0) ? new Vec3d(0, 1, 0) : new Vec3d(1, 0, 0);
-        Vec3d u = planeNormal.crossProduct(arbitrary).normalize();
-        Vec3d v = planeNormal.crossProduct(u).normalize();
+    public static Vec3d map2DTo3D(Vec2f point2f, Vec3d planeOrigin, float pitch, float yaw) {
+        float pitchRadians = (float) Math.toRadians(pitch);
+        float yawRadians = (float) Math.toRadians(yaw);
 
-        // Map 2D point to 3D
-        return planeOrigin.add(u.multiply(point2f.x)).add(v.multiply(point2f.y));
+        // Create quaternions for pitch and yaw
+        Quaternionf pitchQuaternion = new Quaternionf().rotateX(pitchRadians); // Rotation around X-axis
+        Quaternionf yawQuaternion = new Quaternionf().rotateY(yawRadians);    // Rotation around Y-axis
+
+        // Combine pitch and yaw
+        Quaternionf combinedQuaternion = yawQuaternion.mul(pitchQuaternion);
+
+        Vector3f rotatedPoint = new Vector3f(point2f.x, point2f.y, 0).rotate(combinedQuaternion);
+        return planeOrigin.add(rotatedPoint.x, rotatedPoint.y, rotatedPoint.z);
     }
 
     public static void setBlockPos(BlockPos bPos) {
