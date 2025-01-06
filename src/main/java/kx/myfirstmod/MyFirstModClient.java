@@ -38,7 +38,7 @@ public class MyFirstModClient implements ClientModInitializer {
 
         ModelPredicateProviderRegistry.register(ModItems.ARROW_RAIN, new Identifier("pull"), (stack, world, entity, seed) -> {
             if (entity == null) return 0;
-            if (entity.getActiveItem().getItem() != ModItems.ARROW_RAIN) return 0;
+            if (entity.getActiveItem() != stack) return 0;
 
             int maxPullTicks = stack.getMaxUseTime(); // Typically 20
             int ticksPulled = maxPullTicks - entity.getItemUseTimeLeft();

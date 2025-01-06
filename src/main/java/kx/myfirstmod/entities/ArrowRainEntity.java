@@ -25,7 +25,7 @@ public class ArrowRainEntity extends ArrowEntity {
     private Vec3d targetPos;
     private LivingEntity target;
     private Vec3d offset = new Vec3d(0,0,0);
-    private double speed = 4;
+    private double speed = 3;
     private boolean guiding = true;
     private double guidingRange = 20;
     private Vec3d prevPos;
