@@ -14,6 +14,9 @@ import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.GhastEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -21,6 +24,7 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
@@ -28,15 +32,17 @@ public class BlockGlowRenderer {
     private static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
     private static final float[] color = {1,0,0,0.5F};
     private static final float thickness = 5;
+    private static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
 
     public static void register() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderGlowingBlock(context, color, context.tickDelta(), context.consumers());
         });
-        WorldRenderEvents.END.register((context) -> {
+        WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
+            BlockGlowRenderer.renderEntityOutline(context.matrixStack(), entity, color[0], color[1], color[2], color[3]);
         });
     }
 
@@ -68,8 +74,6 @@ public class BlockGlowRenderer {
         VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
 
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-        RenderSystem.disableDepthTest(); // Optional: Disable depth for full visibility
-        RenderSystem.depthMask(false); // Disable depth writing
 
 //        MatrixStack adjustedMatrixStack = new MatrixStack();
 //        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
@@ -78,9 +82,6 @@ public class BlockGlowRenderer {
 
         // Reset RenderSystem to default values
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.enableDepthTest(); // Re-enable depth testing
-        RenderSystem.depthMask(true); // Disable depth writing
-
     }
 
     private static void drawBoundingBox(MatrixStack matrices, VertexConsumer buffer, Box box, Vec3d cameraPos, float red, float green, float blue, float alpha) {
@@ -125,41 +126,6 @@ public class BlockGlowRenderer {
                         .next();
             }
         }
-
-//        // Loop through edges and render them
-//        for (int[] edge : edges) {
-//            int start = edge[0];
-//            int end = edge[1];
-//
-//            // Start and end points of the edge
-//            float x1 = corners[start][0];
-//            float y1 = corners[start][1];
-//            float z1 = corners[start][2];
-//            float x2 = corners[end][0];
-//            float y2 = corners[end][1];
-//            float z2 = corners[end][2];
-//
-//            // Direction vector of the edge
-//            Vec3d direction = new Vec3d(x2 - x1, y2 - y1, z2 - z1).normalize();
-//
-//            // Perpendicular vector for thickness
-//            Vec3d perpendicular = direction.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(thickness / 2);
-//
-//            // Define the quad vertices
-//            Vec3d v1 = new Vec3d(x1, y1, z1).add(perpendicular);
-//            Vec3d v2 = new Vec3d(x1, y1, z1).subtract(perpendicular);
-//            Vec3d v3 = new Vec3d(x2, y2, z2).add(perpendicular);
-//            Vec3d v4 = new Vec3d(x2, y2, z2).subtract(perpendicular);
-//
-//            // Calculate a normal for the quad (use the direction vector or cross product)
-//            Vec3d quadNormal = direction.crossProduct(perpendicular).normalize();
-//
-//            // Render the quad
-//            renderQuad(buffer, positionMatrix, normalMatrix,
-//                    v1, v2, v3, v4,
-//                    (float) quadNormal.x, (float) quadNormal.y, (float) quadNormal.z,
-//                    red, green, blue, alpha);
-//        }
     }
 
     private static void renderQuad(VertexConsumer buffer, Matrix4f positionMatrix, Matrix3f normalMatrix,
@@ -192,6 +158,7 @@ public class BlockGlowRenderer {
     }
 
     private static void renderEntityOutline(MatrixStack matrices, Entity entity, float red, float green, float blue, float alpha) {
+        if (entity == null) return;
         MinecraftClient client = MinecraftClient.getInstance();
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         EntityRenderer<?> renderer = dispatcher.getRenderer(entity);
@@ -204,10 +171,31 @@ public class BlockGlowRenderer {
             // Set up a custom render layer for the outline
             RenderLayer outlineLayer = RenderLayer.getOutline(OUTLINE_TEXTURE);
             VertexConsumer buffer = bufferProvider.getBuffer(outlineLayer);
+            Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+            Vec3d toEntity = entity.getPos().subtract(cameraPos);
 
             // Render the model
             matrices.push();
-            matrices.translate(0, 0.01, 0); // Slightly offset to avoid z-fighting
+//            matrices.translate(1,1,1); // Slightly offset to avoid z-fighting
+            matrices.translate(toEntity.x, toEntity.y + entity.getEyeHeight(entity.getPose()), toEntity.z);
+            float yaw = entity.getYaw();
+            float pitch = entity.getPitch();
+            Quaternionf yawRotation = new Quaternionf().rotateY((float) Math.toRadians(-yaw));
+            matrices.multiply(yawRotation);
+            Quaternionf pitchRotation = new Quaternionf().rotateX((float) Math.toRadians(180 - pitch));
+            matrices.multiply(pitchRotation);
+
+            // Apply entity-specific scaling
+            if (entity instanceof GhastEntity) {
+                matrices.scale(4.0F, 4.0F, 4.0F); // Apply Ghast's scaling
+            } else if (entity instanceof SlimeEntity slime) {
+                float sizeScale = slime.getSize() / 2.0F;
+                matrices.scale(sizeScale, sizeScale, sizeScale);
+            } else if (entity instanceof MobEntity && ((MobEntity) entity).isBaby()) {
+                matrices.scale(0.5F, 0.5F, 0.5F); // Scale for baby entities
+            } else {
+                matrices.scale(1.0F, 1.0F, 1.0F); // Default scale
+            }
 
             // Pass the entity model and outline color
             livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
@@ -221,15 +209,15 @@ public class BlockGlowRenderer {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || entity == null || client.player == null) return;
         if (client.player.getActiveItem().getItem() != ModItems.ARROW_RAIN) return;
-        MatrixStack adjustedMatrixStack = new MatrixStack();
-        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
+//        MatrixStack adjustedMatrixStack = new MatrixStack();
+//        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
 
         Vec3d entityCenterPos = entity.getPos().add(0,entity.getHeight() / 2,0);
 
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
         Vec3d planeNormal = cameraPos.subtract(entityCenterPos).normalize();
 
-        VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
+        VertexConsumer buffer = consumers.getBuffer(TEST_LAYER);
 
         float width = 0.25f;
         float height = 1.875f;
@@ -243,11 +231,7 @@ public class BlockGlowRenderer {
                 },
         };
 
-        RenderSystem.disableDepthTest();
-
-        adjustedMatrixStack.push();
-
-        MatrixStack.Entry entry = adjustedMatrixStack.peek();
+        MatrixStack.Entry entry = context.matrixStack().peek();
         Matrix4f positionMatrix = entry.getPositionMatrix();
         Matrix3f normalMatrix = entry.getNormalMatrix();
         float nx = 0.0F, ny = 1.0F, nz = 0.0F;
@@ -258,15 +242,12 @@ public class BlockGlowRenderer {
                 Vec3d newPoint = map2DTo3D(point, entityCenterPos.subtract(cameraPos).multiply(1 + z_offset), planeNormal);
                 buffer.vertex(positionMatrix, (float) newPoint.x, (float) newPoint.y,  (float) newPoint.z)
                         .color(color[0], color[1], color[2], color[3])
-                        .normal(normalMatrix, nx, ny, nz)
+//                        .normal(normalMatrix, nx, ny, nz)
+                        .texture(0,0)
                         .next();
             }
             z_offset += 0.01f;
         }
-
-        adjustedMatrixStack.pop();
-
-        RenderSystem.enableDepthTest();
     }
 
     public static Vec3d map2DTo3D(Vec2f point2f, Vec3d planeOrigin, Vec3d planeNormal) {
