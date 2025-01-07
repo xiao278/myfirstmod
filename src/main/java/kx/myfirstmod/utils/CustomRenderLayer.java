@@ -20,8 +20,9 @@ public class CustomRenderLayer extends RenderLayer {
                 .lightmap(Lightmap.DISABLE_LIGHTMAP) // Enable lightmaps
                 .cull(Cull.DISABLE_CULLING) // Disable backface culling
                 .depthTest(DepthTest.ALWAYS_DEPTH_TEST)
+                .target(OUTLINE_TARGET)
+                .writeMaskState(WriteMaskState.COLOR_MASK)
                 .build(true); // Sort for transparency
-
         return RenderLayer.of(
                 "custom_layer",
                 VertexFormats.POSITION_COLOR_TEXTURE, // Vertex format
@@ -31,5 +32,13 @@ public class CustomRenderLayer extends RenderLayer {
                 true, // Is translucent
                 parameters
         );
+    }
+
+    public static RenderLayer createTestLayer(Identifier texture) {
+        MultiPhaseParameters params = MultiPhaseParameters.builder().program(OUTLINE_PROGRAM).texture(new RenderPhase.Texture(texture, false, false))
+                .cull(Cull.DISABLE_CULLING)
+                .depthTest(ALWAYS_DEPTH_TEST).target(OUTLINE_TARGET)
+                .build(true);
+        return RenderLayer.of("outline", VertexFormats.POSITION_COLOR_TEXTURE, VertexFormat.DrawMode.QUADS, 256, params);
     }
 }

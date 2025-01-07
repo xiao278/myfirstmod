@@ -15,7 +15,7 @@ public class EnableGlowingMobMixin {
     @Inject(method = "hasOutline", at = @At("HEAD"), cancellable = true)
     private void outlineMob(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (BlockGlowRenderer.getEntity() != null && entity.getUuid() == BlockGlowRenderer.getEntity().getUuid()) {
-            cir.setReturnValue(true);
+            cir.setReturnValue(false);
         }
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.GlowSquidEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
@@ -29,11 +30,11 @@ import org.joml.Vector3f;
 
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
-    private static Entity entity;
-    private static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
+    private static LivingEntity entity;
+    public static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
     private static final float[] color = {0.5f,1f,0.75f,0.25F};
     private static final float thickness = 5;
-    private static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
+    public static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
 
     public static void register() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
@@ -42,8 +43,8 @@ public class BlockGlowRenderer {
         });
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
-            BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
-//            BlockGlowRenderer.renderEntityOutline(context.matrixStack(), entity, color[0], color[1], color[2], color[3]);
+//            BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
+//            BlockGlowRenderer.renderEntityOutline(context);
         });
     }
 
@@ -158,52 +159,56 @@ public class BlockGlowRenderer {
                 .next();
     }
 
-    private static void renderEntityOutline(MatrixStack matrices, Entity entity, float red, float green, float blue, float alpha) {
+    private static void renderEntityOutline(WorldRenderContext context) {
         if (entity == null) return;
         MinecraftClient client = MinecraftClient.getInstance();
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
-        EntityRenderer<?> renderer = dispatcher.getRenderer(entity);
+//        dispatcher.getRenderer(entity)
+//                .render(entity, entity.getBodyYaw(), context.tickDelta(), context.matrixStack(), context.consumers(), 0xF000F0);
 
-        if (renderer instanceof LivingEntityRenderer<?, ?> livingRenderer && entity instanceof  LivingEntity livingEntity) {
-//            System.out.println("isworking");
-            // Get the model from the renderer
-            VertexConsumerProvider.Immediate bufferProvider = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+        //    public void render(T entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
 
-            // Set up a custom render layer for the outline
-            RenderLayer outlineLayer = RenderLayer.getOutline(OUTLINE_TEXTURE);
-            VertexConsumer buffer = bufferProvider.getBuffer(outlineLayer);
-            Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
-            Vec3d toEntity = entity.getPos().subtract(cameraPos);
 
-            // Render the model
-            matrices.push();
-//            matrices.translate(1,1,1); // Slightly offset to avoid z-fighting
-            matrices.translate(toEntity.x, toEntity.y + entity.getEyeHeight(entity.getPose()), toEntity.z);
-            float yaw = (float) Math.toRadians(-entity.getBodyYaw());
-            float pitch = (float) Math.toRadians(180);
-            Quaternionf pitchRotation = new Quaternionf().rotateX(pitch);
-            Quaternionf yawRotation = new Quaternionf().rotateY(yaw);
-            Quaternionf totalRot = yawRotation.mul(pitchRotation);
-            matrices.multiply(totalRot);
-
-            // Apply entity-specific scaling
-            if (entity instanceof GhastEntity) {
-                matrices.scale(4.0F, 4.0F, 4.0F); // Apply Ghast's scaling
-            } else if (entity instanceof SlimeEntity slime) {
-                float sizeScale = slime.getSize() / 2.0F;
-                matrices.scale(sizeScale, sizeScale, sizeScale);
-            } else if (entity instanceof MobEntity && ((MobEntity) entity).isBaby()) {
-                matrices.scale(0.5F, 0.5F, 0.5F); // Scale for baby entities
-            } else {
-                matrices.scale(1.0F, 1.0F, 1.0F); // Default scale
-            }
-
-            // Pass the entity model and outline color
-//            livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
-
-            matrices.pop();
-            bufferProvider.draw();
-        }
+//        if (renderer instanceof LivingEntityRenderer<?, ?> livingRenderer && entity instanceof  LivingEntity livingEntity) {
+////            System.out.println("isworking");
+//            // Get the model from the renderer
+//            VertexConsumerProvider.Immediate bufferProvider = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+//
+//            // Set up a custom render layer for the outline
+//            RenderLayer outlineLayer = RenderLayer.getOutline(OUTLINE_TEXTURE);
+//            VertexConsumer buffer = bufferProvider.getBuffer(outlineLayer);
+//            Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+//            Vec3d toEntity = entity.getPos().subtract(cameraPos);
+//
+//            // Render the model
+//            matrices.push();
+////            matrices.translate(1,1,1); // Slightly offset to avoid z-fighting
+//            matrices.translate(toEntity.x, toEntity.y + entity.getEyeHeight(entity.getPose()), toEntity.z);
+//            float yaw = (float) Math.toRadians(-entity.getBodyYaw());
+//            float pitch = (float) Math.toRadians(180);
+//            Quaternionf pitchRotation = new Quaternionf().rotateX(pitch);
+//            Quaternionf yawRotation = new Quaternionf().rotateY(yaw);
+//            Quaternionf totalRot = yawRotation.mul(pitchRotation);
+//            matrices.multiply(totalRot);
+//
+//            // Apply entity-specific scaling
+//            if (entity instanceof GhastEntity) {
+//                matrices.scale(4.0F, 4.0F, 4.0F); // Apply Ghast's scaling
+//            } else if (entity instanceof SlimeEntity slime) {
+//                float sizeScale = slime.getSize() / 2.0F;
+//                matrices.scale(sizeScale, sizeScale, sizeScale);
+//            } else if (entity instanceof MobEntity && ((MobEntity) entity).isBaby()) {
+//                matrices.scale(0.5F, 0.5F, 0.5F); // Scale for baby entities
+//            } else {
+//                matrices.scale(1.0F, 1.0F, 1.0F); // Default scale
+//            }
+//
+//            // Pass the entity model and outline color
+////            livingRenderer.getModel().render(matrices, buffer, 15728880, OverlayTexture.DEFAULT_UV, red, green, blue, alpha);
+//            livingRenderer.render(livingEntity);
+//            matrices.pop();
+//            bufferProvider.draw();
+//        }
     }
 
     private static void renderEntityTarget(WorldRenderContext context, float[] color, float tickDelta, VertexConsumerProvider consumers) {
@@ -276,8 +281,14 @@ public class BlockGlowRenderer {
     }
 
     public static void setEntity(Entity e) {
-        entity = e;
+        if (!(e instanceof LivingEntity livingEntity)) {
+            entity = null;
+        }
+        else {
+            entity = livingEntity;
+        }
     }
+
 
     public static Entity getEntity() {
         return entity;
