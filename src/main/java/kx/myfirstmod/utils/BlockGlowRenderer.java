@@ -39,7 +39,7 @@ public class BlockGlowRenderer {
     public static final Identifier HIGHLIGHT_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/entity_highlight_texture.png");
     private static final float[] color = {0.5f,1f,0.75f,0.25F};
     private static final float[] targetColor = {0.8f, 0.9f, 0.3f, 1f};
-    private static final float thickness = 5;
+    private static final float targetSquareSize = 0.01f;
     public static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
     public static final RenderLayer HIGHLIGHT_LAYER = CustomRenderLayer.createCustomLayer(HIGHLIGHT_TEXTURE);
 
@@ -234,27 +234,7 @@ public class BlockGlowRenderer {
 
         VertexConsumer buffer = consumers.getBuffer(TEST_LAYER);
 
-//        float width = 0.125f;
-//        float height = 1.625f;
-//
-//        Vec2f[][] planeQuads = {
-//                {
-//                        new Vec2f(-height,-width), new Vec2f(-height,width), new Vec2f(height,width), new Vec2f(height,-width)
-//                },
-//                {
-//                        new Vec2f(-width,-height), new Vec2f(-width,height), new Vec2f(width,height), new Vec2f(width,-height)
-//                },
-//        };
-
-        float sqSize = 0.03f;
-
-//        Vec2f[][] planeQuads = {
-//                getSquareQuadPoints(new Vec2f(5 * sqSize,5 * sqSize),sqSize),
-//                getSquareQuadPoints(new Vec2f(5 * sqSize,-5 * sqSize),sqSize),
-//                getSquareQuadPoints(new Vec2f(-5 * sqSize,-5 * sqSize),sqSize),
-//                getSquareQuadPoints(new Vec2f(-5 * sqSize,5 * sqSize),sqSize)
-//        };
-        Vec2f[][] planeQuads = getTargetCorners(1 - (float) (pullProgress * 0.5), 5);
+        Vec2f[][] planeQuads = getTargetCorners(1 - (float) (pullProgress * 0.5), 10, targetSquareSize);
 
         MatrixStack.Entry entry = context.matrixStack().peek();
         Matrix4f positionMatrix = entry.getPositionMatrix();
@@ -275,14 +255,17 @@ public class BlockGlowRenderer {
         }
     }
 
-    public static Vec2f[][] getTargetCorners(float scale, float base) {
-        float sqSize = 0.03f;
+    public static Vec2f[][] getTargetCorners(float scale, float base, float sqSize) {
         // top left corner
         float scaledBase = base * scale;
         Vec2f[][] corner = {
                 getSquareQuadPoints(new Vec2f(scaledBase * sqSize,scaledBase * sqSize),sqSize),
                 getSquareQuadPoints(new Vec2f((scaledBase - 1) * sqSize,scaledBase * sqSize),sqSize),
-                getSquareQuadPoints(new Vec2f(scaledBase * sqSize,(scaledBase - 1) * sqSize),sqSize)
+                getSquareQuadPoints(new Vec2f((scaledBase - 2) * sqSize,scaledBase * sqSize),sqSize),
+                getSquareQuadPoints(new Vec2f((scaledBase - 3) * sqSize,scaledBase * sqSize),sqSize),
+                getSquareQuadPoints(new Vec2f(scaledBase * sqSize,(scaledBase - 1) * sqSize),sqSize),
+                getSquareQuadPoints(new Vec2f(scaledBase * sqSize,(scaledBase - 2) * sqSize),sqSize),
+                getSquareQuadPoints(new Vec2f(scaledBase * sqSize,(scaledBase - 3) * sqSize),sqSize)
         };
         Vec2f[][] four_corners = new Vec2f[corner.length * 4][4];
         for (int c = 0; c < four_corners.length / corner.length; c++) {
@@ -292,7 +275,7 @@ public class BlockGlowRenderer {
                 }
                 else {
                     for (int vertex = 0; vertex < 4; vertex++) {
-                        four_corners[c * 3 + quad][vertex] = rotateClockwise90(four_corners[c * 3 + quad - corner.length][vertex]);
+                        four_corners[c * corner.length + quad][vertex] = rotateClockwise90(four_corners[c * corner.length + quad - corner.length][vertex]);
                     }
                 }
             }
