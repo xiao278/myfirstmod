@@ -23,10 +23,9 @@ import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
@@ -35,6 +34,7 @@ public class BlockGlowRenderer {
     private static final float[] color = {0.5f,1f,0.75f,0.25F};
     private static final float thickness = 5;
     public static final RenderLayer TEST_LAYER = CustomRenderLayer.createCustomLayer(OUTLINE_TEXTURE);
+    public static final RenderLayer OUTLINE_LAYER = CustomRenderLayer.createTestLayer(OUTLINE_TEXTURE);
 
     public static void register() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
@@ -43,7 +43,7 @@ public class BlockGlowRenderer {
         });
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
-//            BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
+            BlockGlowRenderer.renderEntityTarget(context, color, context.tickDelta(), context.consumers());
 //            BlockGlowRenderer.renderEntityOutline(context);
         });
     }
@@ -73,7 +73,8 @@ public class BlockGlowRenderer {
 
 //        System.out.printf("(%f, %f, %f), (%f, %f, %f)\n", box.maxX, box.maxY, box.maxZ, box.minX, box.minY, box.minZ);
 
-        VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
+//        VertexConsumer buffer = consumers.getBuffer(RenderLayer.getDebugQuads());
+        VertexConsumer buffer = consumers.getBuffer(TEST_LAYER);
 
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
@@ -124,6 +125,7 @@ public class BlockGlowRenderer {
                 float[] pos = corners[corner_index];
                 buffer.vertex(positionMatrix, pos[0], pos[1], pos[2])
                         .color(red, green, blue, alpha)
+                        .texture(0,0)
                         .normal(normalMatrix, nx, ny, nz)
                         .next();
             }
@@ -216,6 +218,7 @@ public class BlockGlowRenderer {
         if (client.world == null || entity == null || client.player == null) return;
         PlayerEntity player = client.player;
         if (client.player.getActiveItem().getItem() != ModItems.ARROW_RAIN) return;
+//        System.out.println("called");
 //        MatrixStack adjustedMatrixStack = new MatrixStack();
 //        adjustedMatrixStack.multiplyPositionMatrix(context.matrixStack().peek().getPositionMatrix());
 
@@ -226,15 +229,20 @@ public class BlockGlowRenderer {
 
         VertexConsumer buffer = consumers.getBuffer(TEST_LAYER);
 
+//        Vec2f[][] planeQuads = {
+//                getSquareQuadPoints(new Vec2f(1,1), 1),
+//                getSquareQuadPoints(new Vec2f(-5,5), 1),
+//                getSquareQuadPoints(new Vec2f(-5,-5), 1),
+//                getSquareQuadPoints(new Vec2f(5,-5), 1)
+//        };
         float width = 0.125f;
         float height = 1.625f;
-
         Vec2f[][] planeQuads = {
                 {
-                        new Vec2f(-height,-width), new Vec2f(-height,width), new Vec2f(height,width), new Vec2f(height,-width)
+                        new Vec2f(-height, -width), new Vec2f(-height, width), new Vec2f(height, width), new Vec2f(height, -width)
                 },
                 {
-                        new Vec2f(-width,-height), new Vec2f(-width,height), new Vec2f(width,height), new Vec2f(width,-height)
+                        new Vec2f(-width, -height), new Vec2f(-width, height), new Vec2f(width, height), new Vec2f(width, -height)
                 },
         };
 
@@ -249,12 +257,20 @@ public class BlockGlowRenderer {
                 Vec3d newPoint = map2DTo3D(point, entityCenterPos.subtract(cameraPos).multiply(1 + z_offset), player.getPitch(), -player.getYaw());
                 buffer.vertex(positionMatrix, (float) newPoint.x, (float) newPoint.y,  (float) newPoint.z)
                         .color(color[0], color[1], color[2], color[3])
-//                        .normal(normalMatrix, nx, ny, nz)
+                        .normal(normalMatrix, nx, ny, nz)
                         .texture(0,0)
                         .next();
             }
             z_offset += 0.01f;
         }
+    }
+
+    public static Vec2f[] getSquareQuadPoints (Vec2f centerPos, double size) {
+        float width = (float) size / 2;
+        float height = (float) size / 2;
+        float x = centerPos.x;
+        float y = centerPos.y;
+        return new Vec2f[]{new Vec2f(x - height, y - width), new Vec2f(x - height, y + width), new Vec2f(x + height, y + width), new Vec2f(x + height, y - width)};
     }
 
     public static Vec3d map2DTo3D(Vec2f point2f, Vec3d planeOrigin, float pitch, float yaw) {

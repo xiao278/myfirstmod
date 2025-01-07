@@ -29,7 +29,7 @@ public class ArrowRainWeapon extends BowItem {
         super(settings);
     }
     public static final int MAX_PULL_TICKS = 20;
-    public static final double range = 64;
+    public static final double range = 100;
     public static final double angle = 6;
     public static final int projectile_count = 16;
     private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";

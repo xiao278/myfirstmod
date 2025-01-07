@@ -27,7 +27,7 @@ public class LightningStick extends Item {
         }
 
         // everything onwards here on out is serverside only
-        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 50);
+        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 64);
         if (blockPos == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }

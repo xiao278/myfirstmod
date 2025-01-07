@@ -16,7 +16,7 @@ import java.util.List;
 public class EntityDetector {
     public static boolean isLineOfSightClear(World world, Entity source, Entity target) {
         Vec3d sourcePos = source.getEyePos(); // Eye position of the source entity
-        Vec3d targetPos = getCenter(target); // Eye position of the target entity
+        Vec3d targetPos = target.getEyePos(); // Eye position of the target entity
 
         // Perform a raycast to check for block obstructions
         BlockHitResult result = world.raycast(new RaycastContext(
