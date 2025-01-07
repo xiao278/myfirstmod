@@ -29,7 +29,7 @@ public class ArrowRainWeapon extends BowItem {
         super(settings);
     }
     public static final int MAX_PULL_TICKS = 20;
-    public static final double range = 64;
+    public static final double range = 100;
     public static final double angle = 6;
     public static final int projectile_count = 16;
     private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";
@@ -48,6 +48,8 @@ public class ArrowRainWeapon extends BowItem {
         PlayerEntity clientPlayer = MinecraftClient.getInstance().player;
         if (world.isClient && clientPlayer != null && clientPlayer.getUuid() == user.getUuid()) {
             LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
+            int ticksPulled = stack.getMaxUseTime() - user.getItemUseTimeLeft();
+            BlockGlowRenderer.setPullProgress(ArrowRainWeapon.getPullProgress(ticksPulled));
             if (target != null) {
                 BlockGlowRenderer.setEntity(target);
                 BlockGlowRenderer.setBlockPos(null);
@@ -68,6 +70,7 @@ public class ArrowRainWeapon extends BowItem {
         if (world.isClient) {
             BlockGlowRenderer.setBlockPos(null);
             BlockGlowRenderer.setEntity(null);
+            BlockGlowRenderer.setPullProgress(0);
             LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
             BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
             if ((target != null || block != null) && ticksPulled >= MAX_PULL_TICKS) {
