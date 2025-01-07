@@ -2,6 +2,7 @@ package kx.myfirstmod.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import kx.myfirstmod.MyFirstMod;
+import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.ModItems;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -22,6 +23,7 @@ import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import org.joml.Matrix3f;
@@ -32,6 +34,7 @@ import org.joml.Vector3f;
 public class BlockGlowRenderer {
     private static BlockPos blockPos;
     private static LivingEntity entity;
+    private static float pullProgress = 0;
     public static final Identifier OUTLINE_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/dummy_texture.png");
     public static final Identifier HIGHLIGHT_TEXTURE = new Identifier(MyFirstMod.MOD_ID, "textures/entity_highlight_texture.png");
     private static final float[] color = {0.5f,1f,0.75f,0.25F};
@@ -251,7 +254,7 @@ public class BlockGlowRenderer {
 //                getSquareQuadPoints(new Vec2f(-5 * sqSize,-5 * sqSize),sqSize),
 //                getSquareQuadPoints(new Vec2f(-5 * sqSize,5 * sqSize),sqSize)
 //        };
-        Vec2f[][] planeQuads = getTargetCorners(1, 5);
+        Vec2f[][] planeQuads = getTargetCorners(1 - (float) (pullProgress * 0.5), 5);
 
         MatrixStack.Entry entry = context.matrixStack().peek();
         Matrix4f positionMatrix = entry.getPositionMatrix();
@@ -330,6 +333,10 @@ public class BlockGlowRenderer {
 
     public static BlockPos getBlockPos() {
         return blockPos;
+    }
+
+    public static void setPullProgress(float pullProgress) {
+        BlockGlowRenderer.pullProgress = pullProgress;
     }
 
     public static void setEntity(Entity e) {
