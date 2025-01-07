@@ -22,7 +22,7 @@ public class RenderLayerMixin {
     @Inject(method = "getRenderLayer", at = @At("HEAD"), cancellable = true)
     private void changeRenderLayer(LivingEntity entity, boolean showBody, boolean translucent, boolean showOutline, CallbackInfoReturnable<RenderLayer> cir) {
         if (BlockGlowRenderer.getEntity() != null && entity.getUuid() == BlockGlowRenderer.getEntity().getUuid()) {
-            cir.setReturnValue(BlockGlowRenderer.TEST_LAYER);
+            cir.setReturnValue(BlockGlowRenderer.HIGHLIGHT_LAYER);
         }
 //        cir.setReturnValue(RenderLayer.getOutline(BlockGlowRenderer.OUTLINE_TEXTURE));
     }
