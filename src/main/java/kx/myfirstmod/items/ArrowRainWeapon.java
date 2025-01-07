@@ -6,6 +6,7 @@ import kx.myfirstmod.utils.BlockDetector;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EntityDetector;
 import kx.myfirstmod.utils.TaskScheduler;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
@@ -44,7 +45,8 @@ public class ArrowRainWeapon extends BowItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (world.isClient) {
+        PlayerEntity clientPlayer = MinecraftClient.getInstance().player;
+        if (world.isClient && clientPlayer != null && clientPlayer.getUuid() == user.getUuid()) {
             LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, angle, true);
             if (target != null) {
                 BlockGlowRenderer.setEntity(target);
@@ -55,6 +57,7 @@ public class ArrowRainWeapon extends BowItem {
                 BlockGlowRenderer.setEntity(null);
                 BlockGlowRenderer.setBlockPos(block);
             }
+//            System.out.println(user.getDisplayName());
         }
     }
 
