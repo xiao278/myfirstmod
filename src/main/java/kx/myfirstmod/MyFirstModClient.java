@@ -8,6 +8,7 @@ import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.BlockGlowRenderer;
+import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -48,6 +49,7 @@ public class MyFirstModClient implements ClientModInitializer {
 
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         BlockGlowRenderer.register();
+        ParticleSpawnPacket.registerClientListener();
     }
 
     private void onResourcesReady() {
