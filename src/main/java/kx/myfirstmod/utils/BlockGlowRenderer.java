@@ -49,7 +49,7 @@ public class BlockGlowRenderer {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderGlowingBlock(context, color, context.tickDelta(), context.consumers());
         });
-        WorldRenderEvents.END.register((context) -> {
+        WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderEntityTarget(context, targetColor, context.tickDelta(), context.consumers());
 //            BlockGlowRenderer.renderEntityOutline(context);
@@ -238,7 +238,7 @@ public class BlockGlowRenderer {
 
         MatrixStack matrices = context.matrixStack();
         matrices.push();
-
+        
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f positionMatrix = entry.getPositionMatrix();
         Matrix3f normalMatrix = entry.getNormalMatrix();
