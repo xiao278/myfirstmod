@@ -49,7 +49,7 @@ public class BlockGlowRenderer {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderGlowingBlock(context, color, context.tickDelta(), context.consumers());
         });
-        WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
+        WorldRenderEvents.END.register((context) -> {
             // Call the BlockGlowRenderer to render the glow
             BlockGlowRenderer.renderEntityTarget(context, targetColor, context.tickDelta(), context.consumers());
 //            BlockGlowRenderer.renderEntityOutline(context);
@@ -236,7 +236,10 @@ public class BlockGlowRenderer {
 
         Vec2f[][] planeQuads = getTargetCorners(1 - (float) (pullProgress * 0.5), 10, targetSquareSize);
 
-        MatrixStack.Entry entry = context.matrixStack().peek();
+        MatrixStack matrices = context.matrixStack();
+        matrices.push();
+
+        MatrixStack.Entry entry = matrices.peek();
         Matrix4f positionMatrix = entry.getPositionMatrix();
         Matrix3f normalMatrix = entry.getNormalMatrix();
         float nx = 0.0F, ny = 1.0F, nz = 0.0F;
@@ -253,6 +256,8 @@ public class BlockGlowRenderer {
             }
             z_offset += 0.00001f;
         }
+
+        matrices.pop();
     }
 
     public static Vec2f[][] getTargetCorners(float scale, float base, float sqSize) {
