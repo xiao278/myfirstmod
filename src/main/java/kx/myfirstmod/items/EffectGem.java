@@ -1,18 +1,13 @@
 package kx.myfirstmod.items;
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -22,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EffectGem extends Item {
-    private static String IS_CREATIVE_KEY = "GemIsCreative";
-    private static String EFFECT_KEY = "StoredEffect";
+    private static final String IS_CREATIVE_KEY = "GemIsCreative";
+    private static final String EFFECT_KEY = "StoredEffect";
 
     public EffectGem(Settings settings) {
         super(settings);
