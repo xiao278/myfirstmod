@@ -1,13 +1,21 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.utils.ParticleUtils;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.impl.client.particle.ParticleFactoryRegistryImpl;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.SpellParticle;
+import net.minecraft.client.util.ParticleUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
@@ -64,9 +72,16 @@ public class EffectGem extends Item {
             Vec3d pos = user.getEyePos().add(user.getHandPosOffset(ModItems.EFFECT_GEM).multiply(0.5).add(
                     new Vec3d(0,0,0.5).rotateX((float) Math.toRadians(-user.getPitch())).rotateY((float) Math.toRadians(-user.getYaw()))
             ));
-            world.addParticle(ParticleTypes.EFFECT,
+
+            List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+            int color = PotionUtil.getColor(effects);
+            float red = (color >> 16 & 0xFF) / 255.0F;
+            float green = (color >> 8 & 0xFF) / 255.0F;
+            float blue = (color & 0xFF) / 255.0F;
+
+            world.addParticle(ParticleTypes.ENTITY_EFFECT,
                     pos.x, pos.y, pos.z,
-                    0,0,0
+                    red,green,blue
             );
         }
     }
@@ -111,7 +126,6 @@ public class EffectGem extends Item {
     public static List<StatusEffectInstance> getStoredEffect(ItemStack stack) {
         List<StatusEffectInstance> effects = new ArrayList<>();
         NbtCompound nbt = stack.getNbt();
-
         if (nbt != null && nbt.contains(EFFECT_KEY)) {
             NbtList effectsList = nbt.getList(EFFECT_KEY, 10); // Type 10 is NbtCompound
             for (int i = 0; i < effectsList.size(); i++) {
