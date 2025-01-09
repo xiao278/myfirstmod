@@ -57,4 +57,9 @@ public class ModItems {
             new ArrowRainWeapon(new Item.Settings().maxCount(1)),
             "arrow_rain"
     );
+
+    public static final Item EFFECT_GEM = register(
+            new EffectGem(new Item.Settings().maxCount(1)),
+            "effect_gem"
+    );
 }

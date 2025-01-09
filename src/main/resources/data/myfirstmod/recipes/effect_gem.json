@@ -1,0 +1,8 @@
+{
+  "type": "myfirstmod:effect_gem",
+  "ingredients": [
+    { "item": "minecraft:potion" },
+    { "item": "myfirstmod:effect_gem" }
+  ],
+  "result": { "item": "myfirstmod:effect_gem" }
+}
