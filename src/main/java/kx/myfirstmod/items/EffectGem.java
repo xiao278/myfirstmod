@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EffectGem extends Item {
+    private static String IS_CREATIVE_KEY = "GemIsCreative";
+    private static String EFFECT_KEY = "StoredEffect";
+
     public EffectGem(Settings settings) {
         super(settings);
     }
@@ -51,15 +54,15 @@ public class EffectGem extends Item {
         NbtCompound nbt = stack.getOrCreateNbt();
         NbtCompound effectNbt = new NbtCompound();
         effect.writeNbt(effectNbt);
-        nbt.put("StoredEffect", effectNbt);
+        nbt.put(EFFECT_KEY, effectNbt);
     }
 
     // Retrieve the stored effect from the gem
     public StatusEffectInstance getStoredEffect(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
 
-        if (nbt != null && nbt.contains("StoredEffect")) {
-            return StatusEffectInstance.fromNbt(nbt.getCompound("StoredEffect"));
+        if (nbt != null && nbt.contains(EFFECT_KEY)) {
+            return StatusEffectInstance.fromNbt(nbt.getCompound(EFFECT_KEY));
         }
 
         return null; // No effect stored
@@ -76,5 +79,30 @@ public class EffectGem extends Item {
             effectList.add(effect);
             PotionUtil.buildTooltip(effectList, tooltip, 1.0F);
         }
+    }
+
+    @Override
+    public Text getName(ItemStack stack) {
+        // Get the base name from the item's settings
+        Text baseName = super.getName(stack);
+        if (((EffectGem) ModItems.EFFECT_GEM).getIsCreative(stack)) {
+            return Text.literal("Creative " + baseName.getString()); // Append effect name
+        }
+        return baseName;
+    }
+
+    public void storeIsCreative (ItemStack stack, boolean isCreative) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putBoolean(IS_CREATIVE_KEY, isCreative);
+    }
+
+    public boolean getIsCreative(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+
+        if (nbt != null && nbt.contains(IS_CREATIVE_KEY)) {
+            return nbt.getBoolean(IS_CREATIVE_KEY);
+        }
+
+        return false;
     }
 }

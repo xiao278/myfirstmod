@@ -4,18 +4,24 @@ import kx.myfirstmod.MyFirstMod;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class ModItems {
     public static void initialize() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((itemGroup) -> {
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register((itemGroup) -> {
             itemGroup.add(ModItems.LIGHTNING_STICK);
             itemGroup.add(ModItems.GUARDIAN_LASER);
             itemGroup.add(ModItems.EVOKER_STAFF);
             itemGroup.add(ModItems.SHULKER_STAFF);
             itemGroup.add(ModItems.ARROW_RAIN);
+        });
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((itemGroup) -> {
+            ItemStack creativeGem = new ItemStack(ModItems.EFFECT_GEM);
+            ((EffectGem) ModItems.EFFECT_GEM).storeIsCreative(creativeGem, true);
+            itemGroup.add(creativeGem);
         });
     }
 

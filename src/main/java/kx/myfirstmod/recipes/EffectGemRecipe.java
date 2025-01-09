@@ -3,6 +3,7 @@ package kx.myfirstmod.recipes;
 import com.google.gson.JsonObject;
 import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.ModItems;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
@@ -32,15 +33,22 @@ public class EffectGemRecipe extends SpecialCraftingRecipe {
 
             if (stack.isOf(Items.POTION)) {
                 potionCount++;
+                if (PotionUtil.getPotionEffects(stack).size() < 1) {
+                    //reject the match
+                    potionCount++;
+                }
             } else if (stack.isOf(ModItems.EFFECT_GEM)) {
                 gemCount++;
-//                if (((EffectGem) ModItems.EFFECT_GEM).getStoredEffect(stack) != null) {
-//                    gemCount++;
-//                }
+                StatusEffectInstance effect = ((EffectGem) ModItems.EFFECT_GEM).getStoredEffect(stack);
+                boolean isCreativeGem = ((EffectGem) ModItems.EFFECT_GEM).getIsCreative(stack);
+                if (effect != null || !isCreativeGem) {
+                    //reject the match
+                    gemCount++;
+                }
             }
         }
 
-        System.out.printf("gems: %d, potions: %d\n", gemCount, potionCount);
+//        System.out.printf("gems: %d, potions: %d\n", gemCount, potionCount);
 
         return gemCount == 1 && potionCount == 1;
     }
