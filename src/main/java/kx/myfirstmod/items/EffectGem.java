@@ -1,5 +1,6 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -9,12 +10,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +31,7 @@ public class EffectGem extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 20;
+        return 64;
     }
 
     public EffectGem(Settings settings) {
@@ -54,6 +58,20 @@ public class EffectGem extends Item {
         }
         else {
             return TypedActionResult.pass(stack);
+        }
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        super.usageTick(world, user, stack, remainingUseTicks);
+        if (world.isClient) {
+            Vec3d pos = user.getEyePos().add(user.getHandPosOffset(ModItems.EFFECT_GEM).multiply(0.5).add(
+                    new Vec3d(0,0,0.5).rotateX((float) Math.toRadians(-user.getPitch())).rotateY((float) Math.toRadians(-user.getYaw()))
+            ));
+            world.addParticle(ParticleTypes.EFFECT,
+                    pos.x, pos.y, pos.z,
+                    0,0,0
+            );
         }
     }
 
