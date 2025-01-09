@@ -1,15 +1,20 @@
 package kx.myfirstmod.items;
 
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +24,11 @@ import java.util.List;
 public class EffectGem extends Item {
     private static final String IS_CREATIVE_KEY = "GemIsCreative";
     private static final String EFFECT_KEY = "StoredEffect";
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return 20;
+    }
 
     public EffectGem(Settings settings) {
         super(settings);
@@ -34,18 +44,39 @@ public class EffectGem extends Item {
 
             if (effect != null) {
                 // Apply the effect to the player
-                user.addStatusEffect(new StatusEffectInstance(effect));
+                user.setCurrentHand(hand);
+                return TypedActionResult.consume(stack);
             }
-//            else {
-//                user.sendMessage(Text.literal("No effect stored in the gem!"), true);
-//            }
+            else {
+                user.sendMessage(Text.literal("No effect stored in the gem!"), true);
+                return TypedActionResult.fail(stack);
+            }
         }
+        else {
+            return TypedActionResult.pass(stack);
+        }
+    }
 
-        return TypedActionResult.success(stack);
+    @Override
+    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+        if (!world.isClient) {
+            StatusEffectInstance effect = EffectGem.getStoredEffect(stack);
+            if (effect != null) {
+                user.addStatusEffect(effect);
+            }
+            if (user instanceof PlayerEntity pe) {
+                pe.getItemCooldownManager().set(this, 400);
+            }
+        }
+        return stack;
+    }
+
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.SPYGLASS;
     }
 
     // Store a single effect in the gem
-    public void storeEffect(ItemStack stack, StatusEffectInstance effect) {
+    public static void storeEffect(ItemStack stack, StatusEffectInstance effect) {
         NbtCompound nbt = stack.getOrCreateNbt();
         NbtCompound effectNbt = new NbtCompound();
         effect.writeNbt(effectNbt);
@@ -53,7 +84,7 @@ public class EffectGem extends Item {
     }
 
     // Retrieve the stored effect from the gem
-    public StatusEffectInstance getStoredEffect(ItemStack stack) {
+    public static StatusEffectInstance getStoredEffect(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
 
         if (nbt != null && nbt.contains(EFFECT_KEY)) {
@@ -80,18 +111,18 @@ public class EffectGem extends Item {
     public Text getName(ItemStack stack) {
         // Get the base name from the item's settings
         Text baseName = super.getName(stack);
-        if (((EffectGem) ModItems.EFFECT_GEM).getIsCreative(stack)) {
+        if (EffectGem.getIsCreative(stack)) {
             return Text.literal("Creative " + baseName.getString()); // Append effect name
         }
         return baseName;
     }
 
-    public void storeIsCreative (ItemStack stack, boolean isCreative) {
+    public static void storeIsCreative (ItemStack stack, boolean isCreative) {
         NbtCompound nbt = stack.getOrCreateNbt();
         nbt.putBoolean(IS_CREATIVE_KEY, isCreative);
     }
 
-    public boolean getIsCreative(ItemStack stack) {
+    public static boolean getIsCreative(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
 
         if (nbt != null && nbt.contains(IS_CREATIVE_KEY)) {

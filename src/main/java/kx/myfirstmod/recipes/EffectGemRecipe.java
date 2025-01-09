@@ -1,10 +1,8 @@
 package kx.myfirstmod.recipes;
 
-import com.google.gson.JsonObject;
 import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.ModItems;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -14,7 +12,6 @@ import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 public class EffectGemRecipe extends SpecialCraftingRecipe {
@@ -33,15 +30,14 @@ public class EffectGemRecipe extends SpecialCraftingRecipe {
 
             if (stack.isOf(Items.POTION)) {
                 potionCount++;
-                if (PotionUtil.getPotionEffects(stack).size() < 1) {
+                if (PotionUtil.getPotionEffects(stack).isEmpty()) {
                     //reject the match
                     potionCount++;
                 }
             } else if (stack.isOf(ModItems.EFFECT_GEM)) {
                 gemCount++;
-                StatusEffectInstance effect = ((EffectGem) ModItems.EFFECT_GEM).getStoredEffect(stack);
-                boolean isCreativeGem = ((EffectGem) ModItems.EFFECT_GEM).getIsCreative(stack);
-                if (effect != null || !isCreativeGem) {
+                boolean isCreativeGem = EffectGem.getIsCreative(stack);
+                if (!isCreativeGem) {
                     //reject the match
                     gemCount++;
                 }
@@ -69,11 +65,11 @@ public class EffectGemRecipe extends SpecialCraftingRecipe {
             }
         }
 
-        if (potionStack != null && gemStack != null && gemStack.getItem() instanceof EffectGem gem) {
+        if (potionStack != null && gemStack != null && gemStack.getItem() instanceof EffectGem) {
             // Transfer the potion's NBT to the gem
             Potion potion = PotionUtil.getPotion(potionStack);
             if (!potion.getEffects().isEmpty()) {
-                gem.storeEffect(gemStack, potion.getEffects().get(0));
+                EffectGem.storeEffect(gemStack, potion.getEffects().get(0));
             }
         }
 
