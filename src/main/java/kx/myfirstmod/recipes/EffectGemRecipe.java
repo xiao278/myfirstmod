@@ -69,7 +69,7 @@ public class EffectGemRecipe extends SpecialCraftingRecipe {
             // Transfer the potion's NBT to the gem
             Potion potion = PotionUtil.getPotion(potionStack);
             if (!potion.getEffects().isEmpty()) {
-                EffectGem.storeEffect(gemStack, potion.getEffects().get(0));
+                EffectGem.storeEffect(gemStack, potion.getEffects());
             }
         }
 

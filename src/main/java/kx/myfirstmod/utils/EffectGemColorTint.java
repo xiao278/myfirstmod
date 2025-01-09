@@ -14,16 +14,8 @@ public class EffectGemColorTint {
     public static void register() {
         ColorProviderRegistry.ITEM.register((stack, layer) -> {
             if (layer == 0) { // Tint only layer1
-                StatusEffectInstance effect = ((EffectGem) ModItems.EFFECT_GEM).getStoredEffect(stack);
-                int color = 0;
-                if (effect == null) {
-                    color =  PotionUtil.getColor(Potions.WATER);
-                }
-                else {
-                    List<StatusEffectInstance> effectList = new ArrayList<>();
-                    effectList.add(effect);
-                    color = PotionUtil.getColor(effectList);
-                }
+                List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+                int color = PotionUtil.getColor(effects);
 //                color = averageColors(0xFFFFFF, color);
                 return color;
             }

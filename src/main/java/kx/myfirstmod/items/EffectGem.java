@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
@@ -39,9 +40,9 @@ public class EffectGem extends Item {
 
         if (!world.isClient) {
             // Get the stored effect from the gem
-            StatusEffectInstance effect = getStoredEffect(stack);
+            List<StatusEffectInstance> effects = getStoredEffect(stack);
 
-            if (effect != null) {
+            if (!effects.isEmpty()) {
                 // Apply the effect to the player
                 user.setCurrentHand(hand);
                 return TypedActionResult.consume(stack);
@@ -73,10 +74,13 @@ public class EffectGem extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if (!world.isClient) {
-            StatusEffectInstance effect = EffectGem.getStoredEffect(stack);
-            if (effect != null) {
-                user.addStatusEffect(effect);
+            List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+            for (StatusEffectInstance effect: effects) {
+                if (effect != null) {
+                    user.addStatusEffect(effect);
+                }
             }
+
             if (user instanceof PlayerEntity pe) {
                 pe.getItemCooldownManager().set(this, 400);
             }
@@ -89,35 +93,41 @@ public class EffectGem extends Item {
     }
 
     // Store a single effect in the gem
-    public static void storeEffect(ItemStack stack, StatusEffectInstance effect) {
+    public static void storeEffect(ItemStack stack, List<StatusEffectInstance> effects) {
         NbtCompound nbt = stack.getOrCreateNbt();
-        NbtCompound effectNbt = new NbtCompound();
-        effect.writeNbt(effectNbt);
-        nbt.put(EFFECT_KEY, effectNbt);
+        NbtList effectsList = new NbtList();
+        // Convert each StatusEffectInstance into NBT and add to the list
+        for (StatusEffectInstance effect : effects) {
+            NbtCompound effectNbt = new NbtCompound();
+            effect.writeNbt(effectNbt);
+            effectsList.add(effectNbt);
+        }
+
+        // Store the list in the item's NBT
+        nbt.put(EFFECT_KEY, effectsList);
     }
 
     // Retrieve the stored effect from the gem
-    public static StatusEffectInstance getStoredEffect(ItemStack stack) {
+    public static List<StatusEffectInstance> getStoredEffect(ItemStack stack) {
+        List<StatusEffectInstance> effects = new ArrayList<>();
         NbtCompound nbt = stack.getNbt();
 
         if (nbt != null && nbt.contains(EFFECT_KEY)) {
-            return StatusEffectInstance.fromNbt(nbt.getCompound(EFFECT_KEY));
+            NbtList effectsList = nbt.getList(EFFECT_KEY, 10); // Type 10 is NbtCompound
+            for (int i = 0; i < effectsList.size(); i++) {
+                NbtCompound effectNbt = effectsList.getCompound(i);
+                effects.add(StatusEffectInstance.fromNbt(effectNbt));
+            }
         }
 
-        return null; // No effect stored
+        return effects; // Return the list (empty if no effects are stored)
     }
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         // Retrieve the stored potion effect
-        StatusEffectInstance effect = getStoredEffect(stack);
-        List<StatusEffectInstance> effectList = new ArrayList<>();
-        if (effect == null) {
-            PotionUtil.buildTooltip(effectList, tooltip, 0);
-        } else {
-            effectList.add(effect);
-            PotionUtil.buildTooltip(effectList, tooltip, 1.0F);
-        }
+        List<StatusEffectInstance> effects = getStoredEffect(stack);
+        PotionUtil.buildTooltip(effects, tooltip, 1.0F);
     }
 
     @Override
