@@ -8,13 +8,13 @@ import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.BlockGlowRenderer;
+import kx.myfirstmod.utils.EffectGemColorTint;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.render.entity.ArrowEntityRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -50,6 +50,7 @@ public class MyFirstModClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         BlockGlowRenderer.register();
         ParticleSpawnPacket.registerClientListener();
+        EffectGemColorTint.register();
     }
 
     private void onResourcesReady() {

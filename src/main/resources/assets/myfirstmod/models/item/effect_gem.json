@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer1": "myfirstmod:item/effect_gem_base",
+    "layer0": "myfirstmod:item/effect_gem_potion"
+  }
+}

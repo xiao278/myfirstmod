@@ -1,6 +1,7 @@
 package kx.myfirstmod.items;
 
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -69,7 +70,11 @@ public class EffectGem extends Item {
         // Retrieve the stored potion effect
         StatusEffectInstance effect = getStoredEffect(stack);
         List<StatusEffectInstance> effectList = new ArrayList<>();
-        effectList.add(effect);
-        PotionUtil.buildTooltip(effectList, tooltip, 1.0F);
+        if (effect == null) {
+            PotionUtil.buildTooltip(effectList, tooltip, 0);
+        } else {
+            effectList.add(effect);
+            PotionUtil.buildTooltip(effectList, tooltip, 1.0F);
+        }
     }
 }
