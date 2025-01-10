@@ -24,10 +24,6 @@ public class EffectGemPoseMixin {
     public void modifyPose(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (player.getActiveItem() == item && item.getItem() instanceof EffectGem) {
 //             Adjust transformations for the pose
-            MatrixStack.Entry entry = matrices.peek();
-
-            System.out.println(entry.getNormalMatrix());
-
             matrices.translate(0.3, -0.3, -0.8);
 
             Quaternionf quat = new Quaternionf().rotateAxis((float) Math.toRadians(90), new Vector3f(0,1,0));
