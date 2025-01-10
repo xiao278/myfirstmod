@@ -30,4 +30,14 @@ public class ModEntityTypes {
                     .trackRangeChunks(8)
                     .trackedUpdateRate(1).build()
     );
+
+    public static final EntityType<EffectGemProjectileEntity> EFFECT_GEM_PROJECTILE_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier("myfirstmod", "effect_gem_projectile_entity"),
+            FabricEntityTypeBuilder.<EffectGemProjectileEntity>create(SpawnGroup.MISC, EffectGemProjectileEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.2F,0.2F))
+                    .trackRangeChunks(5)
+                    .trackedUpdateRate(1)
+                    .build()
+    );
 }

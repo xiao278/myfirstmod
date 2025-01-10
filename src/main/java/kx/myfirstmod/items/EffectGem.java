@@ -1,5 +1,7 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.entities.EffectGemProjectileEntity;
+import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.utils.ParticleUtils;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.impl.client.particle.ParticleFactoryRegistryImpl;
@@ -13,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SplashPotionItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.particle.ParticleEffect;
@@ -33,6 +36,7 @@ public class EffectGem extends Item {
     private static final String IS_CREATIVE_KEY = "GemIsCreative";
     private static final String EFFECT_KEY = "StoredEffect";
     private static final String UNSTABLE_KEY = "GemIsUnstable";
+    private static final String IS_PROJECTILE_KEY = "GemIsProjectile";
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
@@ -90,15 +94,26 @@ public class EffectGem extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if (!world.isClient) {
-            List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
-            for (StatusEffectInstance effect: effects) {
-                if (effect != null) {
-                    user.addStatusEffect(effect);
+            if (!EffectGem.getIsUnstable(stack)) {
+                // use on self
+                List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+                for (StatusEffectInstance effect: effects) {
+                    if (effect != null) {
+                        user.addStatusEffect(effect);
+                    }
+                }
+
+                if (user instanceof PlayerEntity pe) {
+                    pe.getItemCooldownManager().set(this, 400);
                 }
             }
+            else {
+                // spawn throwing entity
+                EffectGemProjectileEntity projectile = new EffectGemProjectileEntity(world, user);
+                projectile.setItem(stack);
+                projectile.setVelocity(user, user.getPitch(), user.getYaw(), 0f, 0.1F, 1.0F);
 
-            if (user instanceof PlayerEntity pe) {
-                pe.getItemCooldownManager().set(this, 400);
+                world.spawnEntity(projectile);
             }
         }
         return stack;
@@ -180,6 +195,21 @@ public class EffectGem extends Item {
 
         if (nbt != null && nbt.contains(UNSTABLE_KEY)) {
             return nbt.getBoolean(UNSTABLE_KEY);
+        }
+
+        return false;
+    }
+
+    public static void storeIsProjectile (ItemStack stack, boolean isProjectile) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putBoolean(IS_PROJECTILE_KEY, isProjectile);
+    }
+
+    public static boolean getIsProjectile(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+
+        if (nbt != null && nbt.contains(IS_PROJECTILE_KEY)) {
+            return nbt.getBoolean(IS_PROJECTILE_KEY);
         }
 
         return false;

@@ -8,6 +8,10 @@
     {
       "predicate": { "unstable": 1 },
       "model": "myfirstmod:item/effect_gem_unstable"
+    },
+    {
+      "predicate": { "thrown": 1 },
+      "model": "myfirstmod:item/effect_gem_thrown"
     }
   ]
 }

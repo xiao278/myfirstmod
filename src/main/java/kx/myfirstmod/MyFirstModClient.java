@@ -1,9 +1,6 @@
 package kx.myfirstmod;
 
-import kx.myfirstmod.entities.ArrowRainEntityRenderer;
-import kx.myfirstmod.entities.GuardianLaserEntity;
-import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
-import kx.myfirstmod.entities.ModEntityTypes;
+import kx.myfirstmod.entities.*;
 import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.GuardianLaser;
@@ -51,8 +48,12 @@ public class MyFirstModClient implements ClientModInitializer {
         ModelPredicateProviderRegistry.register(ModItems.EFFECT_GEM, new Identifier("unstable"), (stack, world, entity, seed) -> {
             return EffectGem.getIsUnstable(stack) ? 1 : 0;
         });
+        ModelPredicateProviderRegistry.register(ModItems.EFFECT_GEM, new Identifier("thrown"), (stack, world, entity, seed) -> {
+            return EffectGem.getIsProjectile(stack) ? 1 : 0;
+        });
 
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.EFFECT_GEM_PROJECTILE_ENTITY, EffectGemProjectileEntityRenderer::new);
         BlockGlowRenderer.register();
         ParticleSpawnPacket.registerClientListener();
         EffectGemColorTint.register();
