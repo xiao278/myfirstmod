@@ -10,7 +10,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.util.ParticleUtil;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
@@ -24,6 +26,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -32,6 +35,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class EffectGem extends Item {
@@ -39,6 +43,9 @@ public class EffectGem extends Item {
     private static final String EFFECT_KEY = "StoredEffect";
     private static final String UNSTABLE_KEY = "GemIsUnstable";
     private static final String IS_PROJECTILE_KEY = "GemIsProjectile";
+    private static final int COOLDOWN_TICKS_PER_POWER = 40;
+    private static final HashMap<StatusEffect, Float> EFFECT_POWER_PER_LEVEL = new HashMap<>();
+
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
@@ -47,6 +54,7 @@ public class EffectGem extends Item {
 
     public EffectGem(Settings settings) {
         super(settings);
+        fill_power_map();
     }
 
     @Override
@@ -95,10 +103,11 @@ public class EffectGem extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if (!world.isClient) {
+            List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
+
             if (!EffectGem.getIsUnstable(stack)) {
                 // use on self
                 PlayerEntity playerEntity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
-                List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
                 for (StatusEffectInstance effect: effects) {
                     if (effect.getEffectType().isInstant()) {
                         effect.getEffectType().applyInstantEffect(playerEntity, playerEntity, user, effect.getAmplifier(), (double)1.0F);
@@ -106,10 +115,6 @@ public class EffectGem extends Item {
                         user.addStatusEffect(new StatusEffectInstance(effect));
                     }
                 }
-
-//                if (user instanceof PlayerEntity pe) {
-//                    pe.getItemCooldownManager().set(this, 400);
-//                }
             }
             else {
                 // spawn throwing entity
@@ -118,6 +123,9 @@ public class EffectGem extends Item {
                 projectile.setVelocity(user, user.getPitch(), user.getYaw(), 0f, 0.1F, 1.0F);
 
                 world.spawnEntity(projectile);
+            }
+            if (user instanceof PlayerEntity pe) {
+                pe.getItemCooldownManager().set(this, calculateCooldownTicks(effects));
             }
         }
         return stack;
@@ -161,6 +169,11 @@ public class EffectGem extends Item {
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         // Retrieve the stored potion effect
         List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
+        if (!effects.isEmpty()) {
+            int cd_ticks = calculateCooldownTicks(PotionUtil.getPotionEffects(stack));
+            float cd_seconds = (float) cd_ticks / 20;
+            tooltip.add(Text.literal(cd_seconds + " second cooldown").formatted(Formatting.GRAY));
+        }
         PotionUtil.buildTooltip(effects, tooltip, 1.0F);
     }
 
@@ -217,5 +230,37 @@ public class EffectGem extends Item {
         }
 
         return false;
+    }
+
+    public static int calculateCooldownTicks(List<StatusEffectInstance> instances) {
+        float total_power = 0;
+        for (StatusEffectInstance instance: instances) {
+            StatusEffect effect = instance.getEffectType();
+//            (1 + ((float) instance.getDuration() / 20))
+            float power = getPower(effect);
+            if (!effect.isBeneficial()) {
+                power *= -1;
+            }
+            total_power += power;
+        }
+        total_power = Math.abs(total_power);
+        return (int) (COOLDOWN_TICKS_PER_POWER * (1 + total_power));
+    }
+
+    private static float getPower(StatusEffect effect) {
+        if (!EFFECT_POWER_PER_LEVEL.containsKey(effect)) {
+            return 1;
+        }
+        else return EFFECT_POWER_PER_LEVEL.get(effect);
+    }
+
+    private void fill_power_map() {
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_DAMAGE, 1.5f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_HEALTH, 1.5f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.INVISIBILITY, 0.3f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.RESISTANCE, 0.8f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.SPEED, 0.7F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.WEAKNESS, 0.5F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.REGENERATION, 2.0F);
     }
 }
