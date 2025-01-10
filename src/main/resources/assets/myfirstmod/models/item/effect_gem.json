@@ -3,5 +3,11 @@
   "textures": {
     "layer1": "myfirstmod:item/effect_gem_base",
     "layer0": "myfirstmod:item/effect_gem_potion"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": { "unstable": 1 },
+      "model": "myfirstmod:item/effect_gem_unstable"
+    }
+  ]
 }

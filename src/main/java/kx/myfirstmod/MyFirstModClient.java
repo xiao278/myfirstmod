@@ -5,6 +5,7 @@ import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.entities.GuardianLaserEntityRenderer;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.items.ArrowRainWeapon;
+import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.BlockGlowRenderer;
@@ -45,6 +46,10 @@ public class MyFirstModClient implements ClientModInitializer {
             int ticksPulled = maxPullTicks - entity.getItemUseTimeLeft();
 
             return ArrowRainWeapon.getPullProgress(ticksPulled);
+        });
+
+        ModelPredicateProviderRegistry.register(ModItems.EFFECT_GEM, new Identifier("unstable"), (stack, world, entity, seed) -> {
+            return EffectGem.getIsUnstable(stack) ? 1 : 0;
         });
 
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);

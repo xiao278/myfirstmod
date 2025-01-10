@@ -15,14 +15,25 @@ public class ModRecipes {
         // This is called during mod initialization
     }
 
-    public static final RecipeType<EffectGemRecipe> EFFECT_GEM_RECIPE_TYPE = Registry.register(
+    public static final RecipeType<EffectGemApplyPotionRecipe> EFFECT_GEM_POTION_RECIPE_TYPE = Registry.register(
                     Registries.RECIPE_TYPE,
-                    new Identifier(MyFirstMod.MOD_ID, "effect_gem"),
+                    new Identifier(MyFirstMod.MOD_ID, "effect_gem_potion"),
                     new RecipeType<>() {}
             );
-    public static final RecipeSerializer<EffectGemRecipe> EFFECT_GEM_RECIPE = Registry.register(
+    public static final RecipeSerializer<EffectGemApplyPotionRecipe> EFFECT_GEM_POTION_RECIPE = Registry.register(
                     Registries.RECIPE_SERIALIZER,
-                    new Identifier(MyFirstMod.MOD_ID, "effect_gem"),
-                    new SpecialRecipeSerializer<>(EffectGemRecipe::new)
+                    new Identifier(MyFirstMod.MOD_ID, "effect_gem_potion"),
+                    new SpecialRecipeSerializer<>(EffectGemApplyPotionRecipe::new)
             );
+
+    public static final RecipeType<EffectGemApplyUnstableRecipe> EFFECT_GEM_UNSTABLE_RECIPE_TYPE = Registry.register(
+            Registries.RECIPE_TYPE,
+            new Identifier(MyFirstMod.MOD_ID, "effect_gem_unstable"),
+            new RecipeType<>() {}
+    );
+    public static final RecipeSerializer<EffectGemApplyUnstableRecipe> EFFECT_GEM_UNSTABLE_RECIPE = Registry.register(
+            Registries.RECIPE_SERIALIZER,
+            new Identifier(MyFirstMod.MOD_ID, "effect_gem_unstable"),
+            new SpecialRecipeSerializer<>(EffectGemApplyUnstableRecipe::new)
+    );
 }

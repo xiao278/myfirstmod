@@ -1,0 +1,8 @@
+{
+  "type": "myfirstmod:effect_gem_unstable",
+  "ingredients": [
+    { "item": "minecraft:end_crystal" },
+    { "item": "myfirstmod:effect_gem" }
+  ],
+  "result": { "item": "myfirstmod:effect_gem" }
+}

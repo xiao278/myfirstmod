@@ -2,7 +2,6 @@ package kx.myfirstmod.recipes;
 
 import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.ModItems;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -14,8 +13,8 @@ import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-public class EffectGemRecipe extends SpecialCraftingRecipe {
-    public EffectGemRecipe(Identifier identifier, CraftingRecipeCategory craftingRecipeCategory) {
+public class EffectGemApplyPotionRecipe extends SpecialCraftingRecipe {
+    public EffectGemApplyPotionRecipe(Identifier identifier, CraftingRecipeCategory craftingRecipeCategory) {
         super(identifier, craftingRecipeCategory);
     }
 
@@ -83,6 +82,6 @@ public class EffectGemRecipe extends SpecialCraftingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return ModRecipes.EFFECT_GEM_RECIPE;
+        return ModRecipes.EFFECT_GEM_POTION_RECIPE;
     }
 }

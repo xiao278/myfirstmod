@@ -32,6 +32,7 @@ import java.util.List;
 public class EffectGem extends Item {
     private static final String IS_CREATIVE_KEY = "GemIsCreative";
     private static final String EFFECT_KEY = "StoredEffect";
+    private static final String UNSTABLE_KEY = "GemIsUnstable";
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
@@ -164,6 +165,21 @@ public class EffectGem extends Item {
 
         if (nbt != null && nbt.contains(IS_CREATIVE_KEY)) {
             return nbt.getBoolean(IS_CREATIVE_KEY);
+        }
+
+        return false;
+    }
+
+    public static void storeIsUnstable (ItemStack stack, boolean isUnstable) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putBoolean(UNSTABLE_KEY, isUnstable);
+    }
+
+    public static boolean getIsUnstable(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+
+        if (nbt != null && nbt.contains(UNSTABLE_KEY)) {
+            return nbt.getBoolean(UNSTABLE_KEY);
         }
 
         return false;
