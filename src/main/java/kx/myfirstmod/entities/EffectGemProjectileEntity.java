@@ -20,10 +20,14 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class EffectGemProjectileEntity extends PotionEntity {
-    private static final int maxTickAge = 40;
+    private static final int MAX_TICK_AGE = 40;
+    private static final double PARTICLE_SPACING = 0.5;
     private boolean reachedMaxSpeed = false;
     private double maxSpeed = 5;
     private double acceleration = 0.25;
+    private double prevOverflow = 0;
+    private Vec3d prevPos;
+
     public EffectGemProjectileEntity(EntityType<? extends PotionEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -52,12 +56,21 @@ public class EffectGemProjectileEntity extends PotionEntity {
                     setVelocity(dir.multiply(newSpeed));
                 }
             }
-            if (this.age >= maxTickAge) {
+            if (this.age >= MAX_TICK_AGE) {
                 this.discard();
             }
         }
         else {
-            spawnParticles(world, this.getPos());
+                if (prevPos != null) {
+                    int color = PotionUtil.getColor(getStack());
+                    double red = (color >> 16 & 0xFF) / 255.0;
+                    double green = (color >> 8 & 0xFF) / 255.0;
+                    double blue = (color & 0xFF) / 255.0;
+                    Vec3d color_vel = new Vec3d(red, green, blue);
+
+                    prevOverflow = ParticleUtils.lerpSpawn(world, ParticleTypes.ENTITY_EFFECT, prevPos, this.getPos(), color_vel, PARTICLE_SPACING, prevOverflow);
+                }
+                prevPos = this.getPos();
         }
     }
 

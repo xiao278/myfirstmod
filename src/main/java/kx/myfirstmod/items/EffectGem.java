@@ -44,12 +44,13 @@ public class EffectGem extends Item {
     private static final String UNSTABLE_KEY = "GemIsUnstable";
     private static final String IS_PROJECTILE_KEY = "GemIsProjectile";
     private static final int COOLDOWN_TICKS_PER_POWER = 40;
+    private static final int TICKS_PER_SECOND = 20;
     private static final HashMap<StatusEffect, Float> EFFECT_POWER_PER_LEVEL = new HashMap<>();
 
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 64;
+        return 32;
     }
 
     public EffectGem(Settings settings) {
@@ -236,8 +237,10 @@ public class EffectGem extends Item {
         float total_power = 0;
         for (StatusEffectInstance instance: instances) {
             StatusEffect effect = instance.getEffectType();
-//            (1 + ((float) instance.getDuration() / 20))
             float power = getPower(effect);
+            if (!effect.isInstant()) {
+                power *= (1 + ((float) instance.getDuration() / (60 * TICKS_PER_SECOND)));
+            }
             if (!effect.isBeneficial()) {
                 power *= -1;
             }
@@ -257,10 +260,17 @@ public class EffectGem extends Item {
     private void fill_power_map() {
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_DAMAGE, 1.5f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_HEALTH, 1.5f);
-        EFFECT_POWER_PER_LEVEL.put(StatusEffects.INVISIBILITY, 0.3f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.INVISIBILITY, 0.5f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.RESISTANCE, 0.8f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.SPEED, 0.7F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.WEAKNESS, 0.5F);
-        EFFECT_POWER_PER_LEVEL.put(StatusEffects.REGENERATION, 2.0F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.STRENGTH, 1.2F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.REGENERATION, 1.8F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.POISON, 2.0F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.NIGHT_VISION, 0.3F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.FIRE_RESISTANCE, 0.5F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.WITHER, 3.2F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.JUMP_BOOST, 0.7F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.MINING_FATIGUE, 0.6F);
     }
 }

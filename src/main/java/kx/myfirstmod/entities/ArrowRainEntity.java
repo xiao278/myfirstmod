@@ -1,6 +1,7 @@
 package kx.myfirstmod.entities;
 
 import kx.myfirstmod.utils.NormalDistribution;
+import kx.myfirstmod.utils.ParticleUtils;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -27,7 +28,7 @@ public class ArrowRainEntity extends ArrowEntity {
     private Vec3d offset = new Vec3d(0,0,0);
     private double speed = 3;
     private boolean guiding = true;
-    private double guidingRange = 35;
+    private double guidingRange = 25;
     private Vec3d prevPos;
     private double prevOverflow = 0;
 
@@ -87,21 +88,7 @@ public class ArrowRainEntity extends ArrowEntity {
             }
             // spawn particles along path
             if (!this.hasHitBlock && prevPos != null) {
-                Vec3d movementVector = this.getPos().subtract(prevPos);
-                Vec3d movementDir = movementVector.normalize();
-                double spacing = 0.375;
-                double total_length = movementVector.length();
-                double cur_lerp = prevOverflow;
-                while (cur_lerp < total_length) {
-                    Vec3d pos = this.prevPos.add(movementDir.multiply(cur_lerp));
-                    Vec3d vel = this.getRotationVector().multiply(speed * 0.125);
-                    this.getWorld().addParticle(ParticleTypes.ELECTRIC_SPARK,
-                            pos.x, pos.y, pos.z,
-                            vel.x, vel.y, vel.z
-                    );
-                    cur_lerp += spacing;
-                }
-                prevOverflow = cur_lerp - total_length;
+                prevOverflow =  ParticleUtils.lerpSpawn(getWorld(), ParticleTypes.ELECTRIC_SPARK, this.prevPos, this.getPos(), this.getRotationVector().multiply(speed * 0.125), 0.375, prevOverflow);
             }
             prevPos = this.getPos();
         }
