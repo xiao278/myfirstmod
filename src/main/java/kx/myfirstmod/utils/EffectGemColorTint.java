@@ -4,6 +4,7 @@ import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.ModItems;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 
@@ -14,12 +15,15 @@ public class EffectGemColorTint {
     public static void register() {
         ColorProviderRegistry.ITEM.register((stack, layer) -> {
             if (layer == 0) { // Tint only layer1
-                List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
-                int color = PotionUtil.getColor(effects);
+                Potion potion = PotionUtil.getPotion(stack);
+                int color = PotionUtil.getColor(potion);
+//                List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+//                int color = PotionUtil.getColor(effects);
 //                color = averageColors(0xFFFFFF, color);
                 return color;
             }
             return 0xFFFFFF; // Default to no tint for other layers
+
         }, ModItems.EFFECT_GEM);
     }
 

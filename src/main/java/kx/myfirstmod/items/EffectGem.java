@@ -15,11 +15,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
 import net.minecraft.item.SplashPotionItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -53,7 +55,7 @@ public class EffectGem extends Item {
 
         if (!world.isClient) {
             // Get the stored effect from the gem
-            List<StatusEffectInstance> effects = getStoredEffect(stack);
+            List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
 
             if (!effects.isEmpty()) {
                 // Apply the effect to the player
@@ -78,8 +80,7 @@ public class EffectGem extends Item {
                     new Vec3d(0,0,0.5).rotateX((float) Math.toRadians(-user.getPitch())).rotateY((float) Math.toRadians(-user.getYaw()))
             ));
 
-            List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
-            int color = PotionUtil.getColor(effects);
+            int color = PotionUtil.getColor(stack);
             float red = (color >> 16 & 0xFF) / 255.0F;
             float green = (color >> 8 & 0xFF) / 255.0F;
             float blue = (color & 0xFF) / 255.0F;
@@ -96,16 +97,19 @@ public class EffectGem extends Item {
         if (!world.isClient) {
             if (!EffectGem.getIsUnstable(stack)) {
                 // use on self
-                List<StatusEffectInstance> effects = EffectGem.getStoredEffect(stack);
+                PlayerEntity playerEntity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
+                List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
                 for (StatusEffectInstance effect: effects) {
-                    if (effect != null) {
-                        user.addStatusEffect(effect);
+                    if (effect.getEffectType().isInstant()) {
+                        effect.getEffectType().applyInstantEffect(playerEntity, playerEntity, user, effect.getAmplifier(), (double)1.0F);
+                    } else {
+                        user.addStatusEffect(new StatusEffectInstance(effect));
                     }
                 }
 
-                if (user instanceof PlayerEntity pe) {
-                    pe.getItemCooldownManager().set(this, 400);
-                }
+//                if (user instanceof PlayerEntity pe) {
+//                    pe.getItemCooldownManager().set(this, 400);
+//                }
             }
             else {
                 // spawn throwing entity
@@ -156,7 +160,7 @@ public class EffectGem extends Item {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         // Retrieve the stored potion effect
-        List<StatusEffectInstance> effects = getStoredEffect(stack);
+        List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
         PotionUtil.buildTooltip(effects, tooltip, 1.0F);
     }
 

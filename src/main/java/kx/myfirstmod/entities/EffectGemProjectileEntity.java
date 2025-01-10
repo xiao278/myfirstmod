@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class EffectGemProjectileEntity extends PotionEntity {
-    private static final int maxTickAge = 60;
+    private static final int maxTickAge = 40;
     private boolean reachedMaxSpeed = false;
     private double maxSpeed = 5;
     private double acceleration = 0.25;
@@ -62,8 +62,7 @@ public class EffectGemProjectileEntity extends PotionEntity {
     }
 
     private void spawnParticles(World world, Vec3d pos) {
-        List<StatusEffectInstance> effects = EffectGem.getStoredEffect(getStack());
-        int color = PotionUtil.getColor(effects);
+        int color = PotionUtil.getColor(getStack());
         float red = (color >> 16 & 0xFF) / 255.0F;
         float green = (color >> 8 & 0xFF) / 255.0F;
         float blue = (color & 0xFF) / 255.0F;
