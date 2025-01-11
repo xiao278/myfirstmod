@@ -1,0 +1,8 @@
+{
+  "type": "myfirstmod:effect_gem_misc",
+  "ingredients": [
+    { "tag": "myfirstmod:creative_effect_gem_potion_ingredients" },
+    { "item": "myfirstmod:effect_gem" }
+  ],
+  "result": { "item": "myfirstmod:effect_gem" }
+}

@@ -7,6 +7,7 @@ package kx.myfirstmod;
 
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.misc.ModCustomPotions;
 import kx.myfirstmod.recipes.ModRecipes;
 import kx.myfirstmod.utils.TaskScheduler;
 import net.fabricmc.api.ModInitializer;
@@ -27,5 +28,6 @@ public class MyFirstMod implements ModInitializer {
 		TaskScheduler.initialize();
 		ModSounds.initialize();
 		ModRecipes.initialize();
+		ModCustomPotions.initialize();
 	}
 }

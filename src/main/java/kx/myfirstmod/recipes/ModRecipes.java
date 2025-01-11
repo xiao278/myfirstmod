@@ -36,4 +36,15 @@ public class ModRecipes {
             new Identifier(MyFirstMod.MOD_ID, "effect_gem_unstable"),
             new SpecialRecipeSerializer<>(EffectGemApplyUnstableRecipe::new)
     );
+
+    public static final RecipeType<EffectGemApplyMiscRecipe> EFFECT_GEM_MISC_RECIPE_TYPE = Registry.register(
+            Registries.RECIPE_TYPE,
+            new Identifier(MyFirstMod.MOD_ID, "effect_gem_misc"),
+            new RecipeType<>() {}
+    );
+    public static final RecipeSerializer<EffectGemApplyMiscRecipe> EFFECT_GEM_MISC_RECIPE = Registry.register(
+            Registries.RECIPE_SERIALIZER,
+            new Identifier(MyFirstMod.MOD_ID, "effect_gem_misc"),
+            new SpecialRecipeSerializer<>(EffectGemApplyMiscRecipe::new)
+    );
 }
