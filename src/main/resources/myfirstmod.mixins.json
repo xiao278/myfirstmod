@@ -12,6 +12,7 @@
   "client": [
     "EffectGemPoseMixin",
     "EnableGlowingMobMixin",
+    "FeatureRendererMixin",
     "RenderLayerMixin"
   ]
 }

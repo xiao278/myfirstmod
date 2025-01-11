@@ -5,14 +5,26 @@ import kx.myfirstmod.items.ArrowRainWeapon;
 import kx.myfirstmod.items.EffectGem;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.rendering.BeamWeaponFeatureRenderer;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EffectGemColorTint;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.model.DolphinEntityModel;
+import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -54,6 +66,13 @@ public class MyFirstModClient implements ClientModInitializer {
 
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.EFFECT_GEM_PROJECTILE_ENTITY, EffectGemProjectileEntityRenderer::new);
+//        LivingEntityFeatureRendererRegistrationCallback.EVENT.register((a,b,c,d) -> {
+//            if (b instanceof ) {
+//
+//            }
+//            c.register(new BeamWeaponFeatureRenderer<PlayerEntity, EntityModel<PlayerEntity>>((FeatureRenderer<Entity, PlayerEntityModel<PlayerEntity>>) b));
+//        });
+
         BlockGlowRenderer.register();
         ParticleSpawnPacket.registerClientListener();
         EffectGemColorTint.register();

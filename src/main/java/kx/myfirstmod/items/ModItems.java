@@ -17,6 +17,7 @@ public class ModItems {
             itemGroup.add(ModItems.EVOKER_STAFF);
             itemGroup.add(ModItems.SHULKER_STAFF);
             itemGroup.add(ModItems.ARROW_RAIN);
+            itemGroup.add(ModItems.BEAM_WEAPON);
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((itemGroup) -> {
             ItemStack creativeGem = new ItemStack(ModItems.EFFECT_GEM);
@@ -67,5 +68,10 @@ public class ModItems {
     public static final Item EFFECT_GEM = register(
             new EffectGem(new Item.Settings().maxCount(1)),
             "effect_gem"
+    );
+
+    public static final Item BEAM_WEAPON = register(
+            new BeamWeapon(new Item.Settings().maxCount(1)),
+            "beam_weapon"
     );
 }

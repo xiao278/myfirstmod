@@ -1,0 +1,162 @@
+package kx.myfirstmod.rendering;
+
+import com.google.common.collect.Lists;
+import kx.myfirstmod.items.BeamWeapon;
+import kx.myfirstmod.items.ModItems;
+import net.minecraft.block.Stainable;
+import net.minecraft.block.entity.BeaconBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.GuardianEntityRenderer;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.List;
+
+public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
+
+    public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
+
+    public BeamWeaponFeatureRenderer(FeatureRendererContext<T, M> context) {
+        super(context);
+    }
+
+    @Override
+    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, T entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+// Check if the player is holding an item
+        if (!(entity instanceof PlayerEntity)) return;
+        MinecraftClient client = MinecraftClient.getInstance();
+        PlayerEntity player = (PlayerEntity) entity;
+        ItemStack stack = player.getActiveItem();
+        if (stack.getItem() == ModItems.BEAM_WEAPON) {
+            long l = player.getWorld().getTime();
+            List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
+//            float[] fs = ((Stainable)block).getColor().getColorComponents();
+            float[] color = new float[]{1,0,0};
+            for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
+                list.add(new BeaconBlockEntity.BeamSegment(color));
+            }
+
+            int k = 0;
+
+            for(int m = 0; m < list.size(); ++m) {
+                BeaconBlockEntity.BeamSegment beamSegment = list.get(m);
+//                matrices = new MatrixStack();
+                matrices.push();
+                matrices.translate(-0.4, 0.6, -0.2);
+
+                Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch(), (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw) - player.getYaw(tickDelta))).toVector3f());
+                matrices.multiply(quat, 0, 0, 0);
+
+                renderBeam(matrices, vertexConsumers, tickDelta, l, k, m == list.size() - 1 ? 1024 : beamSegment.getHeight(), beamSegment.getColor());
+                matrices.pop();
+                k += beamSegment.getHeight();
+            }
+        }
+    }
+
+    private static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, long worldTime, int yOffset, int maxY, float[] color) {
+        renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, worldTime, yOffset, maxY, color, 0.2F, 0.25F);
+    }
+
+    public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, int maxY, float[] color, float innerRadius, float outerRadius) {
+        int i = yOffset + maxY;
+        matrices.push();
+
+//        matrices.translate((double)0.5F, (double)0.0F, (double)0.5F);
+        float f = (float)Math.floorMod(worldTime, 40) + tickDelta;
+        float g = maxY < 0 ? f : -f;
+        float h = MathHelper.fractionalPart(g * 0.2F - (float)MathHelper.floor(g * 0.1F));
+        float j = color[0];
+        float k = color[1];
+        float l = color[2];
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * 2.25F - 45.0F));
+        float m = 0.0F;
+        float p = 0.0F;
+        float q = -innerRadius;
+        float r = 0.0F;
+        float s = 0.0F;
+        float t = -innerRadius;
+        float u = 0.0F;
+        float v = 1.0F;
+        float w = -1.0F + h;
+        float x = (float)maxY * heightScale * (0.5F / innerRadius) + w;
+        renderBeamLayer(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, false)), j, k, l, 1.0F, yOffset, i, 0.0F, innerRadius, innerRadius, 0.0F, q, 0.0F, 0.0F, t, 0.0F, 1.0F, x, w);
+        matrices.pop();
+        m = -outerRadius;
+        float n = -outerRadius;
+        p = -outerRadius;
+        q = -outerRadius;
+        u = 0.0F;
+        v = 1.0F;
+        w = -1.0F + h;
+        x = (float)maxY * heightScale + w;
+        renderBeamLayer(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), j, k, l, 0.125F, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
+        matrices.pop();
+    }
+
+    private static void renderBeamLayer(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
+        MatrixStack.Entry entry = matrices.peek();
+        Matrix4f matrix4f = entry.getPositionMatrix();
+        Matrix3f matrix3f = entry.getNormalMatrix();
+        renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x1, z1, x2, z2, u1, u2, v1, v2);
+        renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x4, z4, x3, z3, u1, u2, v1, v2);
+        renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x2, z2, x4, z4, u1, u2, v1, v2);
+        renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x3, z3, x1, z1, u1, u2, v1, v2);
+    }
+
+    private static void renderBeamFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float u1, float u2, float v1, float v2) {
+        renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, height, x1, z1, u2, v1);
+        renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x1, z1, u2, v2);
+        renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x2, z2, u1, v2);
+        renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, height, x2, z2, u1, v1);
+    }
+
+    private static void renderBeamVertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int y, float x, float z, float u, float v) {
+        vertices.vertex(positionMatrix, x, (float)y, z).color(red, green, blue, alpha).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(15728880).normal(normalMatrix, 0.0F, 1.0F, 0.0F).next();
+    }
+
+    public boolean rendersOutsideBoundingBox(BeaconBlockEntity beaconBlockEntity) {
+        return true;
+    }
+
+    public int getRenderDistance() {
+        return 256;
+    }
+
+    public boolean isInRenderDistance(BeaconBlockEntity beaconBlockEntity, Vec3d vec3d) {
+        return Vec3d.ofCenter(beaconBlockEntity.getPos()).multiply((double)1.0F, (double)0.0F, (double)1.0F).isInRange(vec3d.multiply((double)1.0F, (double)0.0F, (double)1.0F), (double)this.getRenderDistance());
+    }
+
+    public final Vec3d getRotationVector(float pitch, float yaw) {
+        float f = pitch * ((float)Math.PI / 180F);
+        float g = -yaw * ((float)Math.PI / 180F);
+        float h = MathHelper.cos(g);
+        float i = MathHelper.sin(g);
+        float j = MathHelper.cos(f);
+        float k = MathHelper.sin(f);
+        return new Vec3d((double)(i * j), (double)(-k), (double)(h * j));
+    }
+}
