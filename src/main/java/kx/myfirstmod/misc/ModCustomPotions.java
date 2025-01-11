@@ -18,13 +18,13 @@ public class ModCustomPotions {
     static {
         //StatusEffect type, int duration, int amplifier
         WITHERING = register("withering", new Potion(
-                new StatusEffectInstance(StatusEffects.WITHER, (int) (30 * TICKS_PER_SECOND), 0)
+                new StatusEffectInstance(StatusEffects.WITHER, (int) (45 * TICKS_PER_SECOND), 0)
         ));
         STRONG_WITHERING = register("strong_withering", new Potion(
-                new StatusEffectInstance(StatusEffects.WITHER, (int) (20 * TICKS_PER_SECOND), 1)
+                new StatusEffectInstance(StatusEffects.WITHER, (int) (30 * TICKS_PER_SECOND), 1)
         ));
         LONG_WITHERING = register("long_withering", new Potion(
-                new StatusEffectInstance(StatusEffects.WITHER, (int) (60 * TICKS_PER_SECOND), 0)
+                new StatusEffectInstance(StatusEffects.WITHER, (int) (120 * TICKS_PER_SECOND), 0)
         ));
         GLOWING = register("glowing", new Potion(
                 new StatusEffectInstance(StatusEffects.GLOWING, (int) (60 * TICKS_PER_SECOND), 0)

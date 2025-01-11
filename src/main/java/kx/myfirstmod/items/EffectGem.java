@@ -272,7 +272,7 @@ public class EffectGem extends Item {
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.POISON, 2.0F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.NIGHT_VISION, 0.3F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.FIRE_RESISTANCE, 0.5F);
-        EFFECT_POWER_PER_LEVEL.put(StatusEffects.WITHER, 3.2F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.WITHER, 1.6F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.JUMP_BOOST, 0.7F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.MINING_FATIGUE, 0.6F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.SLOWNESS, 0.7F);
