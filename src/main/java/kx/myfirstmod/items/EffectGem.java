@@ -43,14 +43,20 @@ public class EffectGem extends Item {
     private static final String EFFECT_KEY = "StoredEffect";
     private static final String UNSTABLE_KEY = "GemIsUnstable";
     private static final String IS_PROJECTILE_KEY = "GemIsProjectile";
-    private static final int COOLDOWN_TICKS_PER_POWER = 40;
+    private static final int COOLDOWN_TICKS_PER_POWER = 20;
+    private static final int CHARGE_TIME = 32;
     private static final int TICKS_PER_SECOND = 20;
+    private static final float UNSTABLE_COOLDOWN_MODIFIER = 1.6F;
+    private static final float UNSTABLE_CHARGE_MODIFIER = 0.4F;
     private static final HashMap<StatusEffect, Float> EFFECT_POWER_PER_LEVEL = new HashMap<>();
 
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 32;
+        if (getIsUnstable(stack)) {
+            return (int) (CHARGE_TIME * UNSTABLE_CHARGE_MODIFIER);
+        }
+        return CHARGE_TIME;
     }
 
     public EffectGem(Settings settings) {
@@ -126,7 +132,7 @@ public class EffectGem extends Item {
                 world.spawnEntity(projectile);
             }
             if (user instanceof PlayerEntity pe) {
-                pe.getItemCooldownManager().set(this, calculateCooldownTicks(effects));
+                pe.getItemCooldownManager().set(this, calculateCooldownTicks(effects, getIsUnstable(stack)));
             }
         }
         return stack;
@@ -170,8 +176,14 @@ public class EffectGem extends Item {
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         // Retrieve the stored potion effect
         List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(stack);
+        if (getIsCreative(stack)) {
+            tooltip.add(Text.literal("Creative-Only").formatted(Formatting.LIGHT_PURPLE));
+        }
+        if (getIsUnstable(stack)) {
+            tooltip.add(Text.literal("Unstable").formatted(Formatting.BLUE));
+        }
         if (!effects.isEmpty()) {
-            int cd_ticks = calculateCooldownTicks(PotionUtil.getPotionEffects(stack));
+            int cd_ticks = calculateCooldownTicks(PotionUtil.getPotionEffects(stack), getIsUnstable(stack));
             float cd_seconds = (float) cd_ticks / 20;
             tooltip.add(Text.literal(cd_seconds + " second cooldown").formatted(Formatting.GRAY));
         }
@@ -182,9 +194,9 @@ public class EffectGem extends Item {
     public Text getName(ItemStack stack) {
         // Get the base name from the item's settings
         Text baseName = super.getName(stack);
-        if (EffectGem.getIsCreative(stack)) {
-            return Text.literal("Creative " + baseName.getString()); // Append effect name
-        }
+//        if (EffectGem.getIsCreative(stack)) {
+//            return Text.literal("Creative " + baseName.getString()); // Append effect name
+//        }
         return baseName;
     }
 
@@ -233,13 +245,13 @@ public class EffectGem extends Item {
         return false;
     }
 
-    public static int calculateCooldownTicks(List<StatusEffectInstance> instances) {
+    public static int calculateCooldownTicks(List<StatusEffectInstance> instances, boolean isUnstable) {
         float total_power = 0;
         for (StatusEffectInstance instance: instances) {
             StatusEffect effect = instance.getEffectType();
             float power = getPower(effect);
             if (!effect.isInstant()) {
-                power *= (1 + ((float) instance.getDuration() / (60 * TICKS_PER_SECOND)));
+                power *= (1 + ((float) instance.getDuration() / (80 * TICKS_PER_SECOND)));
             }
             if (!effect.isBeneficial()) {
                 power *= -1;
@@ -247,6 +259,9 @@ public class EffectGem extends Item {
             total_power += power;
         }
         total_power = Math.abs(total_power);
+        if (isUnstable) {
+            total_power *= UNSTABLE_COOLDOWN_MODIFIER;
+        }
         return (int) (COOLDOWN_TICKS_PER_POWER * (1 + total_power));
     }
 
@@ -261,7 +276,7 @@ public class EffectGem extends Item {
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_DAMAGE, 1.5f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.INSTANT_HEALTH, 1.5f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.INVISIBILITY, 0.5f);
-        EFFECT_POWER_PER_LEVEL.put(StatusEffects.RESISTANCE, 0.8f);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.RESISTANCE, 1.3f);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.SPEED, 0.7F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.WEAKNESS, 0.5F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.STRENGTH, 1.2F);
@@ -272,5 +287,6 @@ public class EffectGem extends Item {
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.WITHER, 3.2F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.JUMP_BOOST, 0.7F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.MINING_FATIGUE, 0.6F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.SLOWNESS, 0.7F);
     }
 }
