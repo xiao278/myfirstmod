@@ -92,7 +92,7 @@ public class BeamWeapon extends Item {
     }
 
     public static boolean canShoot(ItemStack stack, World world) {
-        return (world.getTime() - getLastUsedTime(stack)) <= DAMAGE_TICKS;
+        return timeSinceFirstShot(stack, world) <= DAMAGE_TICKS;
     }
 
     public static boolean canShoot(LivingEntity livingEntity, World world) {
@@ -149,6 +149,10 @@ public class BeamWeapon extends Item {
 
     public static Vec3d getOffset(PlayerEntity user, Hand hand) {
         return new Vec3d(0, user.getHeight() / 2, 0).add(user.getHandPosOffset(ModItems.BEAM_WEAPON).multiply(0.5));
+    }
+
+    public static long timeSinceFirstShot(ItemStack stack, World world) {
+        return world.getTime() - getLastUsedTime(stack);
     }
 
     public static void storeLastUsedTime (ItemStack stack, long time) {
