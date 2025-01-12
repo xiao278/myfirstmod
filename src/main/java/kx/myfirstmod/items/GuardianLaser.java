@@ -92,10 +92,9 @@ public class GuardianLaser extends Item {
         } else {
             if (hook != null && (hook.hasBeamTarget() && hook.isAlive() && !hook.isRemoved())) {
                 if (hook.getBeamTicks() >= hook.getWarmupTime()) {
-                    float volume = 0.1F;
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1F);
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 2F);
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 3F);
+                    float volume = 0.15F;
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 0.75F);
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1.5F);
                 }
             }
         }
