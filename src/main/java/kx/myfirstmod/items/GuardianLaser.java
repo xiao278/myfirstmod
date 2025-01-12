@@ -134,7 +134,12 @@ public class GuardianLaser extends Item {
 
     public GuardianLaserEntity getHook(ItemStack stack, World world) {
         if (!stack.hasNbt() || stack.getNbt() == null || !stack.getNbt().contains("LaserHook")) return null;
-        return (GuardianLaserEntity) world.getEntityById(stack.getNbt().getInt("LaserHook"));
+        Entity e = world.getEntityById(stack.getNbt().getInt("LaserHook"));
+        if (e instanceof GuardianLaserEntity) return (GuardianLaserEntity) e;
+        else {
+            removeHook(stack);
+            return null;
+        }
     }
 
     private void setHook(ItemStack stack, GuardianLaserEntity entity) {
