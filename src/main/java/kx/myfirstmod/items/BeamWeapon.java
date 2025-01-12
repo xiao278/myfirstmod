@@ -155,7 +155,7 @@ public class BeamWeapon extends Item {
     }
 
     public static Vec3d getOffset(PlayerEntity user, Hand hand) {
-        return new Vec3d(0, user.getHeight() / 2, 0).add(user.getHandPosOffset(ModItems.BEAM_WEAPON).multiply(0.5));
+        return new Vec3d(0, user.getHeight() / 2, 0);
     }
 
     public static long timeSinceFirstShot(ItemStack stack, World world) {
