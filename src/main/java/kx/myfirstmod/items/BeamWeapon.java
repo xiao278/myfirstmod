@@ -12,6 +12,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -28,7 +29,11 @@ import java.util.Set;
 public class BeamWeapon extends Item {
     public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.9;
-    private static final float BASE_DAMAGE = 10F;
+    private static final float BASE_DAMAGE = 20F;
+    private static final int CHARGE_TICKS = 30;
+    public static final int DAMAGE_TICKS = 5;
+    private static final String TIME_KEY = "BeamWeaponLastUsedTime";
+    private static final String CHARGED_KEY = "BeamWeaponCharged";
 
     public BeamWeapon(Settings settings) {
         super(settings);
@@ -39,19 +44,64 @@ public class BeamWeapon extends Item {
         ItemStack stack = user.getStackInHand(hand);
         if (world.isClient) {
             // clientside logic
-            shoot(world, user, hand);
+//            shoot(world, user, hand);
 //            BeaconBlockEntityRenderer;
 //            WardenFeatureRenderer
             return TypedActionResult.pass(stack);
         } else {
             // serverside logic
-            shoot(world, user, hand);
-            user.setCurrentHand(hand);
-            return TypedActionResult.success(stack);
+//            shoot(world, user, hand);
+            if (hand != Hand.MAIN_HAND) return TypedActionResult.fail(stack);
+            if (!getIsCharged(stack)) {
+                // charge
+                user.setCurrentHand(hand);
+                return TypedActionResult.consume(stack);
+            }
+            else {
+                // fire
+                storeLastUsedTime(stack, world.getTime());
+                storeIsCharged(stack,false);
+                return TypedActionResult.success(stack);
+            }
         }
     }
 
-    private void shoot(World world, PlayerEntity user, Hand hand) {
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        super.usageTick(world, user, stack, remainingUseTicks);
+        if (!world.isClient) {
+            if (ticksUsed(user, stack) >= CHARGE_TICKS) {
+                storeIsCharged(stack, true);
+            }
+        }
+    }
+
+    public int ticksUsed(LivingEntity user, ItemStack stack) {
+        return stack.getMaxUseTime() - user.getItemUseTimeLeft();
+    }
+
+    @Override
+    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+        storeIsCharged(stack, true);
+        return stack;
+    }
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return 72000;
+    }
+
+    public static boolean canShoot(ItemStack stack, World world) {
+        return (world.getTime() - getLastUsedTime(stack)) <= DAMAGE_TICKS;
+    }
+
+    public static boolean canShoot(LivingEntity livingEntity, World world) {
+        ItemStack stack = livingEntity.getStackInHand(Hand.MAIN_HAND);
+        if (!(stack.getItem() instanceof BeamWeapon)) return false;
+        return canShoot(stack, world);
+    }
+
+    public static void shoot(World world, PlayerEntity user, Hand hand) {
         double lerp_progress = 0;
         Vec3d origin = getShootOrigin(user, hand);
         Vec3d dir = user.getRotationVector();
@@ -81,10 +131,17 @@ public class BeamWeapon extends Item {
         } else {
             for (LivingEntity e : hitEntities) {
                 RegistryEntry<DamageType> dtype = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
-                e.damage(new GuardianLaserDamageSource(dtype, user), BASE_DAMAGE);
+                e.damage(new GuardianLaserDamageSource(dtype, user), BASE_DAMAGE / DAMAGE_TICKS);
+                e.timeUntilRegen = 0;
             }
         }
     }
+
+//    @Override
+//    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+//        super.onStoppedUsing(stack, world, user, remainingUseTicks);
+//        storeLastUsedTime(stack, world.getTime());
+//    }
 
     public static Vec3d getShootOrigin(PlayerEntity user, Hand hand) {
         return user.getPos().add(getOffset(user, hand));
@@ -92,5 +149,35 @@ public class BeamWeapon extends Item {
 
     public static Vec3d getOffset(PlayerEntity user, Hand hand) {
         return new Vec3d(0, user.getHeight() / 2, 0).add(user.getHandPosOffset(ModItems.BEAM_WEAPON).multiply(0.5));
+    }
+
+    public static void storeLastUsedTime (ItemStack stack, long time) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putLong(TIME_KEY, time);
+    }
+
+    public static long getLastUsedTime(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+
+        if (nbt != null && nbt.contains(TIME_KEY)) {
+            return nbt.getLong(TIME_KEY);
+        }
+
+        return 0;
+    }
+
+    public static void storeIsCharged (ItemStack stack, boolean isCharged) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        nbt.putBoolean(CHARGED_KEY, isCharged);
+    }
+
+    public static boolean getIsCharged (ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+
+        if (nbt != null && nbt.contains(CHARGED_KEY)) {
+            return nbt.getBoolean(CHARGED_KEY);
+        }
+
+        return false;
     }
 }

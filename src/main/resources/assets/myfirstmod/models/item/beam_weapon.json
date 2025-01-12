@@ -1,5 +1,5 @@
 {
-  "parent": "item/generated",
+  "parent": "item/crossbow",
   "textures": {
     "layer0": "myfirstmod:item/evoker_staff"
   }

@@ -6,18 +6,12 @@ import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.block.Stainable;
 import net.minecraft.block.entity.BeaconBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.GuardianEntityRenderer;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
@@ -63,6 +57,7 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         MinecraftClient client = MinecraftClient.getInstance();
         PlayerEntity player = client.player;
         if (player == null || (!client.options.getPerspective().isFirstPerson())) return;
+        if (!BeamWeapon.canShoot(player, player.getWorld())) return;
         MatrixStack matrices = context.matrixStack();
         float tickDelta = context.tickDelta();
         VertexConsumerProvider vertexConsumers = context.consumers();
@@ -114,7 +109,9 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         if (!(entity instanceof PlayerEntity)) return;
         MinecraftClient client = MinecraftClient.getInstance();
         PlayerEntity player = (PlayerEntity) entity;
-        ItemStack stack = player.getActiveItem();
+        if (!BeamWeapon.canShoot(player, player.getWorld())) return;
+
+        ItemStack stack = player.getStackInHand(Hand.MAIN_HAND);
         if (stack.getItem() == ModItems.BEAM_WEAPON) {
             long l = player.getWorld().getTime();
             List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
