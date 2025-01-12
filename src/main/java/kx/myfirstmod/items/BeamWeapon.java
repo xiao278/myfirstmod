@@ -10,12 +10,16 @@ import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
@@ -28,7 +32,7 @@ import java.util.Set;
 
 public class BeamWeapon extends Item {
     public static final double BEAM_RANGE = 32;
-    public static final double BEAM_WIDTH = 0.9;
+    public static final double BEAM_WIDTH = 0.7;
     private static final float BASE_DAMAGE = 20F;
     private static final int CHARGE_TICKS = 30;
     public static final int DAMAGE_TICKS = 5;
@@ -59,6 +63,9 @@ public class BeamWeapon extends Item {
             }
             else {
                 // fire
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 2.0F, 0.5F);
+//                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 0.5F);
+//                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
                 storeIsCharged(stack,false);
                 return TypedActionResult.success(stack);
@@ -130,7 +137,7 @@ public class BeamWeapon extends Item {
             //
         } else {
             for (LivingEntity e : hitEntities) {
-                RegistryEntry<DamageType> dtype = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
+                RegistryEntry<DamageType> dtype = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
                 e.damage(new GuardianLaserDamageSource(dtype, user), BASE_DAMAGE / DAMAGE_TICKS);
                 e.timeUntilRegen = 0;
             }
