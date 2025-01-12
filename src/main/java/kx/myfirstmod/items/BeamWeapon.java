@@ -158,10 +158,12 @@ public class BeamWeapon extends Item {
             RegistryEntry<DamageType> dtypeNonPierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
             RegistryEntry<DamageType> dtypePierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
             for (LivingEntity e : hitEntities) {
+                Vec3d prev_vel = e.getVelocity();
                 e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), getTickDamage(stack) * (1 - getMagicDamageProportion(stack)));
                 e.timeUntilRegen = 0;
                 e.damage(new GuardianLaserDamageSource(dtypePierce, user), getTickDamage(stack) * getMagicDamageProportion(stack));
                 e.timeUntilRegen = 0;
+                e.setVelocity(prev_vel);
             }
         }
     }
