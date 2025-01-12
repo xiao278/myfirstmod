@@ -37,6 +37,7 @@ public class BeamWeapon extends Item {
     private static final float BASE_DAMAGE = 25F;
     private static final int CHARGE_TICKS = 100;
     public static final int DAMAGE_TICKS = 5;
+    public static final float MAGIC_DAMAGE_PROPORTION = 0.4F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
     private static final String CHARGED_KEY = "BeamWeaponCharged";
 
@@ -146,9 +147,12 @@ public class BeamWeapon extends Item {
         if (world.isClient) {
             //
         } else {
+            RegistryEntry<DamageType> dtypeNonPierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
+            RegistryEntry<DamageType> dtypePierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
             for (LivingEntity e : hitEntities) {
-                RegistryEntry<DamageType> dtype = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
-                e.damage(new GuardianLaserDamageSource(dtype, user), BASE_DAMAGE / DAMAGE_TICKS);
+                e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), (BASE_DAMAGE / DAMAGE_TICKS) * (1 - MAGIC_DAMAGE_PROPORTION));
+                e.timeUntilRegen = 0;
+                e.damage(new GuardianLaserDamageSource(dtypePierce, user), (BASE_DAMAGE / DAMAGE_TICKS) * MAGIC_DAMAGE_PROPORTION);
                 e.timeUntilRegen = 0;
             }
         }
@@ -165,7 +169,7 @@ public class BeamWeapon extends Item {
     }
 
     public static Vec3d getOffset(PlayerEntity user, Hand hand) {
-        return new Vec3d(0, user.getHeight() / 2, 0);
+        return new Vec3d(0, user.getHeight() * 0.7, 0);
     }
 
     public static long timeSinceFirstShot(ItemStack stack, World world) {
