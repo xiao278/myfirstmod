@@ -98,5 +98,6 @@ public class EffectGemApplyMiscRecipe extends SpecialCraftingRecipe {
     private void initializeIngredientMap() {
         INGREDIENT_ITEMS.put(Items.NETHER_STAR, ModCustomPotions.WITHERING);
         INGREDIENT_ITEMS.put(Items.GLOWSTONE, ModCustomPotions.GLOWING);
+        INGREDIENT_ITEMS.put(Items.AZURE_BLUET, ModCustomPotions.BLINDING);
     }
 }

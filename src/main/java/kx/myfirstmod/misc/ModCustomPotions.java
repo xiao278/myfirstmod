@@ -14,6 +14,8 @@ public class ModCustomPotions {
     public static final Potion STRONG_WITHERING;
     public static final Potion LONG_WITHERING;
     public static final Potion GLOWING;
+    public static final Potion BLINDING;
+    public static final Potion LONG_BLINDING;
 
     static {
         //StatusEffect type, int duration, int amplifier
@@ -28,6 +30,12 @@ public class ModCustomPotions {
         ));
         GLOWING = register("glowing", new Potion(
                 new StatusEffectInstance(StatusEffects.GLOWING, (int) (60 * TICKS_PER_SECOND), 0)
+        ));
+        BLINDING = register("blinding", new Potion(
+                new StatusEffectInstance(StatusEffects.BLINDNESS, (int) (10 * TICKS_PER_SECOND), 0)
+        ));
+        LONG_BLINDING = register("long_blinding", new Potion(
+                new StatusEffectInstance(StatusEffects.BLINDNESS, (int) (20 * TICKS_PER_SECOND), 0)
         ));
     }
 

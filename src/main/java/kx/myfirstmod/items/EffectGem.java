@@ -276,5 +276,6 @@ public class EffectGem extends Item {
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.JUMP_BOOST, 0.7F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.MINING_FATIGUE, 0.6F);
         EFFECT_POWER_PER_LEVEL.put(StatusEffects.SLOWNESS, 0.7F);
+        EFFECT_POWER_PER_LEVEL.put(StatusEffects.BLINDNESS, 3.2F);
     }
 }
