@@ -1,0 +1,16 @@
+{
+  "parent": "item/crossbow",
+  "textures": {
+    "layer0": "myfirstmod:item/beam_weapon_charge3"
+  },
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [-90, 0, -45],
+      "translation": [-9, 0.5, -6.25],
+      "scale": [1, 1, 1]
+    },
+    "firstperson_lefthand": {
+      "scale": [0, 0, 0]
+    }
+  }
+}

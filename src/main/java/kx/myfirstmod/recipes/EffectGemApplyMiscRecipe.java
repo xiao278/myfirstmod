@@ -79,7 +79,7 @@ public class EffectGemApplyMiscRecipe extends SpecialCraftingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return null;
+        return ModRecipes.EFFECT_GEM_MISC_RECIPE;
     }
 
     public boolean isIngredient(Item item) {

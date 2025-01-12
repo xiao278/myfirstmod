@@ -3,6 +3,7 @@
   "package": "kx.myfirstmod.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BeamWeaponShootMixin",
     "EnchantmentTargetMixin",
     "ExampleMixin"
   ],
@@ -10,8 +11,10 @@
     "defaultRequire": 1
   },
   "client": [
+    "BipedEntityModelMixin",
     "EffectGemPoseMixin",
     "EnableGlowingMobMixin",
+    "FeatureRendererMixin",
     "RenderLayerMixin"
   ]
 }
