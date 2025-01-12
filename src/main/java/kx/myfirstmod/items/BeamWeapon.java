@@ -168,7 +168,7 @@ public class BeamWeapon extends Item {
         return user.getPos().add(getOffset(user, hand));
     }
 
-    public static Vec3d getOffset(PlayerEntity user, Hand hand) {
+    public static Vec3d getOffset(LivingEntity user, Hand hand) {
         return new Vec3d(0, user.getHeight() * 0.7, 0);
     }
 

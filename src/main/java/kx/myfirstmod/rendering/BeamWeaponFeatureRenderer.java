@@ -83,9 +83,9 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 
         matrices = new MatrixStack();
         matrices.push();
-        float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-        Vec3d offset = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(BEAM_OFFSET);
-        matrices.translate(-offset.x, -offset.y, -offset.z);
+
+        Vec3d offset = calcOffset(player, tickDelta);
+        matrices.translate(offset.x, offset.y, offset.z);
 //        matrices.translate(0.35 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  -0.5, -0.5);
 
         matrices.multiply(
@@ -123,8 +123,8 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 
             matrices.push();
             float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-            Vec3d offset = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(player.getYaw(tickDelta))).add(BEAM_OFFSET);
-            matrices.translate(offset.x, offset.y, offset.z);
+            Vec3d offset = calcOffset(player, tickDelta);
+            matrices.translate(-offset.x, -offset.y, -offset.z);
 //            matrices.translate(-0.4 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  0.6, -0.2);
             Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch(), smoothed_body_yaw - player.getYaw(tickDelta)).toVector3f());
             matrices.multiply(quat, 0, 0, 0);
@@ -220,5 +220,12 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         float j = MathHelper.cos(f);
         float k = MathHelper.sin(f);
         return new Vec3d((double)(i * j), (double)(-k), (double)(h * j));
+    }
+
+    private Vec3d calcOffset(LivingEntity player, float tickDelta) {
+        float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
+        Vec3d original_offseet = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(BEAM_OFFSET);
+        Vec3d eye_offset = new Vec3d(0, player.getEyeHeight(player.getPose()), 0);
+        return original_offseet.subtract(eye_offset);
     }
 }
