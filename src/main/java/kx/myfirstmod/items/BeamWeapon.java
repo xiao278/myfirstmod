@@ -1,8 +1,11 @@
 package kx.myfirstmod.items;
 
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.render.entity.feature.WardenFeatureRenderer;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
@@ -20,12 +23,14 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +42,7 @@ public class BeamWeapon extends Item {
     private static final float BASE_DAMAGE = 25F;
     private static final int CHARGE_TICKS = 100;
     public static final int DAMAGE_TICKS = 5;
-    public static final float MAGIC_DAMAGE_PROPORTION = 0.4F;
+    public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
     private static final String CHARGED_KEY = "BeamWeaponCharged";
 
@@ -147,12 +152,13 @@ public class BeamWeapon extends Item {
         if (world.isClient) {
             //
         } else {
+            ItemStack stack = user.getStackInHand(Hand.MAIN_HAND);
             RegistryEntry<DamageType> dtypeNonPierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
             RegistryEntry<DamageType> dtypePierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
             for (LivingEntity e : hitEntities) {
-                e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), (BASE_DAMAGE / DAMAGE_TICKS) * (1 - MAGIC_DAMAGE_PROPORTION));
+                e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), getTickDamage(stack) * (1 - getMagicDamageProportion(stack)));
                 e.timeUntilRegen = 0;
-                e.damage(new GuardianLaserDamageSource(dtypePierce, user), (BASE_DAMAGE / DAMAGE_TICKS) * MAGIC_DAMAGE_PROPORTION);
+                e.damage(new GuardianLaserDamageSource(dtypePierce, user), getTickDamage(stack) * getMagicDamageProportion(stack));
                 e.timeUntilRegen = 0;
             }
         }
@@ -204,5 +210,24 @@ public class BeamWeapon extends Item {
         }
 
         return false;
+    }
+
+    private static float getDamage(ItemStack stack) {
+        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack));
+    }
+
+    private static float getTickDamage(ItemStack stack) {
+        return getDamage(stack) / DAMAGE_TICKS;
+    }
+
+    private static float getMagicDamageProportion(ItemStack stack) {
+        int pierce_level = EnchantmentHelper.getLevel(Enchantments.PIERCING, stack);
+        return BASE_MAGIC_DAMAGE_PROPORTION + (1 - BASE_MAGIC_DAMAGE_PROPORTION) * Math.min(1, pierce_level * BASE_MAGIC_DAMAGE_PROPORTION);
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(stack, world, tooltip, context);
+
     }
 }
