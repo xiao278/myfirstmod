@@ -3,6 +3,10 @@ package kx.myfirstmod.mixin;
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.CrossbowPosing;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -26,6 +30,7 @@ public abstract class BeamWeaponShootMixin {
     private void shootingWeapon (CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         World world = self.getWorld();
+        ItemStack stack = self.getStackInHand(Hand.MAIN_HAND);
         if (!world.isClient) {
             if (BeamWeapon.canShoot(self, self.getWorld())) {
                 if (self instanceof PlayerEntity pe) {

@@ -22,6 +22,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -33,14 +34,19 @@ import java.util.Set;
 public class BeamWeapon extends Item {
     public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
-    private static final float BASE_DAMAGE = 20F;
-    private static final int CHARGE_TICKS = 30;
+    private static final float BASE_DAMAGE = 25F;
+    private static final int CHARGE_TICKS = 100;
     public static final int DAMAGE_TICKS = 5;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
     private static final String CHARGED_KEY = "BeamWeaponCharged";
 
     public BeamWeapon(Settings settings) {
         super(settings);
+    }
+
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.NONE;
     }
 
     @Override
@@ -68,14 +74,14 @@ public class BeamWeapon extends Item {
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
                 storeIsCharged(stack,false);
-                return TypedActionResult.success(stack);
+                return TypedActionResult.consume(stack);
             }
         }
     }
 
     @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        super.usageTick(world, user, stack, remainingUseTicks);
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        super.onStoppedUsing(stack, world, user, remainingUseTicks);
         if (!world.isClient) {
             if (ticksUsed(user, stack) >= CHARGE_TICKS) {
                 storeIsCharged(stack, true);
@@ -83,7 +89,7 @@ public class BeamWeapon extends Item {
         }
     }
 
-    public int ticksUsed(LivingEntity user, ItemStack stack) {
+    public static int ticksUsed(LivingEntity user, ItemStack stack) {
         return stack.getMaxUseTime() - user.getItemUseTimeLeft();
     }
 
@@ -106,6 +112,10 @@ public class BeamWeapon extends Item {
         ItemStack stack = livingEntity.getStackInHand(Hand.MAIN_HAND);
         if (!(stack.getItem() instanceof BeamWeapon)) return false;
         return canShoot(stack, world);
+    }
+
+    public static float getPullProgress(LivingEntity user, ItemStack stack) {
+        return Math.min((float) ticksUsed(user, stack) / CHARGE_TICKS, 1);
     }
 
     public static void shoot(World world, PlayerEntity user, Hand hand) {
