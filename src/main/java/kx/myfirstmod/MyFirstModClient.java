@@ -76,6 +76,7 @@ public class MyFirstModClient implements ClientModInitializer {
         BlockGlowRenderer.register();
         ParticleSpawnPacket.registerClientListener();
         EffectGemColorTint.register();
+        BeamWeaponFeatureRenderer.register();
     }
 
     private void onResourcesReady() {

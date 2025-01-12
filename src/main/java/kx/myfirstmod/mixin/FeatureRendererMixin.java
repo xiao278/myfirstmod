@@ -8,6 +8,7 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,8 +28,11 @@ public abstract class FeatureRendererMixin {
 
     @Inject(at = @At("RETURN"), method = "<init>")
     public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo info) {
-        this.invokeAddFeature(new BeamWeaponFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this));
+        if (model instanceof PlayerEntityModel<?>) {
+            FeatureRenderer<?,?> featureRenderer = new BeamWeaponFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this);
+            this.invokeAddFeature(featureRenderer);
 //        System.out.println((model.getClass().getName()));
+        }
     }
 }
 
