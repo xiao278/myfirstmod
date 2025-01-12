@@ -27,6 +27,7 @@ public class GuardianLaser extends Item {
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private static final int LASER_SOUND_COOLDOWN_TICKS = 0;
+    private static final int QUICK_CHARGE_REDUCTION = 15;
     private int sound_cooldown_remaining = 0;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -101,11 +102,11 @@ public class GuardianLaser extends Item {
     }
 
     public static int getMaxWarmupTime() {
-        return 80;
+        return 60;
     }
 
     public int getWarmupTime(ItemStack stack) {
-        return getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * 20;
+        return Math.max(getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * QUICK_CHARGE_REDUCTION, 0);
     }
 
     public float getDamage(ItemStack stack) {
@@ -129,7 +130,7 @@ public class GuardianLaser extends Item {
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.literal(this.getDamage(stack) + " Attack Damage").formatted(Formatting.DARK_GREEN));
-        tooltip.add(Text.literal(this.getWarmupTime(stack)/20 + "s Charge Time" ).formatted(Formatting.DARK_GREEN));
+        tooltip.add(Text.literal((float) this.getWarmupTime(stack) / 20 + "s Charge Time" ).formatted(Formatting.DARK_GREEN));
     }
 
     public GuardianLaserEntity getHook(ItemStack stack, World world) {
