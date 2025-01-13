@@ -36,6 +36,8 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
     private static BeamWeaponFeatureRenderer<?,?> INSTANCE;
     private static final Vec3d BEAM_OFFSET = new Vec3d(0, -0.2, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
+    public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
+    public static final float INNER_BEAM_MIN_WIDTH = 0.02F;
 
     public static void register() {
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
@@ -121,9 +123,12 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         }
 
         int k = 0;
-        for (BeaconBlockEntity.BeamSegment beamSegment : list) {
-            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
-            k += beamSegment.getHeight();
+        for (int i = 0; i < list.size(); i++) {
+//            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
+            BeaconBlockEntity.BeamSegment segment = list.get(i);
+            float radius = MathHelper.lerp((float) i / list.size(), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH);
+            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius, radius + 0.05F);
+            k += segment.getHeight();
         }
     }
 
