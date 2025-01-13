@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeapon extends Item {
-    public static final double BEAM_RANGE = 32;
+    public static final double BEAM_RANGE = 64;
     public static final double BEAM_WIDTH = 0.7;
     private static final float BASE_DAMAGE = 22F;
     private static final int CHARGE_TICKS = 100;

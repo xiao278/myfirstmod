@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class GuardianLaser extends Item {
-    private static final int range = 128;
+    private static final int range = 72;
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private static final int LASER_SOUND_COOLDOWN_TICKS = 0;

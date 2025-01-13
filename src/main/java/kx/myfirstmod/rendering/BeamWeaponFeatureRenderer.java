@@ -34,10 +34,12 @@ import java.util.List;
 
 public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
     private static BeamWeaponFeatureRenderer<?,?> INSTANCE;
-    private static final Vec3d BEAM_OFFSET = new Vec3d(0.5, 0, 0);
+//    private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0.5, -0.1, 0);
+    private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
+    private static final Vec3d FIRST_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
     public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
-    public static final float INNER_BEAM_MIN_WIDTH = 0.02F;
+    public static final float INNER_BEAM_MIN_WIDTH = 0.01F;
 
     public static void register() {
         WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
@@ -78,7 +80,7 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         matrices = new MatrixStack();
         matrices.push();
 
-        Vec3d offset = calcOffset(player, tickDelta);
+        Vec3d offset = calcOffset(player, tickDelta, true);
         matrices.translate(offset.x, offset.y, offset.z);
 //        matrices.translate(0.35 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  -0.5, -0.5);
 
@@ -104,10 +106,10 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         if (stack.getItem() == ModItems.BEAM_WEAPON) {
             matrices.push();
             float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-            Vec3d offset = calcOffset(player, tickDelta);
+            Vec3d offset = calcOffset(player, tickDelta, false);
             matrices.translate(-offset.x, -offset.y, -offset.z);
 //            matrices.translate(-0.4 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  0.6, -0.2);
-            Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch(), smoothed_body_yaw - player.getYaw(tickDelta)).toVector3f());
+            Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch() + 0.5F, smoothed_body_yaw - player.getYaw(tickDelta) - 0.5F).toVector3f());
             matrices.multiply(quat, 0, 0, 0);
             renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
             matrices.pop();
@@ -216,9 +218,9 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         return new Vec3d((double)(i * j), (double)(-k), (double)(h * j));
     }
 
-    private Vec3d calcOffset(LivingEntity player, float tickDelta) {
+    private Vec3d calcOffset(LivingEntity player, float tickDelta, boolean isFirstPerson) {
         float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-        Vec3d original_offseet = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(BEAM_OFFSET);
+        Vec3d original_offseet = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(isFirstPerson ? FIRST_PERSON_BEAM_OFFSET : THIRD_PERSON_BEAM_OFFSET);
         Vec3d eye_offset = new Vec3d(0, player.getEyeHeight(player.getPose()), 0);
         return original_offseet.subtract(eye_offset);
     }
