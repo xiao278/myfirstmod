@@ -115,7 +115,7 @@ public class EffectGem extends Item {
                 // spawn throwing entity
                 EffectGemProjectileEntity projectile = new EffectGemProjectileEntity(world, user);
                 projectile.setItem(stack);
-                projectile.setVelocity(user, user.getPitch(), user.getYaw(), 0f, 0.1F, 1.0F);
+                projectile.setVelocity(user.getRotationVector().multiply(0.1));
 
                 world.spawnEntity(projectile);
             }
