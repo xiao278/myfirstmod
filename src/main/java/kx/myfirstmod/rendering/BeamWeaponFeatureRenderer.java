@@ -73,14 +73,6 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 //        render(matrices, vertexConsumers, 0xF000F0, (T) player, 0, 0, tickDelta, 0, 0, 0);
 //        matrices.pop();
 
-        long l = player.getWorld().getTime();
-        List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
-//            float[] fs = ((Stainable)block).getColor().getColorComponents();
-        float[] color = new float[]{1,0,0};
-        for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
-            list.add(new BeaconBlockEntity.BeamSegment(color));
-        }
-
         matrices = new MatrixStack();
         matrices.push();
 
@@ -92,14 +84,9 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
                 new Quaternionf().rotateLocalX((float) Math.toRadians(-90F)),
                 0,0,0
         );
-//        Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch(), smoothed_body_yaw - player.getYaw(tickDelta)).toVector3f());
-//        matrices.multiply(quat, 0, 0, 0);
-        int k = 0;
-        for(int m = 0; m < list.size(); ++m) {
-            BeaconBlockEntity.BeamSegment beamSegment = list.get(m);
-            renderBeam(matrices, vertexConsumers, tickDelta, l, k, m == list.size() - 1 ? 1024 : beamSegment.getHeight(), beamSegment.getColor());
-            k += beamSegment.getHeight();
-        }
+
+        renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
+
         matrices.pop();
     }
 
@@ -113,14 +100,6 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 
         ItemStack stack = player.getStackInHand(Hand.MAIN_HAND);
         if (stack.getItem() == ModItems.BEAM_WEAPON) {
-            long l = player.getWorld().getTime();
-            List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
-//            float[] fs = ((Stainable)block).getColor().getColorComponents();
-            float[] color = new float[]{1,0,0};
-            for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
-                list.add(new BeaconBlockEntity.BeamSegment(color));
-            }
-
             matrices.push();
             float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
             Vec3d offset = calcOffset(player, tickDelta);
@@ -128,13 +107,23 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 //            matrices.translate(-0.4 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  0.6, -0.2);
             Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch(), smoothed_body_yaw - player.getYaw(tickDelta)).toVector3f());
             matrices.multiply(quat, 0, 0, 0);
-            int k = 0;
-            for(int m = 0; m < list.size(); ++m) {
-                BeaconBlockEntity.BeamSegment beamSegment = list.get(m);
-                renderBeam(matrices, vertexConsumers, tickDelta, l, k, m == list.size() - 1 ? 1024 : beamSegment.getHeight(), beamSegment.getColor());
-                k += beamSegment.getHeight();
-            }
+            renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
             matrices.pop();
+        }
+    }
+
+    private static void renderBeamHelper(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, PlayerEntity player) {
+        long l = player.getWorld().getTime();
+        List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
+        float[] color = new float[]{1,0,0};
+        for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
+            list.add(new BeaconBlockEntity.BeamSegment(color));
+        }
+
+        int k = 0;
+        for (BeaconBlockEntity.BeamSegment beamSegment : list) {
+            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
+            k += beamSegment.getHeight();
         }
     }
 
