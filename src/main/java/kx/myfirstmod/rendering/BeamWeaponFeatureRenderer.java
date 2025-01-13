@@ -124,11 +124,13 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
+        float beamWidthModifier = (BeamWeapon.getShootTicksLeft(player, player.getWorld()) - tickDelta) / BeamWeapon.DAMAGE_TICKS;
+
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
 //            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
             BeaconBlockEntity.BeamSegment segment = list.get(i);
-            float radius = MathHelper.lerp((float) i / list.size(), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH);
+            float radius = MathHelper.lerp((float) i / list.size(), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH) * beamWidthModifier;
             renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius, radius + 0.05F);
             k += segment.getHeight();
         }

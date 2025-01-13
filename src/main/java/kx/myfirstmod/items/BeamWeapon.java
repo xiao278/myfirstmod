@@ -112,6 +112,12 @@ public class BeamWeapon extends Item {
         return 72000;
     }
 
+    public static long getShootTicksLeft(LivingEntity livingEntity, World world) {
+        ItemStack stack = livingEntity.getStackInHand(Hand.MAIN_HAND);
+        long shootTime = timeSinceFirstShot(stack, world);
+        return Math.max(DAMAGE_TICKS - shootTime, 0);
+    }
+
     public static boolean canShoot(ItemStack stack, World world) {
         return timeSinceFirstShot(stack, world) <= DAMAGE_TICKS;
     }
