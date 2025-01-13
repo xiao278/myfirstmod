@@ -34,7 +34,7 @@ import java.util.List;
 
 public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
     private static BeamWeaponFeatureRenderer<?,?> INSTANCE;
-    private static final Vec3d BEAM_OFFSET = new Vec3d(0, -0.2, 0);
+    private static final Vec3d BEAM_OFFSET = new Vec3d(0.5, 0, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
     public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
     public static final float INNER_BEAM_MIN_WIDTH = 0.02F;
