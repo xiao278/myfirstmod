@@ -1,5 +1,7 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.entities.BeamWeaponEntity;
+import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
@@ -79,7 +81,9 @@ public class BeamWeapon extends Item {
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 0.5F);
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
-                storeIsCharged(stack,false);
+                world.spawnEntity(new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, user.getPitch(), user.getYaw(), getShootOrigin(user, Hand.MAIN_HAND)));
+//                storeIsCharged(stack,false);
+                shoot(world, user, hand);
                 return TypedActionResult.consume(stack);
             }
         }
@@ -175,7 +179,7 @@ public class BeamWeapon extends Item {
     }
 
     public static Vec3d getOffset(LivingEntity user, Hand hand) {
-        return new Vec3d(0, user.getHeight() * 0.7, 0);
+        return new Vec3d(0, user.getHeight() * 0.7, 0).add(user.getRotationVector().multiply(-0.3));
     }
 
     public static long timeSinceFirstShot(ItemStack stack, World world) {

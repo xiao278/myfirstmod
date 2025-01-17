@@ -34,14 +34,14 @@ public abstract class FeatureRendererMixin {
     @Invoker("addFeature")
     public abstract boolean invokeAddFeature(FeatureRenderer<?, ?> feature);
 
-    @Inject(at = @At("RETURN"), method = "<init>")
-    public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo info) {
-        if (model instanceof PlayerEntityModel<?>) {
-            FeatureRenderer<?,?> featureRenderer = new BeamWeaponFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this);
-            this.invokeAddFeature(featureRenderer);
-//        System.out.println((model.getClass().getName()));
-        }
-    }
+//    @Inject(at = @At("RETURN"), method = "<init>")
+//    public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo info) {
+//        if (model instanceof PlayerEntityModel<?>) {
+//            FeatureRenderer<?,?> featureRenderer = new BeamWeaponFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this);
+//            this.invokeAddFeature(featureRenderer);
+////        System.out.println((model.getClass().getName()));
+//        }
+//    }
 }
 
 @Mixin(BipedEntityModel.class)

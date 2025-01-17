@@ -1,23 +1,26 @@
 package kx.myfirstmod.rendering;
 
 import com.google.common.collect.Lists;
+import kx.myfirstmod.entities.BeamWeaponEntity;
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.misc.ScoreboardReader;
 import kx.myfirstmod.utils.BlockGlowRenderer;
+import kx.myfirstmod.utils.NormalDistribution;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BeaconBlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.ProjectileEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -33,104 +36,49 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
-    private static BeamWeaponFeatureRenderer<?,?> INSTANCE;
-//    private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0.5, -0.1, 0);
+public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntity> {
+    //    private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0.5, -0.1, 0);
     private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     private static final Vec3d FIRST_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
     public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
     public static final float INNER_BEAM_MIN_WIDTH = 0.01F;
 
-    public static void register() {
-        WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
-            // Call the BlockGlowRenderer to render the glow
-//            BlockGlowRenderer.render(context.matrixStack(), context.consumers(), context.tickDelta(), context.consumers());
-//            BlockGlowRenderer.renderEntityOutline(context);
-//            INSTANCE.firstPersonRender(context);
-        });
-    }
-
-    public BeamWeaponFeatureRenderer(FeatureRendererContext<T, M> context) {
+    public BeamWeaponProjectileRenderer(EntityRendererFactory.Context context) {
         super(context);
-        if (INSTANCE == null) {
-            INSTANCE = this;
-        }
-    }
-
-    public void firstPersonRender(WorldRenderContext context) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        PlayerEntity player = client.player;
-        if (player == null || (!client.options.getPerspective().isFirstPerson())) return;
-        if (!BeamWeapon.canShoot(player, player.getWorld())) return;
-        MatrixStack matrices = context.matrixStack();
-        float tickDelta = context.tickDelta();
-        VertexConsumerProvider vertexConsumers = context.consumers();
-
-//
-//        matrices = new MatrixStack();
-//        matrices.push();
-////        Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,0,1), getRotationVector(player.getPitch() * 0, player.getYaw(tickDelta)).toVector3f());
-//        Quaternionf yawQuat = new Quaternionf().rotateY((float) Math.toRadians(player.getYaw(tickDelta)));
-//        Quaternionf pitchQuat = new Quaternionf().rotateY((float) Math.toRadians(player.getPitch(tickDelta)));
-//        matrices.multiply(yawQuat, 0,0,0);
-//        matrices.multiply(pitchQuat, 0,0,0);
-//        render(matrices, vertexConsumers, 0xF000F0, (T) player, 0, 0, tickDelta, 0, 0, 0);
-//        matrices.pop();
-
-        matrices = new MatrixStack();
-        matrices.push();
-
-        Vec3d offset = calcOffset(player, tickDelta, true);
-        matrices.translate(offset.x, offset.y, offset.z);
-//        matrices.translate(0.35 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  -0.5, -0.5);
-
-        matrices.multiply(
-                new Quaternionf().rotateLocalX((float) Math.toRadians(-90F)),
-                0,0,0
-        );
-
-        renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
-
-        matrices.pop();
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, T entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-// Check if the player is holding an item
-        if (!(entity instanceof PlayerEntity)) return;
-        MinecraftClient client = MinecraftClient.getInstance();
-        PlayerEntity player = (PlayerEntity) entity;
-        if (!BeamWeapon.canShoot(player, player.getWorld())) return;
-
-        ItemStack stack = player.getStackInHand(Hand.MAIN_HAND);
-        if (stack.getItem() == ModItems.BEAM_WEAPON) {
-            matrices.push();
-            float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-            Vec3d offset = calcOffset(player, tickDelta, false);
-            matrices.translate(-offset.x, -offset.y, -offset.z);
-//            matrices.translate(-0.4 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  0.6, -0.2);
-            float pitchOffset = (float) ScoreboardReader.getPlayerScore(player.getWorld(), "pitch", "look_offsets") / 100;
-            float yawOffset = (float) ScoreboardReader.getPlayerScore(player.getWorld(), "yaw", "look_offsets") / 100;
-
-            Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch() + pitchOffset, smoothed_body_yaw - player.getYaw(tickDelta) + yawOffset).toVector3f());
-            matrices.multiply(quat, 0, 0, 0);
-            renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
-            matrices.pop();
-        }
+    public boolean shouldRender(BeamWeaponEntity entity, Frustum frustum, double x, double y, double z) {
+//        super.shouldRender(entity, frustum, x, y, z);
+        return true;
     }
 
-    private static void renderBeamHelper(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, PlayerEntity player) {
-        long l = player.getWorld().getTime();
+    @Override
+    public Identifier getTexture(BeamWeaponEntity entity) {
+        return BEAM_TEXTURE;
+    }
+
+    @Override
+    public void render(BeamWeaponEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+        matrices.push();
+        Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), entity.getVelocity().multiply(-1).toVector3f());
+        matrices.multiply(quat, 0, 0, 0);
+        renderBeamHelper(matrices, vertexConsumers, tickDelta, entity);
+        matrices.pop();
+    }
+
+    private static void renderBeamHelper(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, BeamWeaponEntity entity) {
+        long l = entity.getEntityWorld().getTime();
         List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
         float[] color = new float[]{1,0,0};
         for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
-//        float beamWidthModifier = (BeamWeapon.getShootTicksLeft(player, player.getWorld()) - tickDelta) / BeamWeapon.DAMAGE_TICKS;
-//        beamWidthModifier = beamWidthModifier * beamWidthModifier;
-        float beamWidthModifier = 1;
+        float beamWidthModifier = (entity.LIVING_TICKS - entity.age - tickDelta) / entity.LIVING_TICKS;
+
+        if (beamWidthModifier - NormalDistribution.nextValue(0, 0.3) < 0) return;
 
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
