@@ -42,7 +42,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
     private static final Vec3d FIRST_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
     public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
-    public static final float INNER_BEAM_MIN_WIDTH = 0.01F;
+    public static final float INNER_BEAM_MIN_WIDTH = 0.005F;
 
     public BeamWeaponProjectileRenderer(EntityRendererFactory.Context context) {
         super(context);
@@ -76,30 +76,33 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
-        float beamWidthModifier = (entity.LIVING_TICKS - entity.age - tickDelta) / entity.LIVING_TICKS;
+        float beamWidthModifier = Math.min(Math.max((entity.LIVING_TICKS - entity.age - tickDelta), 0) * 2 / entity.LIVING_TICKS, 1);
 
-        if (beamWidthModifier - NormalDistribution.nextValue(0, 0.3) < 0) return;
+//        if (beamWidthModifier - NormalDistribution.nextValue(0, 0.3) < 0) return;
 
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
 //            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
             BeaconBlockEntity.BeamSegment segment = list.get(i);
-            float radius = MathHelper.lerp((float) i / list.size(), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH) * beamWidthModifier;
-            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius, radius + 0.05F);
+            // taper the beam down
+            float end = list.size();
+            float radius = MathHelper.lerp(Math.min(i / end, 1), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH) * beamWidthModifier;
+            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius, INNER_BEAM_MAX_WIDTH * (1.1F - beamWidthModifier * 0.1F), 0.25F * beamWidthModifier);
             k += segment.getHeight();
         }
     }
 
-    private static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, long worldTime, int yOffset, int maxY, float[] color) {
-        renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, worldTime, yOffset, maxY, color, 0.2F, 0.25F);
+    private static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, long worldTime, int yOffset, int maxY, float[] color, float alpha) {
+        renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, worldTime, yOffset, maxY, color, 0.2F, 0.25F, alpha);
     }
 
-    public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, int maxY, float[] color, float innerRadius, float outerRadius) {
+    public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, int maxY, float[] color, float innerRadius, float outerRadius, float alpha) {
         int i = yOffset + maxY;
         matrices.push();
 
 //        matrices.translate((double)0.5F, (double)0.0F, (double)0.5F);
         float f = (float)Math.floorMod(worldTime, 40) + tickDelta;
+        f *= 2;
         float g = maxY < 0 ? f : -f;
         float h = MathHelper.fractionalPart(g * 0.2F - (float)MathHelper.floor(g * 0.1F));
         float j = color[0];
@@ -118,7 +121,6 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         float w = -1.0F + h;
         float x = (float)maxY * heightScale * (0.5F / innerRadius) + w;
         renderBeamLayer(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, false)), j, k, l, 1.0F, yOffset, i, 0.0F, innerRadius, innerRadius, 0.0F, q, 0.0F, 0.0F, t, 0.0F, 1.0F, x, w);
-        matrices.pop();
         m = -outerRadius;
         float n = -outerRadius;
         p = -outerRadius;
@@ -127,7 +129,9 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         v = 1.0F;
         w = -1.0F + h;
         x = (float)maxY * heightScale + w;
-        renderBeamLayer(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), j, k, l, 0.125F, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F));
+        renderBeamLayer(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), j, k, l, alpha, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
+        matrices.pop();
         matrices.pop();
     }
 

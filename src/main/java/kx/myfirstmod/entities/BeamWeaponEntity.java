@@ -49,14 +49,14 @@ public class BeamWeaponEntity extends ProjectileEntity {
     public void tick() {
         super.tick();
         if (this.getWorld().isClient) {
-            if (this.age == 1) {
-                Vec3d startPos = this.getPos();
-                Vec3d dir = this.getVelocity();
-                Vec3d endPos = this.getPos().add(dir.multiply(BeamWeapon.BEAM_RANGE));
-                ParticleUtils.lerpSpawn(this.getWorld(), ParticleTypes.REVERSE_PORTAL,
-                        startPos, endPos, dir.multiply(0.0005), 0.325, 0
-                );
-            }
+//            if (this.age == 1) {
+//                Vec3d startPos = this.getPos();
+//                Vec3d dir = this.getVelocity();
+//                Vec3d endPos = this.getPos().add(dir.multiply(BeamWeapon.BEAM_RANGE));
+//                ParticleUtils.lerpSpawn(this.getWorld(), ParticleTypes.REVERSE_PORTAL,
+//                        startPos, endPos, dir.multiply(0.0005), 0.325, 0
+//                );
+//            }
         }
         else {
             if (this.age > LIVING_TICKS) this.discard();

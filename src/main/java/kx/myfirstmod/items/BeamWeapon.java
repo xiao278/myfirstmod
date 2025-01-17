@@ -41,9 +41,9 @@ import java.util.Set;
 public class BeamWeapon extends Item {
     public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
-    private static final float BASE_DAMAGE = 25F;
+    private static final float BASE_DAMAGE = 20F;
     private static final int CHARGE_TICKS = 100;
-    public static final int DAMAGE_TICKS = 5;
+    public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
     private static final String CHARGED_KEY = "BeamWeaponCharged";
