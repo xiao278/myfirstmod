@@ -3,6 +3,7 @@ package kx.myfirstmod;
 import kx.myfirstmod.entities.*;
 import kx.myfirstmod.items.*;
 import kx.myfirstmod.rendering.BeamWeaponFeatureRenderer;
+import kx.myfirstmod.rendering.BeamWeaponProjectileRenderer;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EffectGemColorTint;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
@@ -76,6 +77,7 @@ public class MyFirstModClient implements ClientModInitializer {
 
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.EFFECT_GEM_PROJECTILE_ENTITY, EffectGemProjectileEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.BEAM_WEAPON_ENTITY, BeamWeaponProjectileRenderer::new);
 //        LivingEntityFeatureRendererRegistrationCallback.EVENT.register((a,b,c,d) -> {
 //            if (b instanceof ) {
 //

@@ -40,4 +40,14 @@ public class ModEntityTypes {
                     .trackedUpdateRate(1)
                     .build()
     );
+
+    public static final EntityType<BeamWeaponEntity> BEAM_WEAPON_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier("myfirstmod", "beam_weapon_projectile_entity"),
+            FabricEntityTypeBuilder.<BeamWeaponEntity>create(SpawnGroup.MISC, BeamWeaponEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.0F,0.0F))
+                    .trackRangeChunks(8)
+                    .trackedUpdateRate(1)
+                    .build()
+    );
 }
