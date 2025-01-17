@@ -125,6 +125,7 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
         }
 
         float beamWidthModifier = (BeamWeapon.getShootTicksLeft(player, player.getWorld()) - tickDelta) / BeamWeapon.DAMAGE_TICKS;
+        beamWidthModifier = beamWidthModifier * beamWidthModifier;
 
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
