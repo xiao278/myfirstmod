@@ -23,11 +23,12 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class GuardianLaser extends Item {
-    private static final int range = 72;
+    private static final int range = 64;
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private static final int LASER_SOUND_COOLDOWN_TICKS = 0;
     private static final int QUICK_CHARGE_REDUCTION = 15;
+    public static final float MAX_ANGLE = 6;
     private int sound_cooldown_remaining = 0;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -40,7 +41,9 @@ public class GuardianLaser extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
 
-        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 30);
+        if (hand == Hand.OFF_HAND && user.getStackInHand(Hand.MAIN_HAND).getItem() == ModItems.GUARDIAN_LASER) return TypedActionResult.fail(user.getStackInHand(hand));
+
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, MAX_ANGLE);
         GuardianLaserEntity hook = getHook(user.getStackInHand(hand), world);
         if (target != null && (hook == null || hook.isRemoved())) {
 //            user.getStackInHand(Hand.OFF_HAND).onStoppedUsing(world, user, 0);

@@ -43,7 +43,7 @@ public class BeamWeapon extends Item {
     public static final boolean DEBUG_MODE = false;
     public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
-    private static final float BASE_DAMAGE = 20F;
+    private static final float BASE_DAMAGE = 25F;
     private static final int CHARGE_TICKS = 100;
     public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
@@ -228,7 +228,7 @@ public class BeamWeapon extends Item {
     }
 
     private static float getDamage(ItemStack stack) {
-        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / 3.0F);
+        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / 4.0F);
     }
 
     private static float getTickDamage(ItemStack stack) {
