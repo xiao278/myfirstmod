@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeaponEntity extends ProjectileEntity {
-    public final int LIVING_TICKS = 10;
+    public final int LIVING_TICKS = BeamWeapon.DEBUG_MODE ? 100 : 10;
 
     public BeamWeaponEntity(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);

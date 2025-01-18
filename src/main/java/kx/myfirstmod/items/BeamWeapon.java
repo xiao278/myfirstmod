@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeapon extends Item {
-    public static final double BEAM_RANGE = 64;
+    public static final boolean DEBUG_MODE = false;
+    public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
     private static final float BASE_DAMAGE = 20F;
     private static final int CHARGE_TICKS = 100;
@@ -84,7 +85,7 @@ public class BeamWeapon extends Item {
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
                 world.spawnEntity(new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, user.getPitch(), user.getYaw(), getShootOrigin(user, Hand.MAIN_HAND)));
-//                storeIsCharged(stack,false);
+                if (!DEBUG_MODE) storeIsCharged(stack,false);
                 shoot(world, user, hand);
                 return TypedActionResult.consume(stack);
             }
