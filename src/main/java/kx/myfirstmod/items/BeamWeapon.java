@@ -81,7 +81,9 @@ public class BeamWeapon extends Item {
             }
             else {
                 // fire
-                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 3F, 1);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 3F, 0.5F);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 3F, 1F);
+
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 0.5F);
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
