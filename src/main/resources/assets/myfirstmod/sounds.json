@@ -3,5 +3,10 @@
     "sounds": [
       "myfirstmod:guardian_attack_loop_custom"
     ]
+  },
+  "weapon_beam_fire": {
+    "sounds": [
+      "myfirstmod:weapon_beam_fire"
+    ]
   }
 }

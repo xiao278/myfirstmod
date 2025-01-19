@@ -5,8 +5,10 @@ import kx.myfirstmod.entities.BeamWeaponEntity;
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.misc.ScoreboardReader;
+import kx.myfirstmod.utils.BinomialDistribution;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.NormalDistribution;
+import kx.myfirstmod.utils.PerlinNoise;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BeaconBlockEntity;
@@ -77,8 +79,9 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         }
 
         float beamWidthModifier = Math.max((entity.LIVING_TICKS - entity.age - tickDelta), 0) / entity.LIVING_TICKS;
-        float beamWidthModifierInner = Math.min(beamWidthModifier * 2, 1);
         float beamWidthModifierOuter = (float) Math.log(50 - 49 * beamWidthModifier);
+        float beamWidthModifierInner = Math.min(beamWidthModifier * 3, 2) / 2;
+
 //        if (beamWidthModifier - NormalDistribution.nextValue(0, 0.3) < 0) return;
 
         int k = 0;
@@ -86,9 +89,11 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
 //            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
             BeaconBlockEntity.BeamSegment segment = list.get(i);
             // taper the beam down
+            float noise = (float) (PerlinNoise.noise1DPositive(i, 1) * 0.15);
             float end = list.size();
             float radius = MathHelper.lerp(Math.min(i / end, 1), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH);
-            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius * beamWidthModifierInner, (float) INNER_BEAM_MAX_WIDTH * beamWidthModifierOuter, 0.25F * beamWidthModifier);
+            if (beamWidthModifierInner - noise < 0) radius = 0;
+            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius * beamWidthModifierInner, INNER_BEAM_MAX_WIDTH * beamWidthModifierOuter, 0.25F * beamWidthModifier);
             k += segment.getHeight();
         }
     }
@@ -168,10 +173,13 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x3, z3, x1, z1, u1, u2, v1, v2);
         // render far end of beam
         renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, height, x1, z1, x2, z2, x4, z4, x3, z3, u1, v1, u2, v2);
-        if (height <= height - yOffset) {
-            //render close end of beam
-            renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
-        }
+        //render close end of beam
+        renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
+//
+//        if (height <= height - yOffset) {
+//            //render close end of beam
+//            renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
+//        }
     }
 
     private static void renderBeamLayerOuter(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
