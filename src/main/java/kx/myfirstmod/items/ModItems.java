@@ -21,7 +21,7 @@ public class ModItems {
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((itemGroup) -> {
             ItemStack creativeGem = new ItemStack(ModItems.EFFECT_GEM);
-            ((EffectGem) ModItems.EFFECT_GEM).storeIsCreative(creativeGem, true);
+            EffectGem.storeIsCreative(creativeGem, true);
             itemGroup.add(creativeGem);
         });
     }

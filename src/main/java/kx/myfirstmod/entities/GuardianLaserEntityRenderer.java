@@ -1,5 +1,6 @@
 package kx.myfirstmod.entities;
 
+import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.EntityDetector;
 import net.minecraft.client.render.*;
@@ -66,15 +67,14 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
 //        System.out.printf("GLEntity: %s\n, Target: %s\n", GLEntity, GLEntity.getBeamTarget());
         LivingEntity target = GLEntity.getBeamTarget();
         PlayerEntity owner = GLEntity.getOwner();
-        boolean posChanged = prevPos.equals(GLEntity.getPos());
-        if (target != null && owner != null && !posChanged) {
+        if (target != null && owner != null) {
             float h = GLEntity.getBeamProgress(g);
-            float j = GLEntity.getBeamTicks() + g;
+            float j = (GLEntity.getBeamTicks() + g) * (80 / (float) GuardianLaser.getMaxWarmupTime());
             float k = j * 0.5F % 1.0F;
 //            Vec3d l = owner.getBoundingBox().getCenter().subtract(owner.getPos());
             Vec3d l = new Vec3d(0.0, 0.8999999761581421 * 0, 0.0);
             matrixStack.push();
-            Vec3d negGLPos = GLEntity.getPos().multiply(-1);
+            Vec3d negGLPos = GLEntity.getLerpedPos(g).multiply(-1);
             matrixStack.translate(negGLPos.x, negGLPos.y, negGLPos.z);
 
             Vec3d vec3d2 = this.fromLerpedPosition(target, (double) target.getHeight() * (double) 0.5F, g);
@@ -140,7 +140,6 @@ public class GuardianLaserEntityRenderer extends EntityRenderer<GuardianLaserEnt
             vertex(vertexConsumer, matrix4f, matrix3f, ab, m, ac, s, t, u, 0.5F, as);
             matrixStack.pop();
         }
-        if (posChanged) prevPos = GLEntity.getPos();
     }
 
     private static void vertex(VertexConsumer vertexConsumer, Matrix4f positionMatrix, Matrix3f normalMatrix, float x, float y, float z, int red, int green, int blue, float u, float v) {

@@ -7,6 +7,8 @@ import net.minecraft.registry.Registry;
 
 public class ModSounds {
     public static final SoundEvent GUARDIAN_LASER_CHARGE_SOUND = registerSound("guardian_attack_loop_custom");
+    public static final SoundEvent WEAPON_BEAM_FIRE = registerSound("weapon_beam_fire");
+
 
     private static SoundEvent registerSound(String name) {
         Identifier id = new Identifier(MyFirstMod.MOD_ID, name);

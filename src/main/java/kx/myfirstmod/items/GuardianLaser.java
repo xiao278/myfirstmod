@@ -23,10 +23,12 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class GuardianLaser extends Item {
-    private static final int range = 128;
+    private static final int range = 64;
     private static final float base_damage = 16;
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private static final int LASER_SOUND_COOLDOWN_TICKS = 0;
+    private static final int QUICK_CHARGE_REDUCTION = 15;
+    public static final float MAX_ANGLE = 6;
     private int sound_cooldown_remaining = 0;
     public GuardianLaser(Settings settings) {
         super(settings);
@@ -39,7 +41,9 @@ public class GuardianLaser extends Item {
             return TypedActionResult.pass(user.getStackInHand(hand));
         }
 
-        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, 30);
+        if (hand == Hand.OFF_HAND && user.getStackInHand(Hand.MAIN_HAND).getItem() == ModItems.GUARDIAN_LASER) return TypedActionResult.fail(user.getStackInHand(hand));
+
+        LivingEntity target = EntityDetector.findClosestCrosshairEntity(world, user, range, MAX_ANGLE);
         GuardianLaserEntity hook = getHook(user.getStackInHand(hand), world);
         if (target != null && (hook == null || hook.isRemoved())) {
 //            user.getStackInHand(Hand.OFF_HAND).onStoppedUsing(world, user, 0);
@@ -91,21 +95,20 @@ public class GuardianLaser extends Item {
         } else {
             if (hook != null && (hook.hasBeamTarget() && hook.isAlive() && !hook.isRemoved())) {
                 if (hook.getBeamTicks() >= hook.getWarmupTime()) {
-                    float volume = 0.1F;
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1F);
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 2F);
-                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 3F);
+                    float volume = 0.15F;
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 0.75F);
+                    user.playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, volume, 1.5F);
                 }
             }
         }
     }
 
     public static int getMaxWarmupTime() {
-        return 80;
+        return 60;
     }
 
     public int getWarmupTime(ItemStack stack) {
-        return getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * 20;
+        return Math.max(getMaxWarmupTime() - EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack) * QUICK_CHARGE_REDUCTION, 0);
     }
 
     public float getDamage(ItemStack stack) {
@@ -129,12 +132,17 @@ public class GuardianLaser extends Item {
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.literal(this.getDamage(stack) + " Attack Damage").formatted(Formatting.DARK_GREEN));
-        tooltip.add(Text.literal(this.getWarmupTime(stack)/20 + "s Charge Time" ).formatted(Formatting.DARK_GREEN));
+        tooltip.add(Text.literal((float) this.getWarmupTime(stack) / 20 + "s Charge Time" ).formatted(Formatting.DARK_GREEN));
     }
 
     public GuardianLaserEntity getHook(ItemStack stack, World world) {
         if (!stack.hasNbt() || stack.getNbt() == null || !stack.getNbt().contains("LaserHook")) return null;
-        return (GuardianLaserEntity) world.getEntityById(stack.getNbt().getInt("LaserHook"));
+        Entity e = world.getEntityById(stack.getNbt().getInt("LaserHook"));
+        if (e instanceof GuardianLaserEntity) return (GuardianLaserEntity) e;
+        else {
+            removeHook(stack);
+            return null;
+        }
     }
 
     private void setHook(ItemStack stack, GuardianLaserEntity entity) {

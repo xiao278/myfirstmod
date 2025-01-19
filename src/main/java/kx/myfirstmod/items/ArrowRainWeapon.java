@@ -4,12 +4,15 @@ import kx.myfirstmod.entities.ArrowRainEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.utils.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.enchantment.PowerEnchantment;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -28,7 +31,7 @@ public class ArrowRainWeapon extends BowItem {
         super(settings);
     }
     public static final int MAX_PULL_TICKS = 20;
-    public static final double range = 100;
+    public static final double range = 72;
     public static final double angle = 6;
     public static final int projectile_count = 16;
     private static final String BLOCK_POS_KEY = "StoredArrowRainAimBlockPos";
@@ -40,6 +43,18 @@ public class ArrowRainWeapon extends BowItem {
         }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(user.getStackInHand(hand));
+    }
+
+    private static void setArrowDamage(ArrowRainEntity arrow, ItemStack stack) {
+        int power_level = EnchantmentHelper.getLevel(Enchantments.POWER, stack);
+        if (power_level > 0) {
+            arrow.setDamage(arrow.getDamage() * (1 + power_level / 2.0F));
+        }
+    }
+
+    private static int getShootCount(ItemStack stack) {
+        int multishot_level = EnchantmentHelper.getLevel(Enchantments.MULTISHOT, stack);
+        return projectile_count * (multishot_level == 1 ? 2 : 1);
     }
 
     @Override
@@ -80,7 +95,7 @@ public class ArrowRainWeapon extends BowItem {
                 BlockPos block = BlockDetector.getBlockLookingAt(world, (PlayerEntity) user, range);
                 ServerWorld sw = (ServerWorld) world;
                 if (target != null) {
-                    spawnArrows(world, target, (PlayerEntity) user);
+                    spawnArrows(world, target, (PlayerEntity) user, stack);
                     shootParticles(sw, user);
                     playShootSound(world, (PlayerEntity) user);
                     return;
@@ -91,7 +106,7 @@ public class ArrowRainWeapon extends BowItem {
                 }
                 playShootSound(world, (PlayerEntity) user);
                 shootParticles(sw, user);
-                spawnArrows(world, block, (PlayerEntity) user);
+                spawnArrows(world, block, (PlayerEntity) user, stack);
             }
         }
     }
@@ -102,17 +117,19 @@ public class ArrowRainWeapon extends BowItem {
         return new Vec3d(pos.getX() + x_variance, pos.y + 256, pos.getZ() + z_variance);
     }
 
-    private void spawnArrows(World world, BlockPos bPos, PlayerEntity user) {
+    private void spawnArrows(World world, BlockPos bPos, PlayerEntity user, ItemStack stack) {
         Random random = world.getRandom();
-        for (int i = 0; i < projectile_count; i++) {
+        for (int i = 0; i < getShootCount(stack); i++) {
             TaskScheduler.schedule(() -> {
-                world.spawnEntity(new ArrowRainEntity(
+                ArrowRainEntity arrow = new ArrowRainEntity(
                         ModEntityTypes.ARROW_RAIN_ENTITY,
                         world,
                         user,
                         getSpawnCoords(random, bPos.toCenterPos(), user),
                         bPos
-                ));
+                );
+                setArrowDamage(arrow, stack);
+                world.spawnEntity(arrow);
             }, i + 1);
         }
     }
@@ -144,17 +161,19 @@ public class ArrowRainWeapon extends BowItem {
         }
     }
 
-    private void spawnArrows(World world, LivingEntity target, PlayerEntity user) {
+    private void spawnArrows(World world, LivingEntity target, PlayerEntity user, ItemStack stack) {
         Random random = world.getRandom();
-        for (int i = 0; i < projectile_count; i++) {
+        for (int i = 0; i < getShootCount(stack); i++) {
             TaskScheduler.schedule(() -> {
-                world.spawnEntity(new ArrowRainEntity(
+                ArrowRainEntity arrow = new ArrowRainEntity(
                         ModEntityTypes.ARROW_RAIN_ENTITY,
                         world,
                         user,
                         getSpawnCoords(random, target.getPos(), user),
                         target
-                ));
+                );
+                setArrowDamage(arrow, stack);
+                world.spawnEntity(arrow);
             }, i + 1);
         }
     }

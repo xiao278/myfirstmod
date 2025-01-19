@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class EffectGemProjectileEntity extends PotionEntity {
-    private static final int MAX_TICK_AGE = 40;
+    private static final int MAX_TICK_AGE = 56;
     private static final double PARTICLE_SPACING = 0.5;
     private boolean reachedMaxSpeed = false;
     private double maxSpeed = 5;

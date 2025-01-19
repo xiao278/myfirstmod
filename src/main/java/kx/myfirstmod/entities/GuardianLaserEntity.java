@@ -141,12 +141,13 @@ public class GuardianLaserEntity extends ProjectileEntity {
                     this.stopUsing();
                 }
                 // follow caster around
-                if (getOwner().getPos().distanceTo(this.getPos()) > 8) {
-                    this.setPosition(getOwner().getPos());
-                    this.setVelocity(new Vec3d(0,0,0));
-                }
+//                if (getOwner().getPos().distanceTo(this.getPos()) > 8) {
+//                    this.setPosition(getOwner().getPos());
+//                    this.setVelocity(new Vec3d(0,0,0));
+//                }
+                this.setPosition(getOwner().getPos());
                 // check if caster has a clear Line of Sight
-                if (!EntityDetector.isLineOfSightClear(world, player, target)) {
+                if (!EntityDetector.isLineOfSightClear(world, player, target) || (EntityDetector.getLookAngle(world, player, target) > GuardianLaser.MAX_ANGLE) && !EntityDetector.isLookingAt(player, target)) {
                     player.stopUsingItem();
                 }
             }

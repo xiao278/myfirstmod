@@ -1,9 +1,6 @@
 package kx.myfirstmod.mixin;
 
-import kx.myfirstmod.items.BeamWeapon;
-import kx.myfirstmod.items.EvokerStaff;
-import kx.myfirstmod.items.GuardianLaser;
-import kx.myfirstmod.items.LightningStick;
+import kx.myfirstmod.items.*;
 import net.minecraft.enchantment.*;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -69,6 +66,17 @@ public abstract class EnchantmentTargetMixin {
         Enchantment self = (Enchantment) (Object) this;
         if (stack.getItem() instanceof BeamWeapon &&
                 (self instanceof PowerEnchantment || self instanceof PiercingEnchantment)
+        ) {
+            cir.setReturnValue(true); // Allow the enchantment
+        }
+    }
+
+    @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true)
+    private void injectArrowRainWeaponEnchantments(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        // have guardian laser accept enchantmnet
+        Enchantment self = (Enchantment) (Object) this;
+        if (stack.getItem() instanceof ArrowRainWeapon &&
+                (self instanceof PowerEnchantment || self instanceof MultishotEnchantment)
         ) {
             cir.setReturnValue(true); // Allow the enchantment
         }

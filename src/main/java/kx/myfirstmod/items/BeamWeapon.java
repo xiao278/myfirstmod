@@ -1,5 +1,6 @@
 package kx.myfirstmod.items;
 
+import kx.myfirstmod.ModSounds;
 import kx.myfirstmod.entities.BeamWeaponEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
@@ -26,6 +27,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -39,9 +41,10 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeapon extends Item {
+    public static final boolean DEBUG_MODE = false;
     public static final double BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
-    private static final float BASE_DAMAGE = 20F;
+    private static final float BASE_DAMAGE = 25F;
     private static final int CHARGE_TICKS = 100;
     public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
@@ -72,17 +75,20 @@ public class BeamWeapon extends Item {
             if (hand != Hand.MAIN_HAND) return TypedActionResult.fail(stack);
             if (!getIsCharged(stack)) {
                 // charge
+//                user.disableShield();
                 user.setCurrentHand(hand);
                 return TypedActionResult.consume(stack);
             }
             else {
                 // fire
-                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 2.0F, 0.5F);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 3F, 0.5F);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 3F, 1F);
+
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 0.5F);
 //                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
                 world.spawnEntity(new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, user.getPitch(), user.getYaw(), getShootOrigin(user, Hand.MAIN_HAND)));
-//                storeIsCharged(stack,false);
+                if (!DEBUG_MODE) storeIsCharged(stack,false);
                 shoot(world, user, hand);
                 return TypedActionResult.consume(stack);
             }
@@ -112,6 +118,12 @@ public class BeamWeapon extends Item {
     @Override
     public int getMaxUseTime(ItemStack stack) {
         return 72000;
+    }
+
+    public static long getShootTicksLeft(LivingEntity livingEntity, World world) {
+        ItemStack stack = livingEntity.getStackInHand(Hand.MAIN_HAND);
+        long shootTime = timeSinceFirstShot(stack, world);
+        return Math.max(DAMAGE_TICKS - shootTime, 0);
     }
 
     public static boolean canShoot(ItemStack stack, World world) {
@@ -160,10 +172,12 @@ public class BeamWeapon extends Item {
             RegistryEntry<DamageType> dtypeNonPierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
             RegistryEntry<DamageType> dtypePierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
             for (LivingEntity e : hitEntities) {
+                Vec3d prev_vel = e.getVelocity();
                 e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), getTickDamage(stack) * (1 - getMagicDamageProportion(stack)));
                 e.timeUntilRegen = 0;
                 e.damage(new GuardianLaserDamageSource(dtypePierce, user), getTickDamage(stack) * getMagicDamageProportion(stack));
                 e.timeUntilRegen = 0;
+                e.setVelocity(prev_vel);
             }
         }
     }
@@ -217,7 +231,7 @@ public class BeamWeapon extends Item {
     }
 
     private static float getDamage(ItemStack stack) {
-        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack));
+        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / 4.0F);
     }
 
     private static float getTickDamage(ItemStack stack) {
@@ -231,7 +245,9 @@ public class BeamWeapon extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        tooltip.add(Text.literal("When in Main Hand").formatted(Formatting.GRAY));
+        tooltip.add(Text.literal(" " + String.format("%.1f", getDamage(stack)) + " Attack Damage").formatted(Formatting.DARK_GREEN));
+        tooltip.add(Text.literal(" " + (int) (getMagicDamageProportion(stack) * 100) + "% Armor Ignore" ).formatted(Formatting.DARK_GREEN));
         super.appendTooltip(stack, world, tooltip, context);
-
     }
 }

@@ -2,6 +2,7 @@ package kx.myfirstmod.entities;
 
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
+import kx.myfirstmod.utils.BlockDetector;
 import kx.myfirstmod.utils.ParticleUtils;
 import net.minecraft.client.util.ParticleUtil;
 import net.minecraft.entity.Entity;
@@ -18,6 +19,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -28,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeaponEntity extends ProjectileEntity {
-    public final int LIVING_TICKS = 10;
+    public final int LIVING_TICKS = BeamWeapon.DEBUG_MODE ? 100 : 18;
 
     public BeamWeaponEntity(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
@@ -57,6 +59,16 @@ public class BeamWeaponEntity extends ProjectileEntity {
 //                        startPos, endPos, dir.multiply(0.0005), 0.325, 0
 //                );
 //            }
+            if (this.age == 1) {
+//                List<BlockPos> blocks = BlockDetector.getAllIntersectedBlocks(this.getPos(), this.getVelocity(), BeamWeapon.BEAM_RANGE, this.getWorld());
+//                for (BlockPos block: blocks) {
+//                    Vec3d pos = block.toCenterPos();
+//                    this.getWorld().addParticle(ParticleTypes.FLAME,
+//                            pos.x, pos.y, pos.z,
+//                            0,0,0
+//                    );
+//                }
+            }
         }
         else {
             if (this.age > LIVING_TICKS) this.discard();
