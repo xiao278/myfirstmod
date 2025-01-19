@@ -4,9 +4,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
+import net.minecraft.world.World;
 
 public class ScoreboardReader {
-    public static int getPlayerScore(ServerWorld world, String playerName, String objectiveName) {
+    public static int getPlayerScore(World world, String playerName, String objectiveName) {
         // Get the scoreboard from the world
         Scoreboard scoreboard = world.getScoreboard();
 

@@ -48,8 +48,10 @@ public class EntityDetector {
 
         List<Entity> potentialTargets = world.getOtherEntities(source, searchBox, entity -> (entity instanceof PlayerEntity || entity instanceof MobEntity));
 
-        LivingEntity target = null;
-        double minCriteria = Float.POSITIVE_INFINITY;
+        LivingEntity minAngletarget = null;
+        LivingEntity closestLookedAtTarget = null;
+        double minAngle = Float.POSITIVE_INFINITY;
+        double closestLookedAt = Float.POSITIVE_INFINITY;
         for (Entity e: potentialTargets) {
             if (checkVisibility) {
                 if (!isLineOfSightClear(world, source, e)) {
@@ -57,19 +59,47 @@ public class EntityDetector {
                 }
             }
             if (e.isAlive() && e.isLiving()) {
-                double criteria = EntityDetector.getLookAngle(world, source, e);
-                if (criteria < minCriteria && e instanceof LivingEntity && e.distanceTo(source) < range && criteria < maxAngle) {
-                    target = (LivingEntity) e;
-                    minCriteria = criteria;
+                double angle = EntityDetector.getLookAngle(world, source, e);
+                if (angle < minAngle && e instanceof LivingEntity && e.distanceTo(source) < range && angle < maxAngle) {
+                    minAngletarget = (LivingEntity) e;
+                    minAngle = angle;
+                }
+                if (isLookingAt(source, e)) {
+                    double dist = e.getPos().distanceTo(source.getPos());
+                    if (dist < closestLookedAt) {
+                        closestLookedAt = dist;
+                        closestLookedAtTarget = (LivingEntity) e;
+                    }
                 }
             }
         }
 
-        return target;
+        if (closestLookedAtTarget != null) return closestLookedAtTarget;
+        else return minAngletarget;
     }
 
     public static LivingEntity findClosestCrosshairEntity(World world, Entity source, double range, double maxAngle) {
         return findClosestCrosshairEntity(world, source, range, maxAngle, false);
+    }
+
+    public static boolean isLookingAt_old_version(World world, Entity source, Entity target) {
+        Vec3d sourceEyePos = source.getEyePos();
+        Vec3d lookDir = source.getRotationVector();
+        double distToTarget = sourceEyePos.distanceTo(target.getEyePos());
+        Vec3d boxCenterPos = sourceEyePos.add(lookDir.multiply(distToTarget));
+        double boxSize = 1;
+        Box box = new Box(boxCenterPos.subtract(boxSize / 2,boxSize / 2,boxSize / 2),
+                boxCenterPos.add(boxSize / 2,boxSize / 2,boxSize / 2)
+        );
+        return box.intersects(target.getBoundingBox());
+    }
+
+    public static boolean isLookingAt(Entity source, Entity target) {
+        Vec3d origin = source.getEyePos();
+        Vec3d dir = source.getRotationVector();
+        Box box = target.getBoundingBox();
+        // r.dir is unit direction vector of ray
+        return BoundingBox.rayIntersection(box, dir, origin).intersectsBox;
     }
 
     public static Vec3d getCenterOffset(Entity e) {

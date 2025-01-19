@@ -3,6 +3,7 @@ package kx.myfirstmod.rendering;
 import com.google.common.collect.Lists;
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.items.ModItems;
+import kx.myfirstmod.misc.ScoreboardReader;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -46,7 +47,7 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
             // Call the BlockGlowRenderer to render the glow
 //            BlockGlowRenderer.render(context.matrixStack(), context.consumers(), context.tickDelta(), context.consumers());
 //            BlockGlowRenderer.renderEntityOutline(context);
-            INSTANCE.firstPersonRender(context);
+//            INSTANCE.firstPersonRender(context);
         });
     }
 
@@ -109,7 +110,10 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
             Vec3d offset = calcOffset(player, tickDelta, false);
             matrices.translate(-offset.x, -offset.y, -offset.z);
 //            matrices.translate(-0.4 * (player.getActiveHand() == Hand.MAIN_HAND ? 1 : -1),  0.6, -0.2);
-            Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch() + 0.5F, smoothed_body_yaw - player.getYaw(tickDelta) - 0.5F).toVector3f());
+            float pitchOffset = (float) ScoreboardReader.getPlayerScore(player.getWorld(), "pitch", "look_offsets") / 100;
+            float yawOffset = (float) ScoreboardReader.getPlayerScore(player.getWorld(), "yaw", "look_offsets") / 100;
+
+            Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), getRotationVector(player.getPitch() + pitchOffset, smoothed_body_yaw - player.getYaw(tickDelta) + yawOffset).toVector3f());
             matrices.multiply(quat, 0, 0, 0);
             renderBeamHelper(matrices, vertexConsumers, tickDelta, player);
             matrices.pop();
@@ -124,8 +128,9 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
-        float beamWidthModifier = (BeamWeapon.getShootTicksLeft(player, player.getWorld()) - tickDelta) / BeamWeapon.DAMAGE_TICKS;
-        beamWidthModifier = beamWidthModifier * beamWidthModifier;
+//        float beamWidthModifier = (BeamWeapon.getShootTicksLeft(player, player.getWorld()) - tickDelta) / BeamWeapon.DAMAGE_TICKS;
+//        beamWidthModifier = beamWidthModifier * beamWidthModifier;
+        float beamWidthModifier = 1;
 
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
