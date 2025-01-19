@@ -89,10 +89,10 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
 //            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
             BeaconBlockEntity.BeamSegment segment = list.get(i);
             // taper the beam down
-            float noise = (float) (PerlinNoise.noise1DPositive(i, 1) * 0.15);
+//            float noise = (float) (PerlinNoise.noise1DPositive(i, 1) * 0.06);
             float end = list.size();
             float radius = MathHelper.lerp(Math.min(i / end, 1), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH);
-            if (beamWidthModifierInner - noise < 0) radius = 0;
+//            if (beamWidthModifierInner - noise < 0) radius = 0;
             renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius * beamWidthModifierInner, INNER_BEAM_MAX_WIDTH * beamWidthModifierOuter, 0.25F * beamWidthModifier);
             k += segment.getHeight();
         }
