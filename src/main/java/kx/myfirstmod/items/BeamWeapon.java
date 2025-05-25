@@ -31,8 +31,11 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,10 +45,10 @@ import java.util.Set;
 
 public class BeamWeapon extends Item {
     public static final boolean DEBUG_MODE = false;
-    public static final double BEAM_RANGE = 32;
+    public static final float BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
     private static final float BASE_DAMAGE = 25F;
-    private static final int CHARGE_TICKS = 100;
+    private static final int CHARGE_TICKS = 80;
     public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
@@ -80,16 +83,18 @@ public class BeamWeapon extends Item {
                 return TypedActionResult.consume(stack);
             }
             else {
-                // fire
+                // fire sound
                 world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 3F, 0.5F);
                 world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 3F, 1F);
-
-//                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 0.5F);
-//                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 1.0F, 0.2F);
                 storeLastUsedTime(stack, world.getTime());
-                world.spawnEntity(new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, user.getPitch(), user.getYaw(), getShootOrigin(user, Hand.MAIN_HAND)));
+                Vec3d shootOrigin = getShootOrigin(user, Hand.MAIN_HAND);
+                Vec3d shootDir = user.getRotationVector();
+                float range = calcBeamLength(world, user, shootOrigin, shootDir);
+                BeamWeaponEntity projectile = new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, shootOrigin, shootDir, getDamage(stack), getMagicDamageProportion(stack), range);
+                projectile.setOwner(user);
+                world.spawnEntity((projectile));
+
                 if (!DEBUG_MODE) storeIsCharged(stack,false);
-                shoot(world, user, hand);
                 return TypedActionResult.consume(stack);
             }
         }
@@ -138,48 +143,6 @@ public class BeamWeapon extends Item {
 
     public static float getPullProgress(LivingEntity user, ItemStack stack) {
         return Math.min((float) ticksUsed(user, stack) / CHARGE_TICKS, 1);
-    }
-
-    public static void shoot(World world, PlayerEntity user, Hand hand) {
-        double lerp_progress = 0;
-        Vec3d origin = getShootOrigin(user, hand);
-        Vec3d dir = user.getRotationVector();
-        Set<LivingEntity> hitEntities = new HashSet<>();
-        while (lerp_progress < BEAM_RANGE) {
-            Vec3d lerp_pos = origin.add(dir.multiply(lerp_progress));
-            if (world.isClient) {
-                // clientside debug
-                world.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                        lerp_pos.x, lerp_pos.y, lerp_pos.z,
-                        0, 0, 0
-                );
-            } else {
-                Box searchBox = new Box(lerp_pos.subtract(BEAM_WIDTH, BEAM_WIDTH, BEAM_WIDTH), lerp_pos.add(BEAM_WIDTH, BEAM_WIDTH, BEAM_WIDTH));
-                List<Entity> potentialTargets = world.getOtherEntities(user, searchBox, entity -> (entity instanceof PlayerEntity || entity instanceof MobEntity));
-                for (Entity e : potentialTargets) {
-                    if (e instanceof LivingEntity livingEntity) {
-                        hitEntities.add(livingEntity);
-                    }
-                }
-            }
-            lerp_progress += BEAM_WIDTH;
-        }
-
-        if (world.isClient) {
-            //
-        } else {
-            ItemStack stack = user.getStackInHand(Hand.MAIN_HAND);
-            RegistryEntry<DamageType> dtypeNonPierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.PLAYER_ATTACK);
-            RegistryEntry<DamageType> dtypePierce = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.MAGIC);
-            for (LivingEntity e : hitEntities) {
-                Vec3d prev_vel = e.getVelocity();
-                e.damage(new GuardianLaserDamageSource(dtypeNonPierce, user), getTickDamage(stack) * (1 - getMagicDamageProportion(stack)));
-                e.timeUntilRegen = 0;
-                e.damage(new GuardianLaserDamageSource(dtypePierce, user), getTickDamage(stack) * getMagicDamageProportion(stack));
-                e.timeUntilRegen = 0;
-                e.setVelocity(prev_vel);
-            }
-        }
     }
 
 //    @Override
@@ -241,6 +204,25 @@ public class BeamWeapon extends Item {
     private static float getMagicDamageProportion(ItemStack stack) {
         int pierce_level = EnchantmentHelper.getLevel(Enchantments.PIERCING, stack);
         return BASE_MAGIC_DAMAGE_PROPORTION + (1 - BASE_MAGIC_DAMAGE_PROPORTION) * Math.min(1, pierce_level * BASE_MAGIC_DAMAGE_PROPORTION);
+    }
+
+    private float calcBeamLength(World world, Entity user, Vec3d start, Vec3d dir) {
+        Vec3d end = start.add(dir.multiply(BEAM_RANGE));
+        if (user == null) return BeamWeapon.BEAM_RANGE;
+        BlockHitResult hit = world.raycast(
+                new RaycastContext(
+                        start,
+                        end,
+                        RaycastContext.ShapeType.COLLIDER,
+                        RaycastContext.FluidHandling.NONE,
+                        user
+                )
+        );
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            Vec3d hitPos = hit.getPos();
+            return (float) start.distanceTo(hitPos);
+        }
+        else return BeamWeapon.BEAM_RANGE;
     }
 
     @Override

@@ -71,6 +71,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         Quaternionf combinedQuaternion = yawQuaternion.mul(pitchQuaternion);
 //
 //        Vector3f rotatedPoint = new Vector3f(point2f.x, point2f.y, 0).rotate(combinedQuaternion);
+//        System.out.println(entity.getBeamLength());
         matrices.multiply(combinedQuaternion, 0, 0, 0);
         renderBeamHelper(matrices, vertexConsumers, tickDelta, entity);
         matrices.pop();
@@ -80,7 +81,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         long l = entity.getEntityWorld().getTime();
         List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
         float[] color = new float[]{1,0,0};
-        for (int i = 0; i < BeamWeapon.BEAM_RANGE; i++) {
+        for (int i = 0; i < entity.getBeamLength(); i++) {
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
