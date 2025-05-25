@@ -1,4 +1,4 @@
-package kx.myfirstmod.entities;
+package kx.myfirstmod.rendering;
 
 import net.minecraft.client.render.entity.ArrowEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;

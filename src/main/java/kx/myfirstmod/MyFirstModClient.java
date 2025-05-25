@@ -2,29 +2,16 @@ package kx.myfirstmod;
 
 import kx.myfirstmod.entities.*;
 import kx.myfirstmod.items.*;
-import kx.myfirstmod.rendering.BeamWeaponFeatureRenderer;
-import kx.myfirstmod.rendering.BeamWeaponProjectileRenderer;
+import kx.myfirstmod.rendering.*;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EffectGemColorTint;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.DolphinEntityModel;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 
 public class MyFirstModClient implements ClientModInitializer {

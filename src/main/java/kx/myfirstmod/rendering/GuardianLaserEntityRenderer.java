@@ -1,5 +1,6 @@
-package kx.myfirstmod.entities;
+package kx.myfirstmod.rendering;
 
+import kx.myfirstmod.entities.GuardianLaserEntity;
 import kx.myfirstmod.items.GuardianLaser;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.utils.EntityDetector;
