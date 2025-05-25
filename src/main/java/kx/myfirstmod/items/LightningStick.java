@@ -27,7 +27,7 @@ public class LightningStick extends Item {
         }
 
         // everything onwards here on out is serverside only
-        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 64);
+        BlockPos blockPos = BlockDetector.getBlockLookingAt(world, user, 128);
         if (blockPos == null) {
             return TypedActionResult.fail(user.getStackInHand(hand));
         }
@@ -54,9 +54,7 @@ public class LightningStick extends Item {
             }
         };
 
-        // Nothing has changed to the item stack,
-        // so we just return it how it was.
-        user.getItemCooldownManager().set(this, 100);
+        user.getItemCooldownManager().set(this, 20);
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 }
