@@ -66,19 +66,16 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         matrices.push();
         Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), entity.getVelocity().multiply(-1).toVector3f());
         Quaternionf pitchQuaternion = new Quaternionf().rotateX((90f - entity.getPitch())
-                * (float) Math.PI / 180f); // Rotation around X-axis
+                * (float) Math.PI / 180f);
         Quaternionf yawQuaternion = new Quaternionf().rotateY(entity.getYaw() * (float) Math.PI / 180f);    // Rotation around Y-axis
         Quaternionf combinedQuaternion = yawQuaternion.mul(pitchQuaternion);
-//
-//        Vector3f rotatedPoint = new Vector3f(point2f.x, point2f.y, 0).rotate(combinedQuaternion);
-//        System.out.println(entity.getBeamLength());
         matrices.multiply(combinedQuaternion, 0, 0, 0);
         renderBeamHelper(matrices, vertexConsumers, tickDelta, entity);
         matrices.pop();
     }
 
     private static void renderBeamHelper(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, BeamWeaponEntity entity) {
-        long l = entity.getEntityWorld().getTime();
+        long worldTime = entity.getEntityWorld().getTime();
         List<BeaconBlockEntity.BeamSegment> list = Lists.newArrayList();
         float[] color = new float[]{1,0,0};
         for (int i = 0; i < entity.getBeamLength(); i++) {
@@ -88,29 +85,19 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         float beamWidthModifier = Math.max((entity.LIVING_TICKS - entity.age - tickDelta), 0) / entity.LIVING_TICKS;
         float beamWidthModifierOuter = (float) Math.log(50 - 49 * beamWidthModifier);
         float beamWidthModifierInner = Math.min(beamWidthModifier * 3, 2) / 2;
-
-//        if (beamWidthModifier - NormalDistribution.nextValue(0, 0.3) < 0) return;
-
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
-//            renderBeam(matrices, vertexConsumers, tickDelta, l, k, beamSegment.getHeight(), beamSegment.getColor());
             BeaconBlockEntity.BeamSegment segment = list.get(i);
-            // taper the beam down
-//            float noise = (float) (PerlinNoise.noise1DPositive(i, 1) * 0.06);
             float end = list.size();
             float radius = MathHelper.lerp(Math.min(i / end, 1), INNER_BEAM_MAX_WIDTH, INNER_BEAM_MIN_WIDTH);
-//            if (beamWidthModifierInner - noise < 0) radius = 0;
-            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, l, k, segment.getHeight(), color, radius * beamWidthModifierInner, INNER_BEAM_MAX_WIDTH * beamWidthModifierOuter, 0.25F * beamWidthModifier);
+            float segHeight = Math.min(entity.getBeamLength() - k, 1);
+            renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1F, worldTime, k, segHeight, color, radius * beamWidthModifierInner, INNER_BEAM_MAX_WIDTH * beamWidthModifierOuter, 0.25F * beamWidthModifier);
             k += segment.getHeight();
         }
     }
 
-    private static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta, long worldTime, int yOffset, int maxY, float[] color, float alpha) {
-        renderBeam(matrices, vertexConsumers, BEAM_TEXTURE, tickDelta, 1.0F, worldTime, yOffset, maxY, color, 0.2F, 0.25F, alpha);
-    }
-
-    public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, int maxY, float[] color, float innerRadius, float outerRadius, float alpha) {
-        int i = yOffset + maxY;
+    public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, float maxY, float[] color, float innerRadius, float outerRadius, float alpha) {
+        float i = yOffset + maxY;
         float f = (float)Math.floorMod(worldTime, 40) + tickDelta;
         f *= 2;
         float g = maxY < 0 ? f : -f;
@@ -156,7 +143,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x3, z3, x1, z1, u1, u2, v1, v2);
     }
 
-    private static void renderBeamLayerInner(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
+    private static void renderBeamLayerInner(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, float height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
         // x1 is 0,
         // z1 is radius
         // x2 is radius
@@ -177,17 +164,16 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x2, z2, x4, z4, u1, u2, v1, v2);
         renderBeamFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, height, x3, z3, x1, z1, u1, u2, v1, v2);
         // render far end of beam
-        renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, height, x1, z1, x2, z2, x4, z4, x3, z3, u1, v1, u2, v2);
+        if (height - yOffset < 1 || height == BeamWeapon.BEAM_RANGE) {
+            renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, height, x1, z1, x2, z2, x4, z4, x3, z3, u1, v1, u2, v2);
+        }
         //render close end of beam
-        renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
-//
-//        if (height <= height - yOffset) {
-//            //render close end of beam
-//            renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
-//        }
+        if (yOffset <= 0) {
+            renderBeamEndFace(matrix4f, matrix3f, vertices, red, green, blue, alpha, yOffset, x3, z3, x4, z4, x2, z2, x1, z1, u1, v1, u2, v2);
+        }
     }
 
-    private static void renderBeamLayerOuter(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
+    private static void renderBeamLayerOuter(MatrixStack matrices, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, float height, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float u2, float v1, float v2) {
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f matrix4f = entry.getPositionMatrix();
         Matrix3f matrix3f = entry.getNormalMatrix();
@@ -205,14 +191,14 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         }
     }
 
-    private static void renderBeamFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, int height, float x1, float z1, float x2, float z2, float u1, float u2, float v1, float v2) {
+    private static void renderBeamFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, float height, float x1, float z1, float x2, float z2, float u1, float u2, float v1, float v2) {
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, height, x1, z1, u2, v1);
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x1, z1, u2, v2);
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x2, z2, u1, v2);
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, height, x2, z2, u1, v1);
     }
 
-    private static void renderBeamEndFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int yOffset, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float v1, float u2, float v2) {
+    private static void renderBeamEndFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, float yOffset, float x1, float z1, float x2, float z2, float x3, float z3, float x4, float z4, float u1, float v1, float u2, float v2) {
 //        System.out.printf("(%f, %f), (%f, %f), (%f, %f), (%f, %f)\n", x1, z1, x2, z2, x3, z3, x4, z4);
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x1, z1, u1, v1);
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x2, z2, u1, v2);
@@ -220,7 +206,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         renderBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, x4, z4, u2, v1);
     };
 
-    private static void renderBeamVertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, int y, float x, float z, float u, float v) {
+    private static void renderBeamVertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices, float red, float green, float blue, float alpha, float y, float x, float z, float u, float v) {
         vertices.vertex(positionMatrix, x, (float)y, z).color(red, green, blue, alpha).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(15728880).normal(normalMatrix, 0.0F, 1.0F, 0.0F).next();
     }
 
