@@ -84,8 +84,8 @@ public class BeamWeapon extends Item {
             }
             else {
                 // fire sound
-                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 3F, 0.5F);
-                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 3F, 1F);
+//                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 3F, 0.5F);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 4F, 0.9F);
                 storeLastUsedTime(stack, world.getTime());
                 Vec3d shootOrigin = getShootOrigin(user, Hand.MAIN_HAND);
                 Vec3d shootDir = user.getRotationVector();
