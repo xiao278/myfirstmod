@@ -65,7 +65,13 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
     public void render(BeamWeaponEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         matrices.push();
         Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), entity.getVelocity().multiply(-1).toVector3f());
-        matrices.multiply(quat, 0, 0, 0);
+        Quaternionf pitchQuaternion = new Quaternionf().rotateX((90f - entity.getPitch())
+                * (float) Math.PI / 180f); // Rotation around X-axis
+        Quaternionf yawQuaternion = new Quaternionf().rotateY(entity.getYaw() * (float) Math.PI / 180f);    // Rotation around Y-axis
+        Quaternionf combinedQuaternion = yawQuaternion.mul(pitchQuaternion);
+//
+//        Vector3f rotatedPoint = new Vector3f(point2f.x, point2f.y, 0).rotate(combinedQuaternion);
+        matrices.multiply(combinedQuaternion, 0, 0, 0);
         renderBeamHelper(matrices, vertexConsumers, tickDelta, entity);
         matrices.pop();
     }
@@ -104,9 +110,6 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
 
     public static void renderBeam(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Identifier textureId, float tickDelta, float heightScale, long worldTime, int yOffset, int maxY, float[] color, float innerRadius, float outerRadius, float alpha) {
         int i = yOffset + maxY;
-        matrices.push();
-
-//        matrices.translate((double)0.5F, (double)0.0F, (double)0.5F);
         float f = (float)Math.floorMod(worldTime, 40) + tickDelta;
         f *= 2;
         float g = maxY < 0 ? f : -f;
@@ -115,7 +118,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         float k = color[1];
         float l = color[2];
         matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * 2.25F - 45.0F));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F));
         float m = 0.0F;
         float p = 0.0F;
         float q = -innerRadius;
@@ -135,6 +138,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         v = 1.0F;
         w = -1.0F + h;
         x = (float)maxY * heightScale + w;
+        matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F));
         renderBeamLayerOuter(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), j, k, l, alpha, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
         matrices.pop();
