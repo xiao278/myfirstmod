@@ -46,38 +46,39 @@ public class EvokerStaff extends Item {
         double e = Math.max(targetPos.getY(), user.getY()) + (double)1.0F;
         float f = (float)MathHelper.atan2(targetDir.getZ() - user.getZ(), targetDir.getX() - user.getX());
         if (Math.abs(user.getPitch()) > 85 || user.isSneaking()) {
-            //radial fangs
-            for(int i = 0; i < 5; ++i) {
-                float g = f + (float)i * (float)Math.PI * 0.4F;
-                this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)1.5F, user.getZ() + (double)MathHelper.sin(g) * (double)1.5F, d, e, g, 0);
-            }
+//            //radial fangs
+//            for(int i = 0; i < 5; ++i) {
+//                float g = f + (float)i * (float)Math.PI * 0.4F;
+//                this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)1.5F, user.getZ() + (double)MathHelper.sin(g) * (double)1.5F, d, e, g, 0);
+//            }
+//
+//            for(int i = 0; i < 8; ++i) {
+//                float g = f + (float)i * (float)Math.PI * 2.0F / 8.0F + 1.2566371F;
+//                this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)2.5F, user.getZ() + (double)MathHelper.sin(g) * (double)2.5F, d, e, g, 3);
+//            }
 
-            for(int i = 0; i < 8; ++i) {
-                float g = f + (float)i * (float)Math.PI * 2.0F / 8.0F + 1.2566371F;
-                this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)2.5F, user.getZ() + (double)MathHelper.sin(g) * (double)2.5F, d, e, g, 3);
-            }
-
-            int[] lvl_fangs = {11,14,17,20};
-            for (int lvl = 0; lvl < Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)), lvl_fangs.length); lvl++) {
+            int[] lvl_fangs = {5,8,11,14,17,20};
+            for (int lvl = 0; lvl < Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)) + 2, lvl_fangs.length); lvl++) {
                 float circumference = ((float) lvl_fangs[lvl] / 8.0F) * 2.5F;
                 for (int i = 0; i < lvl_fangs[lvl]; i++) {
                     float g = f + (float) (Math.PI * 2.0F) * i / lvl_fangs[lvl] + lvl * 1.2566371F;
-                    this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)circumference, user.getZ() + (double)MathHelper.sin(g) * (double)circumference, d, e, g, (lvl + 2) * 3);
+                    this.conjureFangs(user, user.getX() + (double)MathHelper.cos(g) * (double)circumference, user.getZ() + (double)MathHelper.sin(g) * (double)circumference, d, e, g, (lvl + 2) * 2);
                 }
             }
 
         } else {
             //directional fangs
-            for(int i = 0; i < 16 + Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)), 4) * 4;
+            int pierceLvl = Math.min(EnchantmentHelper.getLevel(Enchantments.PIERCING, user.getStackInHand(hand)), 4);
+            for(int i = 0; i < 16 + pierceLvl * 4;
                 ++i) {
                 double h = (double)1.25F * (double)(i + 1);
-                int j = 1 * i;
+                int j = i / (pierceLvl + 1);
                 this.conjureFangs(user, user.getX() + (double)MathHelper.cos(f) * h, user.getZ() + (double)MathHelper.sin(f) * h, d, e, f, j);
             }
             if (EnchantmentHelper.getLevel(Enchantments.MULTISHOT, user.getStackInHand(hand)) > 0) {
                 for(int i = 0; i < 16; ++i) {
                     double h = (double)1.25F * (double)(i + 1);
-                    int j = 1 * i;
+                    int j = i * 1;
                     float spread_angle = (float) 8 / 180 * MathHelper.PI;
                     float f_right = f + spread_angle;
                     float f_left = f - spread_angle;
