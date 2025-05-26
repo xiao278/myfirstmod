@@ -1,6 +1,7 @@
 package kx.myfirstmod.items;
 
 import kx.myfirstmod.ModSounds;
+import kx.myfirstmod.enchantments.ModEnchantments;
 import kx.myfirstmod.entities.BeamWeaponEntity;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
@@ -47,7 +48,7 @@ public class BeamWeapon extends Item {
     public static final boolean DEBUG_MODE = false;
     public static final float BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.7;
-    private static final float BASE_DAMAGE = 25F;
+    private static final float BASE_DAMAGE = 15F;
     private static final int CHARGE_TICKS = 80;
     public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
@@ -89,7 +90,7 @@ public class BeamWeapon extends Item {
                 storeLastUsedTime(stack, world.getTime());
                 Vec3d shootOrigin = getShootOrigin(user, Hand.MAIN_HAND);
                 Vec3d shootDir = user.getRotationVector();
-                float range = calcBeamLength(world, user, shootOrigin, shootDir);
+                float range = calcBeamLength(world, user, shootOrigin, shootDir, getMaxRange(stack));
                 BeamWeaponEntity projectile = new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, shootOrigin, shootDir, getDamage(stack), getMagicDamageProportion(stack), range);
                 projectile.setOwner(user);
                 world.spawnEntity((projectile));
@@ -194,7 +195,11 @@ public class BeamWeapon extends Item {
     }
 
     private static float getDamage(ItemStack stack) {
-        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / 4.0F);
+        return BASE_DAMAGE * (1 + EnchantmentHelper.getLevel(Enchantments.POWER, stack) / 5.0F);
+    }
+
+    private static float getMaxRange(ItemStack stack) {
+        return BEAM_RANGE + BEAM_RANGE * EnchantmentHelper.getLevel(ModEnchantments.LONG_SHOT, stack) / 2;
     }
 
     private static float getTickDamage(ItemStack stack) {
@@ -206,9 +211,9 @@ public class BeamWeapon extends Item {
         return BASE_MAGIC_DAMAGE_PROPORTION + (1 - BASE_MAGIC_DAMAGE_PROPORTION) * Math.min(1, pierce_level * BASE_MAGIC_DAMAGE_PROPORTION);
     }
 
-    private float calcBeamLength(World world, Entity user, Vec3d start, Vec3d dir) {
-        Vec3d end = start.add(dir.multiply(BEAM_RANGE));
-        if (user == null) return BeamWeapon.BEAM_RANGE;
+    private float calcBeamLength(World world, Entity user, Vec3d start, Vec3d dir, float max_range) {
+        Vec3d end = start.add(dir.multiply(max_range));
+        if (user == null) return max_range;
         BlockHitResult hit = world.raycast(
                 new RaycastContext(
                         start,
@@ -222,7 +227,7 @@ public class BeamWeapon extends Item {
             Vec3d hitPos = hit.getPos();
             return (float) start.distanceTo(hitPos);
         }
-        else return BeamWeapon.BEAM_RANGE;
+        else return max_range;
     }
 
     @Override

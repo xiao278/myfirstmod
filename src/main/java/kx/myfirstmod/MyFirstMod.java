@@ -5,6 +5,7 @@
 
 package kx.myfirstmod;
 
+import kx.myfirstmod.enchantments.ModEnchantments;
 import kx.myfirstmod.entities.ModEntityTypes;
 import kx.myfirstmod.items.ModItems;
 import kx.myfirstmod.misc.ModCustomPotions;
@@ -23,6 +24,7 @@ public class MyFirstMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModEnchantments.initialize();
 		ModEntityTypes.initialize();
 		ModItems.initialize();
 		TaskScheduler.initialize();

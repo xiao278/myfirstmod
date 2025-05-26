@@ -9,9 +9,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class ModEntityTypes {
-    public static void initialize() {
-
-    }
+    public static void initialize() {}
 
     public static final EntityType<ArrowRainEntity> ARROW_RAIN_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
