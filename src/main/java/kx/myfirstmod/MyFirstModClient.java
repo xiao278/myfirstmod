@@ -65,7 +65,7 @@ public class MyFirstModClient implements ClientModInitializer {
         });
         ModelPredicateProviderRegistry.register(ModItems.BEAM_WEAPON, new Identifier("discharging"), (stack, world, entity, seed) -> {
             if (entity == null) return 0;
-            return BeamWeapon.isDischarging(entity) ? 1 : 0;
+            return BeamWeapon.isDischarging(entity, stack) ? 1 : 0;
         });
 
         // Option A: Use your own sprite set

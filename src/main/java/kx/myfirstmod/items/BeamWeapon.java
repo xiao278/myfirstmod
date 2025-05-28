@@ -37,7 +37,7 @@ public class BeamWeapon extends Item {
     public static final float BEAM_RANGE = 32;
     public static final double BEAM_WIDTH = 0.5;
     private static final float BASE_DAMAGE = 20F ; // 15f
-    private static final int CHARGE_TICKS = 80;
+    private static final int CHARGE_TICKS = 50;
     public static final int DAMAGE_TICKS = 1;
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
@@ -92,7 +92,7 @@ public class BeamWeapon extends Item {
                 projectile.setOwner(user);
                 world.spawnEntity((projectile));
 
-                user.getItemCooldownManager().set(stack.getItem(), getBeamTicks(stack));
+                user.getItemCooldownManager().set(stack.getItem(), getBeamTicks(stack) + 10);
                 if (!DEBUG_MODE) storeIsCharged(stack,false);
                 return TypedActionResult.consume(stack);
             }
@@ -247,9 +247,10 @@ public class BeamWeapon extends Item {
         );
     }
 
-    public static boolean isDischarging(Entity entity) {
+    public static boolean isDischarging(Entity entity, ItemStack stack) {
         if (!(entity instanceof PlayerEntity)) return false;
-        return ((PlayerEntity) entity).getItemCooldownManager().getCooldownProgress(ModItems.BEAM_WEAPON, 0) > 0.1F;
+        PlayerEntity pe = (PlayerEntity) entity;
+        return pe.getItemCooldownManager().getCooldownProgress(ModItems.BEAM_WEAPON, 0) > 0.1F && stack == pe.getStackInHand(Hand.MAIN_HAND);
     }
 
     @Override

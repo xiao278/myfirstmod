@@ -54,7 +54,7 @@ abstract class BipedEntityModelMixin<T extends LivingEntity> {
                 &&
                 (
                         BeamWeapon.getIsCharged(stack) ||
-                        BeamWeapon.isDischarging(entity)
+                        BeamWeapon.isDischarging(entity, stack)
                 )
         ) {
             CrossbowPosing.hold(self.rightArm, self.leftArm, self.head, true);
