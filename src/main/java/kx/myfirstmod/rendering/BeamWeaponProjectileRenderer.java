@@ -26,8 +26,8 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
     private static final Vec3d THIRD_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     private static final Vec3d FIRST_PERSON_BEAM_OFFSET = new Vec3d(0, 0, 0);
     public static final Identifier BEAM_TEXTURE = new Identifier("textures/entity/beacon_beam.png");
-    public static final float INNER_BEAM_MAX_WIDTH = 0.2F;
-    public static final float INNER_BEAM_MIN_WIDTH = 0.2F;
+    public static final float INNER_BEAM_MAX_WIDTH = 0.1F;
+    public static final float INNER_BEAM_MIN_WIDTH = 0.1F;
 
     public BeamWeaponProjectileRenderer(EntityRendererFactory.Context context) {
         super(context);

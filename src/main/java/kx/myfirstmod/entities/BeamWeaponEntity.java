@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeaponEntity extends ProjectileEntity {
-    private final int BASE_BEAM_TICKS = 18;
     private float piercingDamageProportion;
     private float baseDamage;
     private float baseDOT;
@@ -54,18 +53,13 @@ public class BeamWeaponEntity extends ProjectileEntity {
         this.maxRange = BeamWeapon.getMaxRange(stack);
         this.baseDamage = BeamWeapon.getDamage(stack);
         this.baseDOT = BeamWeapon.getLingeringDamage(stack);
-        this.dataTracker.set(BEAM_TICKS, BeamWeapon.DEBUG_MODE ? 100 : (
-                this.getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT ?
-                        (int) (BASE_BEAM_TICKS * 1.5) :
-                        BASE_BEAM_TICKS
-                )
-        );
+        this.dataTracker.set(BEAM_TICKS, BeamWeapon.getBeamTicks(stack));
     }
 
     @Override
     protected void initDataTracker() {
         this.dataTracker.startTracking(BEAM_LENGTH, 0f);
-        this.dataTracker.startTracking(BEAM_TICKS, BASE_BEAM_TICKS);
+        this.dataTracker.startTracking(BEAM_TICKS, BeamWeapon.BASE_BEAM_TICKS);
         this.dataTracker.startTracking(PROJECTILE_SPECIALIZATION, 0);
     }
 

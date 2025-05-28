@@ -50,7 +50,13 @@ abstract class BipedEntityModelMixin<T extends LivingEntity> {
     private void modifyPose(T entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch, CallbackInfo info) {
         ItemStack stack = entity.getStackInHand(Hand.MAIN_HAND);
         BipedEntityModel<T> self = (BipedEntityModel<T>) (Object) this;
-        if (BeamWeapon.getIsCharged(stack)) {
+        if (entity instanceof PlayerEntity
+                &&
+                (
+                        BeamWeapon.getIsCharged(stack) ||
+                        BeamWeapon.isDischarging(entity)
+                )
+        ) {
             CrossbowPosing.hold(self.rightArm, self.leftArm, self.head, true);
         }
 //        if (entity instanceof PlayerEntity player) {

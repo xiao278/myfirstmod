@@ -32,9 +32,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class BeamWeapon extends Item {
+    public static final int BASE_BEAM_TICKS = 18;
     public static final boolean DEBUG_MODE = false;
     public static final float BEAM_RANGE = 32;
-    public static final double BEAM_WIDTH = 0.7;
+    public static final double BEAM_WIDTH = 0.5;
     private static final float BASE_DAMAGE = 20F ; // 15f
     private static final int CHARGE_TICKS = 80;
     public static final int DAMAGE_TICKS = 1;
@@ -91,6 +92,7 @@ public class BeamWeapon extends Item {
                 projectile.setOwner(user);
                 world.spawnEntity((projectile));
 
+                user.getItemCooldownManager().set(stack.getItem(), getBeamTicks(stack));
                 if (!DEBUG_MODE) storeIsCharged(stack,false);
                 return TypedActionResult.consume(stack);
             }
@@ -235,6 +237,19 @@ public class BeamWeapon extends Item {
             return (float) start.distanceTo(hitPos);
         }
         else return max_range;
+    }
+
+    public static int getBeamTicks(ItemStack stack) {
+        return BeamWeapon.DEBUG_MODE ? 100 : (
+                EnchantmentHelper.getLevel(ModEnchantments.LONG_SHOT, stack) > 0 ?
+                        (int) (BASE_BEAM_TICKS * 1.5) :
+                        BASE_BEAM_TICKS
+        );
+    }
+
+    public static boolean isDischarging(Entity entity) {
+        if (!(entity instanceof PlayerEntity)) return false;
+        return ((PlayerEntity) entity).getItemCooldownManager().getCooldownProgress(ModItems.BEAM_WEAPON, 0) > 0.1F;
     }
 
     @Override

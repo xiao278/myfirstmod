@@ -14,6 +14,10 @@
       "model": "myfirstmod:item/beam_weapon_charged"
     },
     {
+      "predicate": { "discharging": 1 },
+      "model": "myfirstmod:item/beam_weapon_discharging"
+    },
+    {
       "predicate": { "pull": 0.05 },
       "model": "myfirstmod:item/beam_weapon_charge0"
     },

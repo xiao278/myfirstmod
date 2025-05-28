@@ -63,6 +63,10 @@ public class MyFirstModClient implements ClientModInitializer {
             if (entity == null) return 0;
             return BeamWeapon.getIsCharged(stack) ? 1 : 0;
         });
+        ModelPredicateProviderRegistry.register(ModItems.BEAM_WEAPON, new Identifier("discharging"), (stack, world, entity, seed) -> {
+            if (entity == null) return 0;
+            return BeamWeapon.isDischarging(entity) ? 1 : 0;
+        });
 
         // Option A: Use your own sprite set
         ParticleFactoryRegistry.getInstance().register(ModParticles.HELICAL_PARTICLE, HelicalParticleFactory::new);
