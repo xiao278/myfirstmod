@@ -1,7 +1,11 @@
 package kx.myfirstmod.entities;
 
+import kx.myfirstmod.enchantments.ModEnchantments;
 import kx.myfirstmod.items.BeamWeapon;
 import kx.myfirstmod.misc.GuardianLaserDamageSource;
+import kx.myfirstmod.particles.HelicalParticleEffect;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -10,9 +14,11 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Box;
@@ -23,31 +29,47 @@ import java.util.List;
 import java.util.Set;
 
 public class BeamWeaponEntity extends ProjectileEntity {
-    public final int LIVING_TICKS = BeamWeapon.DEBUG_MODE ? 100 : 18;
+    private final int BASE_BEAM_TICKS = 18;
     private float piercingDamageProportion;
     private float baseDamage;
+    private float baseDOT;
     private static final TrackedData<Float> BEAM_LENGTH;
+    private static final TrackedData<Integer> PROJECTILE_SPECIALIZATION;
+    private static final TrackedData<Integer> BEAM_TICKS;
+    public static enum ProjectileSpecialization {
+        NONE, POWER, PIERCE, LONGSHOT
+    }
 
     public BeamWeaponEntity(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
     }
 
-    public BeamWeaponEntity(EntityType<? extends ProjectileEntity> entityType, World world, Vec3d pos, Vec3d vel, float baseDamage, float piercingDamageProportion, float beamLength) {
+    public BeamWeaponEntity(EntityType<? extends ProjectileEntity> entityType, World world, ItemStack stack, float beamLength) {
         super(entityType, world);
-        this.setVelocity(vel);
-        this.setPosition(pos);
-        this.piercingDamageProportion = piercingDamageProportion;
-        this.baseDamage = baseDamage;
         this.dataTracker.set(BEAM_LENGTH, beamLength);
+        this.setProjectileSpecialization(stack);
+        this.piercingDamageProportion = BeamWeapon.getMagicDamageProportion(stack);
+        this.baseDamage = BeamWeapon.getDamage(stack);
+        this.baseDOT = BeamWeapon.getLingeringDamage(stack);
+        this.dataTracker.set(BEAM_TICKS, BeamWeapon.DEBUG_MODE ? 100 : (
+                this.getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT ?
+                        (int) (BASE_BEAM_TICKS * 1.5) :
+                        BASE_BEAM_TICKS
+                )
+        );
     }
 
     @Override
     protected void initDataTracker() {
         this.dataTracker.startTracking(BEAM_LENGTH, 0f);
+        this.dataTracker.startTracking(BEAM_TICKS, BASE_BEAM_TICKS);
+        this.dataTracker.startTracking(PROJECTILE_SPECIALIZATION, 0);
     }
 
     static {
         BEAM_LENGTH = DataTracker.registerData(BeamWeaponEntity.class, TrackedDataHandlerRegistry.FLOAT);
+        BEAM_TICKS = DataTracker.registerData(BeamWeaponEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        PROJECTILE_SPECIALIZATION = DataTracker.registerData(BeamWeaponEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 
     public float getBeamLength() {return this.dataTracker.get(BEAM_LENGTH);}
@@ -57,10 +79,16 @@ public class BeamWeaponEntity extends ProjectileEntity {
         super.tick();
         World world = this.getWorld();
         if (world.isClient) {
-
+            if (getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT) {
+                Vec3d vel = this.getVelocity().multiply(1/10d);
+                for (int i = 0; i < getBeamLength() / 8; i++) {
+                    Vec3d pos = this.getPos().add(this.getVelocity().multiply(random.nextDouble() * getBeamLength()));
+                    world.addParticle(new HelicalParticleEffect(0.3,0.2), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+                }
+            }
         }
         else {
-            if (this.age == 1) {
+            if (this.age == 1 || (getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT)) {
                 double lerp_progress = 0;
                 Vec3d origin = this.getPos();
                 Vec3d dir = this.getVelocity();
@@ -86,8 +114,35 @@ public class BeamWeaponEntity extends ProjectileEntity {
                     e.timeUntilRegen = 0;
                     e.setVelocity(prev_vel);
                 }
+                if (this.getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT) {
+                    this.baseDamage = baseDOT / this.getBeamTicks();
+                    this.piercingDamageProportion = 1;
+                }
             }
-            if (this.age > LIVING_TICKS) this.discard();
+            if (this.age > getBeamTicks()) this.discard();
         }
+    }
+
+    public int getBeamTicks() {
+        return this.dataTracker.get(BEAM_TICKS);
+    }
+
+    private float calcBeamTickDamage(float totalDOT) {
+        return totalDOT / this.getBeamTicks();
+    }
+
+    private void setProjectileSpecialization(ItemStack stack) {
+        ProjectileSpecialization ps = ProjectileSpecialization.NONE;
+        if (EnchantmentHelper.getLevel(Enchantments.POWER, stack) > 0) ps = ProjectileSpecialization.POWER;
+        if (EnchantmentHelper.getLevel(Enchantments.PIERCING, stack) > 0) ps = ProjectileSpecialization.PIERCE;
+        if (EnchantmentHelper.getLevel(ModEnchantments.LONG_SHOT, stack) > 0) ps = ProjectileSpecialization.LONGSHOT;
+        this.dataTracker.set(PROJECTILE_SPECIALIZATION, ps.ordinal());
+    }
+
+    public ProjectileSpecialization getProjectileSpecialization() {
+        int ordinal_value = this.dataTracker.get(PROJECTILE_SPECIALIZATION);
+        ProjectileSpecialization[] value_list = ProjectileSpecialization.values();
+        if (ordinal_value < 0 || ordinal_value >= value_list.length) return ProjectileSpecialization.NONE;
+        return value_list[ordinal_value];
     }
 }

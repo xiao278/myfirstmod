@@ -2,12 +2,15 @@ package kx.myfirstmod;
 
 import kx.myfirstmod.entities.*;
 import kx.myfirstmod.items.*;
+import kx.myfirstmod.particles.HelicalParticleFactory;
+import kx.myfirstmod.particles.ModParticles;
 import kx.myfirstmod.rendering.*;
 import kx.myfirstmod.utils.BlockGlowRenderer;
 import kx.myfirstmod.utils.EffectGemColorTint;
 import kx.myfirstmod.utils.ParticleSpawnPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -61,7 +64,8 @@ public class MyFirstModClient implements ClientModInitializer {
             return BeamWeapon.getIsCharged(stack) ? 1 : 0;
         });
 
-
+        // Option A: Use your own sprite set
+        ParticleFactoryRegistry.getInstance().register(ModParticles.HELICAL_PARTICLE, HelicalParticleFactory::new);
         EntityRendererRegistry.register(ModEntityTypes.ARROW_RAIN_ENTITY, ArrowRainEntityRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.EFFECT_GEM_PROJECTILE_ENTITY, EffectGemProjectileEntityRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.BEAM_WEAPON_ENTITY, BeamWeaponProjectileRenderer::new);
@@ -77,6 +81,7 @@ public class MyFirstModClient implements ClientModInitializer {
         EffectGemColorTint.register();
         BeamWeaponFeatureRenderer.register();
     }
+
 
     private void onResourcesReady() {
         System.out.println("ResourceManager is now available");

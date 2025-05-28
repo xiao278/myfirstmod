@@ -8,5 +8,10 @@
     "sounds": [
       "myfirstmod:weapon_beam_fire"
     ]
+  },
+  "weapon_beam_fire_longshot": {
+    "sounds": [
+      "myfirstmod:weapon_beam_fire_longshot"
+    ]
   }
 }

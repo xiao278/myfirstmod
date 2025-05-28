@@ -13,13 +13,8 @@ import net.minecraft.util.Identifier;
 public class ModEnchantments {
     public static final Enchantment LONG_SHOT = register(new LongshotEnchantment(), "long_shot");
     public static Enchantment register(Enchantment enchantment, String id) {
-        // Create the identifier for the item.
         Identifier enchID = Identifier.of(MyFirstMod.MOD_ID, id);
-
-        // Register the item.
         Enchantment registeredEnch = Registry.register(Registries.ENCHANTMENT, enchID, enchantment);
-
-        // Return the registered item!
         return registeredEnch;
     }
     public static void initialize(){}

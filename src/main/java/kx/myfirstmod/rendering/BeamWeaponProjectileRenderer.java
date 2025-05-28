@@ -3,30 +3,12 @@ package kx.myfirstmod.rendering;
 import com.google.common.collect.Lists;
 import kx.myfirstmod.entities.BeamWeaponEntity;
 import kx.myfirstmod.items.BeamWeapon;
-import kx.myfirstmod.items.ModItems;
-import kx.myfirstmod.misc.ScoreboardReader;
-import kx.myfirstmod.utils.BinomialDistribution;
-import kx.myfirstmod.utils.BlockGlowRenderer;
-import kx.myfirstmod.utils.NormalDistribution;
-import kx.myfirstmod.utils.PerlinNoise;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BeaconBlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.ProjectileEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -82,9 +64,27 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
             list.add(new BeaconBlockEntity.BeamSegment(color));
         }
 
-        float beamWidthModifier = Math.max((entity.LIVING_TICKS - entity.age - tickDelta), 0) / entity.LIVING_TICKS;
-        float beamWidthModifierOuter = (float) Math.log(50 - 49 * beamWidthModifier);
-        float beamWidthModifierInner = Math.min(beamWidthModifier * 3, 2) / 2;
+        float beamWidthModifier = Math.max((entity.getBeamTicks() - entity.age - tickDelta), 0) / entity.getBeamTicks();
+        float beamWidthModifierInner = 1;
+        float beamWidthModifierOuter = 1;
+        if (entity.getProjectileSpecialization() == BeamWeaponEntity.ProjectileSpecialization.LONGSHOT) {
+            float stablePortion = 0.85f;
+            float shrinkPortion = 1 - stablePortion;
+            float wavelength = 0.16f;
+            float t = wavelength / 2;
+            int k = Math.round((stablePortion - stablePortion % t) / t);
+            float sin_wave = beamWidthModifier > shrinkPortion ?
+                    (float) Math.sin(k * Math.PI * (
+                            beamWidthModifier - shrinkPortion
+                    ) / stablePortion)
+                    : 0;
+            beamWidthModifierOuter = Math.min(beamWidthModifier, shrinkPortion) / shrinkPortion + sin_wave * 0.07f;
+            beamWidthModifierInner = Math.max(beamWidthModifierOuter - 0.05f, 0);
+        }
+        else {
+            beamWidthModifierOuter = (float) Math.log(50 - 49 * beamWidthModifier);
+            beamWidthModifierInner = Math.min(beamWidthModifier * 3, 2) / 2;
+        }
         int k = 0;
         for (int i = 0; i < list.size(); i++) {
             BeaconBlockEntity.BeamSegment segment = list.get(i);
@@ -102,9 +102,6 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         f *= 2;
         float g = maxY < 0 ? f : -f;
         float h = MathHelper.fractionalPart(g * 0.2F - (float)MathHelper.floor(g * 0.1F));
-        float j = color[0];
-        float k = color[1];
-        float l = color[2];
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F));
         float m = 0.0F;
@@ -117,7 +114,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         float v = 1.0F;
         float w = -1.0F + h;
         float x = (float)maxY * heightScale * (0.5F / innerRadius) + w;
-        renderBeamLayerInner(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, false)), j, k, l, 1.0F, yOffset, i, 0.0F, innerRadius, innerRadius, 0.0F, q, 0.0F, 0.0F, t, 0.0F, 1.0F, x, w);
+        renderBeamLayerInner(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, false)), color[0], color[1], color[2], 1.0F, yOffset, i, 0.0F, innerRadius, innerRadius, 0.0F, q, 0.0F, 0.0F, t, 0.0F, 1.0F, x, w);
         m = -outerRadius;
         float n = -outerRadius;
         p = -outerRadius;
@@ -128,7 +125,7 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
         x = (float)maxY * heightScale + w;
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F));
-        renderBeamLayerOuter(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), j, k, l, alpha, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
+        renderBeamLayerOuter(matrices, vertexConsumers.getBuffer(RenderLayer.getBeaconBeam(textureId, true)), color[0], color[1], color[2], alpha, yOffset, i, m, n, outerRadius, p, q, outerRadius, outerRadius, outerRadius, 0.0F, 1.0F, x, w);
         matrices.pop();
         matrices.pop();
     }
