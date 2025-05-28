@@ -95,9 +95,13 @@ public class EntityDetector {
     }
 
     public static boolean isLookingAt(Entity source, Entity target) {
+        return isLookingAt(source, target, 0);
+    }
+
+    public static boolean isLookingAt(Entity source, Entity target, double padding) {
         Vec3d origin = source.getEyePos();
         Vec3d dir = source.getRotationVector();
-        Box box = target.getBoundingBox();
+        Box box = target.getBoundingBox().expand(padding);
         // r.dir is unit direction vector of ray
         return BoundingBox.rayIntersection(box, dir, origin).intersectsBox;
     }
