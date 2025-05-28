@@ -228,8 +228,8 @@ public class BeamWeaponFeatureRenderer<T extends LivingEntity, M extends EntityM
 
     private Vec3d calcOffset(LivingEntity player, float tickDelta, boolean isFirstPerson) {
         float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-        Vec3d original_offseet = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(isFirstPerson ? FIRST_PERSON_BEAM_OFFSET : THIRD_PERSON_BEAM_OFFSET);
+        Vec3d original_offset = BeamWeapon.getOffset(player).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(isFirstPerson ? FIRST_PERSON_BEAM_OFFSET : THIRD_PERSON_BEAM_OFFSET);
         Vec3d eye_offset = new Vec3d(0, player.getEyeHeight(player.getPose()), 0);
-        return original_offseet.subtract(eye_offset);
+        return original_offset.subtract(eye_offset);
     }
 }

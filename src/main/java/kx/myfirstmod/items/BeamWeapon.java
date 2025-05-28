@@ -24,6 +24,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
@@ -81,7 +82,7 @@ public class BeamWeapon extends Item {
                     world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_FIRE, SoundCategory.PLAYERS, 4F, 0.9F);
                 }
                 storeLastUsedTime(stack, world.getTime());
-                Vec3d shootOrigin = getShootOrigin(user, Hand.MAIN_HAND);
+                Vec3d shootOrigin = getShootOrigin(user);
                 Vec3d shootDir = user.getRotationVector();
                 float range = calcBeamLength(world, user, shootOrigin, shootDir, getMaxRange(stack));
                 BeamWeaponEntity projectile = new BeamWeaponEntity(ModEntityTypes.BEAM_WEAPON_ENTITY, world, stack, range);
@@ -141,12 +142,29 @@ public class BeamWeapon extends Item {
         return Math.min((float) ticksUsed(user, stack) / CHARGE_TICKS, 1);
     }
 
-    public static Vec3d getShootOrigin(PlayerEntity user, Hand hand) {
-        return user.getPos().add(getOffset(user, hand));
+    public static Vec3d getShootOrigin(PlayerEntity user) {
+        return user.getPos().add(getOffset(user));
     }
 
-    public static Vec3d getOffset(LivingEntity user, Hand hand) {
-        return new Vec3d(0, user.getHeight() * 0.7, 0).add(user.getRotationVector().multiply(-0.3));
+    public static Vec3d getOffset(LivingEntity user) {
+        Vec3d forward = user.getRotationVector();
+        boolean isVertical = Math.abs(forward.y) > 0.99;
+        boolean isUp = forward.y > 0;
+        float yawRad = (float) MathHelper.wrapDegrees(Math.toRadians(
+                (isUp ? 180 : 0) - user.getYaw()
+        ));
+        Vec3d worldUp = isVertical ? new Vec3d(MathHelper.sin(yawRad), 0, MathHelper.cos(yawRad)) : new Vec3d(0, 1, 0);
+        Vec3d right = forward.crossProduct(worldUp).normalize();
+        Vec3d up = right.crossProduct(forward).normalize();
+        double rightOffset = 0;
+        double forwardOffset = 0.1;
+        double upOffset = -0.2;
+        Vec3d totalOffset = forward.multiply(forwardOffset).add(
+                right.multiply(rightOffset)
+        ).add(
+                up.multiply(upOffset)
+        );
+        return new Vec3d(0, user.getEyeHeight(user.getPose()), 0).add(totalOffset);
     }
 
     public static long timeSinceFirstShot(ItemStack stack, World world) {
@@ -200,7 +218,7 @@ public class BeamWeapon extends Item {
         return BASE_MAGIC_DAMAGE_PROPORTION + (1 - BASE_MAGIC_DAMAGE_PROPORTION) * Math.min(1, pierce_level * BASE_MAGIC_DAMAGE_PROPORTION);
     }
 
-    private float calcBeamLength(World world, Entity user, Vec3d start, Vec3d dir, float max_range) {
+    public static float calcBeamLength(World world, Entity user, Vec3d start, Vec3d dir, float max_range) {
         Vec3d end = start.add(dir.multiply(max_range));
         if (user == null) return max_range;
         BlockHitResult hit = world.raycast(

@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class BeamWeaponEntity extends ProjectileEntity {
     private float piercingDamageProportion;
     private float baseDamage;
     private float baseDOT;
+    private float maxRange;
     private static final TrackedData<Float> BEAM_LENGTH;
     private static final TrackedData<Integer> PROJECTILE_SPECIALIZATION;
     private static final TrackedData<Integer> BEAM_TICKS;
@@ -49,6 +51,7 @@ public class BeamWeaponEntity extends ProjectileEntity {
         this.dataTracker.set(BEAM_LENGTH, beamLength);
         this.setProjectileSpecialization(stack);
         this.piercingDamageProportion = BeamWeapon.getMagicDamageProportion(stack);
+        this.maxRange = BeamWeapon.getMaxRange(stack);
         this.baseDamage = BeamWeapon.getDamage(stack);
         this.baseDOT = BeamWeapon.getLingeringDamage(stack);
         this.dataTracker.set(BEAM_TICKS, BeamWeapon.DEBUG_MODE ? 100 : (
@@ -80,14 +83,25 @@ public class BeamWeaponEntity extends ProjectileEntity {
         World world = this.getWorld();
         if (world.isClient) {
             if (getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT) {
-                Vec3d vel = this.getVelocity().multiply(1/10d);
-                for (int i = 0; i < getBeamLength() / 8; i++) {
-                    Vec3d pos = this.getPos().add(this.getVelocity().multiply(random.nextDouble() * getBeamLength()));
-                    world.addParticle(new HelicalParticleEffect(0.3,0.2), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+                if (this.getBeamTicks() - this.age < 2) {
+                    Vec3d vel = this.getVelocity().multiply(1/10d);
+                    for (int i = 0; i < getBeamLength(); i++) {
+                        Vec3d pos = this.getPos().add(this.getVelocity().multiply(random.nextDouble() * getBeamLength()));
+                        world.addParticle(new HelicalParticleEffect(0.3,0.2), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+                    }
                 }
+                this.setYaw((float)(MathHelper.atan2(this.getVelocity().x, this.getVelocity().z) * (180F / Math.PI)));
+                this.setPitch((float)(MathHelper.atan2(this.getVelocity().y, Math.sqrt(this.getVelocity().x * this.getVelocity().x + this.getVelocity().z * this.getVelocity().z)) * (180F / Math.PI)));
             }
         }
         else {
+            if (getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT && this.getOwner() instanceof PlayerEntity) {
+                PlayerEntity owner = (PlayerEntity) this.getOwner();
+                Vec3d o = BeamWeapon.getShootOrigin(owner);
+                this.setPos(o.x, o.y, o.z);
+                this.setVelocity(owner.getRotationVector());
+                dataTracker.set(BEAM_LENGTH, BeamWeapon.calcBeamLength(world, owner, this.getPos(), this.getVelocity(), maxRange));
+            }
             if (this.age == 1 || (getProjectileSpecialization() == ProjectileSpecialization.LONGSHOT)) {
                 double lerp_progress = 0;
                 Vec3d origin = this.getPos();

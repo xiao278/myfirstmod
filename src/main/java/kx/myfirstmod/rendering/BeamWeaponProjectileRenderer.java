@@ -9,6 +9,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -46,10 +47,28 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
     @Override
     public void render(BeamWeaponEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         matrices.push();
-        Quaternionf quat = new Quaternionf().rotateTo(new Vector3f(0,-1,0), entity.getVelocity().multiply(-1).toVector3f());
-        Quaternionf pitchQuaternion = new Quaternionf().rotateX((90f - entity.getPitch())
+        float smoothPitch = 0;
+        float smoothYaw = 0;
+        if (!(entity.getOwner() instanceof PlayerEntity) || entity.getProjectileSpecialization() != BeamWeaponEntity.ProjectileSpecialization.LONGSHOT) {
+            smoothPitch = entity.getPitch();
+            smoothYaw = entity.getYaw();
+        }
+        else {
+            PlayerEntity owner = (PlayerEntity) entity.getOwner();
+            smoothPitch = MathHelper.clamp(-owner.getPitch(tickDelta), -90, 90);
+            smoothYaw = MathHelper.wrapDegrees(-owner.getYaw(tickDelta));
+
+            Vec3d negLerpedPos = entity.getLerpedPos(tickDelta).multiply(-1);
+            matrices.translate(negLerpedPos.x, negLerpedPos.y, negLerpedPos.z);
+
+            Vec3d newLerpedPos = this.fromLerpedPosition(owner, BeamWeapon.getOffset(owner), tickDelta);
+            matrices.translate(newLerpedPos.x, newLerpedPos.y, newLerpedPos.z);
+        }
+
+        Quaternionf pitchQuaternion = new Quaternionf().rotateX((90f - smoothPitch)
                 * (float) Math.PI / 180f);
-        Quaternionf yawQuaternion = new Quaternionf().rotateY(entity.getYaw() * (float) Math.PI / 180f);    // Rotation around Y-axis
+        Quaternionf yawQuaternion = new Quaternionf().rotateY(smoothYaw
+                * (float) Math.PI / 180f);    // Rotation around Y-axis
         Quaternionf combinedQuaternion = yawQuaternion.mul(pitchQuaternion);
         matrices.multiply(combinedQuaternion, 0, 0, 0);
         renderBeamHelper(matrices, vertexConsumers, tickDelta, entity);
@@ -231,8 +250,15 @@ public class BeamWeaponProjectileRenderer extends EntityRenderer<BeamWeaponEntit
 
     private Vec3d calcOffset(LivingEntity player, float tickDelta, boolean isFirstPerson) {
         float smoothed_body_yaw = (MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw));
-        Vec3d original_offseet = BeamWeapon.getOffset(player, player.getActiveHand()).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(isFirstPerson ? FIRST_PERSON_BEAM_OFFSET : THIRD_PERSON_BEAM_OFFSET);
+        Vec3d original_offseet = BeamWeapon.getOffset(player).rotateY((float) Math.toRadians(smoothed_body_yaw)).add(isFirstPerson ? FIRST_PERSON_BEAM_OFFSET : THIRD_PERSON_BEAM_OFFSET);
         Vec3d eye_offset = new Vec3d(0, player.getEyeHeight(player.getPose()), 0);
         return original_offseet.subtract(eye_offset);
+    }
+
+    private Vec3d fromLerpedPosition(LivingEntity entity, Vec3d offset, float delta) {
+        double d = MathHelper.lerp((double)delta, entity.lastRenderX, entity.getX()) + offset.getX();
+        double e = MathHelper.lerp((double)delta, entity.lastRenderY, entity.getY()) + offset.getY();
+        double f = MathHelper.lerp((double)delta, entity.lastRenderZ, entity.getZ()) + offset.getZ();
+        return new Vec3d(d, e, f);
     }
 }
