@@ -31,7 +31,7 @@ public class HelicalParticle extends SpriteBillboardParticle {
         this.phaseShift = world.random.nextDouble() * 2 * Math.PI;
         this.radius = radius;
         this.angularSpeed = angularVelocity;
-        this.maxAge = 15;
+        this.maxAge = 30;
         this.collidesWithWorld = false;
         this.scale = 0.08f;
         this.setColor(1,0,0);
@@ -54,9 +54,10 @@ public class HelicalParticle extends SpriteBillboardParticle {
         super.tick();
         if (fading) {
             //https://www.desmos.com/calculator/oxin02ejal
-            this.setAlpha(1 - Math.abs(
-                    age / (this.getMaxAge() / 2f) - (1 + 1 / (float) this.getMaxAge())
-            ));
+//            this.setAlpha(1 - Math.abs(
+//                    age / (this.getMaxAge() / 2f) - (1 + 1 / (float) this.getMaxAge())
+//            ));
+            this.setAlpha(1 - this.age / (float) this.getMaxAge());
         }
         else {
             this.setAlpha(1);
