@@ -28,7 +28,7 @@ public class GuardianLaser extends Item {
     private static final float reducible_damage = 12; // ideally multiples of 4 or 2
     private static final int LASER_SOUND_COOLDOWN_TICKS = 0;
     private static final int QUICK_CHARGE_REDUCTION = 15;
-    public static final float MAX_ANGLE = 6;
+    public static final float MAX_ANGLE = 1.5F;
     private int sound_cooldown_remaining = 0;
     public GuardianLaser(Settings settings) {
         super(settings);
