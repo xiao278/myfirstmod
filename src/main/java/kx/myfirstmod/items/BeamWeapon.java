@@ -40,7 +40,7 @@ public class BeamWeapon extends Item {
     public static final float BASE_MAGIC_DAMAGE_PROPORTION = 0.2F;
     private static final String TIME_KEY = "BeamWeaponLastUsedTime";
     private static final String CHARGED_KEY = "BeamWeaponCharged";
-    public static final float LONGSHOT_DMG_CONVERSION_RATIO = 2.25F;
+    public static final float LONGSHOT_DMG_CONVERSION_RATIO = 2.5F;
     public static final float LONGSHOT_DMG_CONVERSION_PROPORTION = 0.1F;
 
     public BeamWeapon(Settings settings) {

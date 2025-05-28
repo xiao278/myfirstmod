@@ -2,9 +2,12 @@
   "item.myfirstmod.lightning_stick": "Lightning Stick",
   "item.myfirstmod.guardian_core": "Guardian Core",
   "item.myfirstmod.evoker_staff": "Evoker Staff",
-  "death.attack.guardian_core": "%1$s was beamed by %2$s",
   "item.myfirstmod.effect_gem": "Effect Gem",
   "item.myfirstmod.shulker_staff": "Shulker Staff",
   "item.myfirstmod.arrow_rain": "§eLion Greatbow",
-  "item.myfirstmod.beam_weapon": "Redstone Accelerator"
+  "item.myfirstmod.beam_weapon": "Redstone Accelerator",
+
+  "death.attack.guardian_core": "%1$s was beamed by %2$s",
+
+  "enchantment.myfirstmod.long_shot": "Long-Shot"
 }
