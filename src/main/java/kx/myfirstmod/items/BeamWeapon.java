@@ -69,7 +69,6 @@ public class BeamWeapon extends Item {
             if (hand != Hand.MAIN_HAND) return TypedActionResult.fail(stack);
             if (!getIsCharged(stack)) {
                 // charge
-//                user.disableShield();
                 user.setCurrentHand(hand);
                 return TypedActionResult.consume(stack);
             }
@@ -105,6 +104,7 @@ public class BeamWeapon extends Item {
         if (!world.isClient) {
             if (ticksUsed(user, stack) >= CHARGE_TICKS) {
                 storeIsCharged(stack, true);
+                world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_READY, SoundCategory.PLAYERS, 0.7F, 1.2F);
             }
         }
     }
@@ -251,6 +251,13 @@ public class BeamWeapon extends Item {
         if (!(entity instanceof PlayerEntity)) return false;
         PlayerEntity pe = (PlayerEntity) entity;
         return pe.getItemCooldownManager().getCooldownProgress(ModItems.BEAM_WEAPON, 0) > 0.1F && stack == pe.getStackInHand(Hand.MAIN_HAND);
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        super.usageTick(world, user, stack, remainingUseTicks);
+        float progress = getPullProgress(user, stack);
+        world.playSound((PlayerEntity)null, user.getX(), user.getY(), user.getZ(), ModSounds.WEAPON_BEAM_CHARGE_SOUND, SoundCategory.PLAYERS, progress,  0.75F + 0.75F * progress * progress);
     }
 
     @Override
